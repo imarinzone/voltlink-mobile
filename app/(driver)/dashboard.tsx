@@ -1,0 +1,132 @@
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Zap, Route, DollarSign, AlertTriangle } from 'lucide-react-native';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
+import { VehicleCard } from '../../components/vehicle/VehicleCard';
+import { MetricCard } from '../../components/ui/MetricCard';
+import { RecommendationCard } from '../../components/charging/RecommendationCard';
+import { SectionHeader } from '../../components/ui/SectionHeader';
+import { SOSButton } from '../../components/feedback/SOSButton';
+import { getVehicleDashboard, getTodayStats } from '../../services/driver.service';
+import { useThemeStore } from '../../store/themeStore';
+import { Vehicle } from '../../types/vehicle.types';
+import { MOCK_STATIONS } from '../../mock/stations.mock';
+import { useRouter } from 'expo-router';
+
+const DriverDashboard = () => {
+    const { theme } = useThemeStore();
+    const isDark = theme === 'dark';
+    const router = useRouter();
+
+    const [refreshing, setRefreshing] = useState(false);
+    const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+    const [stats, setStats] = useState<any>(null);
+
+    const fetchData = async () => {
+        try {
+            const vData = await getVehicleDashboard('v1');
+            const sData = await getTodayStats();
+            setVehicle(vData);
+            setStats(sData);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        }
+    };
+
+    useEffect(() => { fetchData(); }, []);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
+    };
+
+    const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
+    const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
+    const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
+
+    const batteryLow = vehicle ? vehicle.batteryLevel < 20 : false;
+
+    return (
+        <SafeAreaView style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.brandBlue} />}
+            >
+                {/* Header */}
+                <View style={styles.header}>
+                    <Text style={[styles.greeting, { color: textSecondary }]}>Good Morning,</Text>
+                    <Text style={[styles.name, { color: textPrimary }]}>Pavan Kalyan</Text>
+                </View>
+
+                {/* Low Battery Alert Banner */}
+                {batteryLow && (
+                    <TouchableOpacity
+                        style={styles.alertBanner}
+                        onPress={() => router.push('/(driver)/recommendations' as any)}
+                        activeOpacity={0.85}
+                    >
+                        <AlertTriangle size={18} color={COLORS.alertRed} />
+                        <Text style={styles.alertText}>
+                            Battery critically low ({vehicle?.batteryLevel}%) — Tap to see nearest chargers
+                        </Text>
+                    </TouchableOpacity>
+                )}
+
+                {vehicle && (
+                    <VehicleCard
+                        vehicle={vehicle}
+                        onPress={() => router.push('/(driver)/recommendations' as any)}
+                    />
+                )}
+
+                <SectionHeader title="Today's Stats" />
+                <View style={styles.statsRow}>
+                    <MetricCard label="Distance" value={stats?.distanceKm || 0} unit="km" icon={<Route size={16} color={COLORS.brandBlue} />} />
+                    <MetricCard label="kWh Used" value={stats?.kwhConsumed || 0} unit="kWh" icon={<Zap size={16} color={COLORS.brandBlue} />} />
+                    <MetricCard label="Rate" value={`₹${stats?.costPerKwh || 0}`} unit="/kWh" icon={<DollarSign size={16} color={COLORS.brandBlue} />} />
+                </View>
+
+                <SectionHeader
+                    title="AI Recommendations"
+                    actionLabel="View All"
+                    onActionPress={() => router.push('/(driver)/recommendations' as any)}
+                />
+
+                {MOCK_STATIONS.slice(0, 2).map((item, index) => (
+                    <RecommendationCard
+                        key={item.id}
+                        recommendation={item}
+                        rank={index + 1}
+                        onBook={() => router.push('/(driver)/booking' as any)}
+                    />
+                ))}
+            </ScrollView>
+            <SOSButton />
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: { flex: 1 },
+    scrollContent: { padding: SPACING.lg, paddingBottom: 120 },
+    header: { marginBottom: SPACING.lg },
+    greeting: { ...TYPOGRAPHY.label, fontSize: 15 },
+    name: { ...TYPOGRAPHY.hero, fontSize: 28 },
+    alertBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,68,68,0.12)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,68,68,0.35)',
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.md,
+        marginBottom: SPACING.md,
+        gap: SPACING.sm,
+    },
+    alertText: { ...TYPOGRAPHY.label, color: COLORS.alertRed, flex: 1, fontWeight: '600', lineHeight: 18 },
+    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: -4 },
+});
+
+export default DriverDashboard;

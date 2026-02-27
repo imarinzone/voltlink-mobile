@@ -1,0 +1,77 @@
+import { Station, ChargerType } from '../types/station.types';
+
+export const MOCK_STATIONS: Station[] = [
+    {
+        id: '1',
+        name: 'VoltLink Superhub - Cyber City',
+        cpoName: 'VoltLink Premium',
+        distanceKm: 2.4,
+        etaMinutes: 8,
+        pricePerKwh: 18,
+        effectivePrice: 15,
+        chargerTypes: ['CCS2' as ChargerType, 'Type 2' as ChargerType],
+        availableChargers: 4,
+        totalChargers: 6,
+        availability: 'Available Now',
+        aiReason: 'Cheapest & Nearest for your route',
+        coordinates: { latitude: 28.495, longitude: 77.088 }
+    },
+    {
+        id: '2',
+        name: 'Tata Power EZ Charge - Sector 44',
+        cpoName: 'Tata Power',
+        distanceKm: 3.8,
+        etaMinutes: 12,
+        pricePerKwh: 22,
+        chargerTypes: ['CCS2' as ChargerType],
+        availableChargers: 2,
+        totalChargers: 4,
+        availability: 'Busy',
+        aiReason: 'High reliability, 98% uptime',
+        coordinates: { latitude: 28.455, longitude: 77.070 }
+    },
+    {
+        id: '3',
+        name: 'Fortum Charge & Drive - Galleria',
+        cpoName: 'Fortum',
+        distanceKm: 5.2,
+        etaMinutes: 18,
+        pricePerKwh: 20,
+        chargerTypes: ['CCS2' as ChargerType, 'CHAdeMO' as ChargerType],
+        availableChargers: 1,
+        totalChargers: 2,
+        availability: 'Available Now',
+        aiReason: 'Next to major amenities',
+        coordinates: { latitude: 28.465, longitude: 77.090 }
+    },
+    {
+        id: '4',
+        name: 'Ather Grid - Koramangala',
+        cpoName: 'Ather Energy',
+        distanceKm: 4.0,
+        etaMinutes: 14,
+        pricePerKwh: 12,
+        effectivePrice: 10,
+        chargerTypes: ['Type 2' as ChargerType],
+        availableChargers: 3,
+        totalChargers: 5,
+        availability: 'Available Now',
+        aiReason: 'Budget-friendly, near you',
+        coordinates: { latitude: 28.474, longitude: 77.080 }
+    },
+    {
+        id: '5',
+        name: 'ChargePoint - MG Road',
+        cpoName: 'ChargePoint',
+        distanceKm: 6.3,
+        etaMinutes: 22,
+        pricePerKwh: 16,
+        effectivePrice: 15,
+        chargerTypes: ['CCS2' as ChargerType, 'Type 2' as ChargerType],
+        availableChargers: 4,
+        totalChargers: 6,
+        availability: 'Available Now',
+        aiReason: 'High-capacity fast charger',
+        coordinates: { latitude: 28.482, longitude: 77.095 }
+    },
+];

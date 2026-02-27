@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "voltlink-mobile",
+    "slug": "voltlink-mobile",
+    "scheme": "voltlink",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/Voltlink-Logo.jpg",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/icons/Voltlink-Logo.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.voltlink.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/Voltlink-Logo.jpg",
+        "backgroundColor": "#1a1a1a"
+      },
+      "package": "com.voltlink.mobile"
+    },
+    "web": {
+      "favicon": "./assets/icons/Voltlink-Logo.jpg"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

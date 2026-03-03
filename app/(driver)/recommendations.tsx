@@ -6,7 +6,8 @@ import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { RecommendationCard } from '../../components/charging/RecommendationCard';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
-import { MOCK_STATIONS } from '../../mock/stations.mock';
+import { getAIRecommendations } from '../../services/stations.service'; // Added
+import { Station } from '../../types/station.types'; // Added
 import { useRouter } from 'expo-router';
 import RatingModal from '../../components/feedback/RatingModal';
 import ReportIssueModal from '../../components/feedback/ReportIssueModal';
@@ -22,6 +23,23 @@ export default function RecommendationsScreen() {
     const [selectedStation, setSelectedStation] = useState<any>(null);
     const [showRating, setShowRating] = useState(false);
     const [showReport, setShowReport] = useState(false);
+    const [stations, setStations] = useState<Station[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setLoading(true);
+        getAIRecommendations('VH001')
+            .then(setStations)
+            .catch(err => console.error('Error fetching recommendations:', err))
+            .finally(() => setLoading(false));
+    }, []);
+
+    const onRefresh = () => {
+        setLoading(true);
+        getAIRecommendations('VH001')
+            .then(setStations)
+            .finally(() => setLoading(false));
+    };
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
@@ -45,8 +63,15 @@ export default function RecommendationsScreen() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
             <FlatList
-                data={MOCK_STATIONS}
+                data={stations}
                 keyExtractor={(item) => item.id}
+                refreshing={loading}
+                onRefresh={() => {
+                    setLoading(true);
+                    getAIRecommendations()
+                        .then(setStations)
+                        .finally(() => setLoading(false));
+                }}
                 renderItem={({ item, index }) => (
                     <RecommendationCard
                         recommendation={item}

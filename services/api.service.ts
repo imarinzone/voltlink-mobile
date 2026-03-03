@@ -8,7 +8,12 @@ import { Platform } from 'react-native';
  * In Expo Go, uses the debugger host IP so the phone can reach the dev machine.
  */
 function getBaseUrl(): string {
-    // Try to get the dev machine IP from Expo's debugger host
+    // 1. Manually set environment variable (Production / Staging)
+    if (process.env.EXPO_PUBLIC_API_URL) {
+        return process.env.EXPO_PUBLIC_API_URL;
+    }
+
+    // 2. Local Development Auto-detection (Expo Go)
     const debuggerHost =
         Constants.expoConfig?.hostUri ??
         (Constants as any).manifest2?.extra?.expoGo?.debuggerHost;
@@ -18,7 +23,7 @@ function getBaseUrl(): string {
         return `http://${ip}:3001/api/v1`;
     }
 
-    // Fallback for emulators
+    // 3. Fallback for emulators/local
     if (Platform.OS === 'android') {
         return 'http://10.0.2.2:3001/api/v1';
     }

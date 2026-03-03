@@ -10,8 +10,15 @@ import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { getB2CStats, getCreditTransactions } from '../../services/b2c.service';
 import { useThemeStore } from '../../store/themeStore';
-import { CreditTransaction } from '../../mock/b2c.mock';
 import { format } from 'date-fns';
+
+interface CreditTransaction {
+    id: string;
+    type: 'earned' | 'spent';
+    amount: number;
+    description: string;
+    date: string;
+}
 
 export default function CreditsScreen() {
     const { theme } = useThemeStore();

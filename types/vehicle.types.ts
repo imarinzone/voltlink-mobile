@@ -9,6 +9,8 @@ export interface Vehicle {
     rangeKm: number;
     status: VehicleStatus;
     lastChargedAt: string;
+    driverName?: string;
+    driverEmail?: string;
 }
 
 export interface TodayStats {

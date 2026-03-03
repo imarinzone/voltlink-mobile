@@ -9,9 +9,10 @@ import { RecommendationCard } from '../../components/charging/RecommendationCard
 import { SectionHeader } from '../../components/ui/SectionHeader';
 import { SOSButton } from '../../components/feedback/SOSButton';
 import { getVehicleDashboard, getTodayStats } from '../../services/driver.service';
+import { getAIRecommendations } from '../../services/stations.service'; // Added
 import { useThemeStore } from '../../store/themeStore';
 import { Vehicle } from '../../types/vehicle.types';
-import { MOCK_STATIONS } from '../../mock/stations.mock';
+import { Station } from '../../types/station.types'; // Added
 import { useRouter } from 'expo-router';
 import { useLanguageStore, Language } from '../../store/languageStore';
 
@@ -50,13 +51,18 @@ const DriverDashboard = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [vehicle, setVehicle] = useState<Vehicle | null>(null);
     const [stats, setStats] = useState<any>(null);
+    const [recommendations, setRecommendations] = useState<Station[]>([]); // Added
 
     const fetchData = async () => {
         try {
-            const vData = await getVehicleDashboard('v1');
-            const sData = await getTodayStats();
+            const [vData, sData, rData] = await Promise.all([
+                getVehicleDashboard('VH001'),
+                getTodayStats('VH001'),
+                getAIRecommendations('VH001')
+            ]);
             setVehicle(vData);
             setStats(sData);
+            setRecommendations(rData);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         }
@@ -87,7 +93,7 @@ const DriverDashboard = () => {
                     <View style={styles.headerTop}>
                         <View>
                             <Text style={[styles.greeting, { color: textSecondary }]}>{t.greeting}</Text>
-                            <Text style={[styles.name, { color: textPrimary }]}>Pavan Kalyan</Text>
+                            <Text style={[styles.name, { color: textPrimary }]}>{vehicle?.driverName || 'Driver'}</Text>
                         </View>
                         <View style={styles.langSwitch}>
                             {(['English', 'हिंदी'] as Language[]).map((l) => (
@@ -142,7 +148,7 @@ const DriverDashboard = () => {
                     onActionPress={() => router.push('/(driver)/recommendations' as any)}
                 />
 
-                {MOCK_STATIONS.slice(0, 2).map((item, index) => (
+                {recommendations.slice(0, 2).map((item, index) => (
                     <RecommendationCard
                         key={item.id}
                         recommendation={item}

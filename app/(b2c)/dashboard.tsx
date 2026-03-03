@@ -107,7 +107,7 @@ const B2CDashboard = () => {
                     <View style={styles.headerTop}>
                         <View>
                             <Text style={[styles.greeting, { color: textSecondary }]}>{t.welcome}</Text>
-                            <Text style={[styles.name, { color: textPrimary }]}>Abhinash</Text>
+                            <Text style={[styles.name, { color: textPrimary }]}>{stats?.user?.name || 'User'}</Text>
                         </View>
                         <View style={styles.langSwitch}>
                             {(['English', 'हिंदी'] as Language[]).map((l) => (

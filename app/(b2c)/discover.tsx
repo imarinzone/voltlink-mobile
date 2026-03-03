@@ -12,7 +12,8 @@ import RatingModal from '../../components/feedback/RatingModal';
 import ReportIssueModal from '../../components/feedback/ReportIssueModal';
 import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore, INITIAL_FAMILY } from '../../store/vehicleStore';
-import { MOCK_STATIONS } from '../../mock/stations.mock';
+import { getStations } from '../../services/stations.service'; // Added
+import { Station } from '../../types/station.types'; // Added
 import { useLanguageStore } from '../../store/languageStore';
 
 const translations = {
@@ -59,15 +60,33 @@ export default function DiscoverScreen() {
     const [selectedStation, setSelectedStation] = useState<any>(null);
     const [showRating, setShowRating] = useState(false);
     const [showReport, setShowReport] = useState(false);
+    const [stations, setStations] = useState<Station[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const data = await getStations();
+            setStations(data);
+        } catch (error) {
+            console.error('Error fetching stations:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => { fetchData(); }, []);
 
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
     const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
 
-    const filtered = MOCK_STATIONS.filter(s => {
+    const filtered = stations.filter(s => {
         const q = searchQuery.toLowerCase();
-        const matchSearch = !q || s.name.toLowerCase().includes(q) || s.cpoName.toLowerCase().includes(q);
+        const name = s.name?.toLowerCase() || '';
+        const cpo = s.cpoName?.toLowerCase() || '';
+        const matchSearch = !q || name.includes(q) || cpo.includes(q);
         const matchFilter =
             activeFilter === 'All' ? true
                 : activeFilter === 'Available Now' ? (s.availableChargers ?? 0) > 0
@@ -86,7 +105,7 @@ export default function DiscoverScreen() {
         Alert.alert('Report Received', 'Our team has been notified. Thank you for helping the community.');
     };
 
-    const renderStation = ({ item }: { item: typeof MOCK_STATIONS[0] }) => {
+    const renderStation = ({ item }: { item: Station }) => {
         const isAvailable = (item.availableChargers ?? 0) > 0;
         const statusColor = isAvailable ? COLORS.successGreen : COLORS.alertRed;
 
@@ -132,9 +151,11 @@ export default function DiscoverScreen() {
                         </View>
                     </View>
 
-                    <View style={styles.aiBadge}>
-                        <Text style={styles.aiText}>🤖 {item.aiReason}</Text>
-                    </View>
+                    {item.aiReason && (
+                        <View style={styles.aiBadge}>
+                            <Text style={styles.aiText}>🤖 {item.aiReason}</Text>
+                        </View>
+                    )}
                 </TouchableOpacity>
 
                 <View style={styles.actionRow}>
@@ -200,7 +221,7 @@ export default function DiscoverScreen() {
                         <View style={[styles.mapContainer, { borderColor }]}>
                             <MapComponent
                                 isDark={isDark}
-                                stations={MOCK_STATIONS}
+                                stations={stations}
                                 familyVehicles={familyVehicles}
                                 initialFamily={INITIAL_FAMILY}
                                 t={t}
@@ -232,6 +253,8 @@ export default function DiscoverScreen() {
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
                 renderItem={renderStation}
+                refreshing={loading}
+                onRefresh={fetchData}
                 ListEmptyComponent={
                     <View style={styles.empty}>
                         <Zap size={40} color={COLORS.textMutedDark} />

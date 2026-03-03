@@ -1,33 +1,37 @@
-import { mockB2CData } from '../mock/b2c.mock';
 import { apiClient } from './api.service';
-import { USE_MOCK } from '../utils/mock-flag';
 
 /**
  * Fetches B2C user statistics (credits, carbon saved, etc.)
  */
-export const getB2CStats = async () => {
-    if (USE_MOCK) {
-        return Promise.resolve(mockB2CData.stats);
-    }
-    return apiClient.get('/b2c/stats').then(res => res.data);
+export const getB2CStats = async (userId: string = '11') => {
+    return apiClient.get(`/b2c/users/${userId}/profile`).then(res => ({
+        ...res.data,
+        availableCredits: res.data.credit_account?.current_balance
+    }));
 };
 
-/**
- * Fetches B2C credit transactions
- */
-export const getCreditTransactions = async () => {
-    if (USE_MOCK) {
-        return Promise.resolve(mockB2CData.transactions);
-    }
-    return apiClient.get('/b2c/transactions').then(res => res.data);
+export const getCreditTransactions = async (userId: string = '11') => {
+    return apiClient.get(`/b2c/users/${userId}/credits`).then(res => {
+        const transactions = res.data.transactions || [];
+        return transactions.map((t: any) => ({
+            id: t.id.toString(),
+            amount: t.credit_amount,
+            description: t.description,
+            date: t.created_at,
+            type: t.credit_amount >= 0 ? 'earned' : 'spent'
+        }));
+    });
 };
 
-/**
- * Fetches AI recommendations for B2C users
- */
 export const getB2CRecommendations = async () => {
-    if (USE_MOCK) {
-        return Promise.resolve(mockB2CData.recommendations);
-    }
-    return apiClient.get('/b2c/recommendations').then(res => res.data);
+    return apiClient.get('/b2c/live-rates', { params: { lat: 12.9716, lng: 77.5946 } }).then(res => res.data);
+};
+
+export const getSustainabilityStats = async (userId: string = '11') => {
+    return apiClient.get(`/b2c/users/${userId}/sustainability`).then(res => ({
+        greenScore: res.data.green_score,
+        carbonSavedKg: res.data.carbon_saved_kg,
+        renewablePercent: res.data.renewable_percent,
+        carbonRank: res.data.carbon_rank
+    }));
 };

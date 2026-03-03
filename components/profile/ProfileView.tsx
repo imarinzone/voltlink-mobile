@@ -9,7 +9,7 @@ import { useThemeStore } from '../../store/themeStore';
 import { useRoleStore } from '../../store/roleStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { useRouter } from 'expo-router';
-import { mockB2CData } from '../../mock/b2c.mock';
+import { getSustainabilityStats } from '../../services/b2c.service'; // Added
 
 interface ProfileViewProps {
     name: string;
@@ -28,6 +28,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
 
     const [showAddFamily, setShowAddFamily] = useState(false);
     const [newMember, setNewMember] = useState({ name: '', relation: 'Spouse', phone: '' });
+    const [sustainability, setSustainability] = useState<any>(null); // Added
+
+    React.useEffect(() => {
+        if (role === 'b2c') {
+            getSustainabilityStats().then(setSustainability).catch(console.error);
+        }
+    }, [role]);
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
@@ -105,22 +112,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                         <View style={styles.sustainGrid}>
                             <GlassCard style={styles.sustainItem} intensity={10}>
                                 <Leaf size={20} color={COLORS.successGreen} />
-                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{mockB2CData.sustainability.greenScore}</Text>
+                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{sustainability?.greenScore || 0}</Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]}>Green Score</Text>
                             </GlassCard>
                             <GlassCard style={styles.sustainItem} intensity={10}>
                                 <Cloud size={20} color={COLORS.brandBlue} />
-                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{mockB2CData.sustainability.carbonSavedKg}kg</Text>
+                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{sustainability?.carbonSavedKg || 0}kg</Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]}>CO2 Saved</Text>
                             </GlassCard>
                             <GlassCard style={styles.sustainItem} intensity={10}>
                                 <Zap size={20} color={COLORS.v2gPurple} />
-                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{mockB2CData.sustainability.renewablePercent}%</Text>
+                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{sustainability?.renewablePercent || 0}%</Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]}>Renewable</Text>
                             </GlassCard>
                             <GlassCard style={styles.sustainItem} intensity={10}>
                                 <Trophy size={20} color={COLORS.warningOrange} />
-                                <Text style={[styles.sustainValue, { color: textPrimary }]}>#{mockB2CData.sustainability.carbonRank}</Text>
+                                <Text style={[styles.sustainValue, { color: textPrimary }]}>#{sustainability?.carbonRank || '--'}</Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]}>Global Rank</Text>
                             </GlassCard>
                         </View>

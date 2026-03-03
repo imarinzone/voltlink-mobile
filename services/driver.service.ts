@@ -1,25 +1,34 @@
-import { USE_MOCK } from '../utils/mock-flag';
-import { mockDriverData } from '../mock/driver.mock';
 import { apiClient } from './api.service';
 
 export const getVehicleDashboard = async (vehicleId: string) => {
-    if (USE_MOCK) {
-        const vehicle = mockDriverData.vehicles.find(v => v.id === vehicleId) || mockDriverData.vehicles[0];
-        return Promise.resolve(vehicle);
-    }
-    return apiClient.get(`/driver/vehicles/${vehicleId}`).then(res => res.data);
+    return apiClient.get(`/vehicles/${vehicleId}/extended`).then(res => {
+        const d = res.data.data;
+        return {
+            id: d.id,
+            name: d.name || 'My EV',
+            model: d.type || 'Nexon EV',
+            licensePlate: 'KA 01 EV 1234',
+            batteryLevel: d.battery?.percentage || 0,
+            rangeKm: d.range?.estimated || 0,
+            status: d.status as any,
+            lastChargedAt: d.battery?.last_charged || 'Unknown',
+            driverName: d.driver?.name || 'Driver',
+            driverEmail: d.driver?.email || 'driver@voltlink.com'
+        };
+    });
 };
 
-export const getTodayStats = async () => {
-    if (USE_MOCK) {
-        return Promise.resolve(mockDriverData.todayStats);
-    }
-    return apiClient.get('/driver/stats/today').then(res => res.data);
+export const getTodayStats = async (vehicleId: string) => {
+    return apiClient.get(`/vehicles/${vehicleId}/extended`).then(res => {
+        const d = res.data.data;
+        return {
+            distanceKm: 0, // Not available in backend model yet
+            kwhConsumed: Math.round((d.battery?.capacity_kwh || 0) * (d.battery?.percentage || 0) / 100 * 10) / 10,
+            costPerKwh: 12.0 // Still hardcoded as there is no vehicle-specific cost API
+        };
+    });
 };
 
-export const getNotifications = async () => {
-    if (USE_MOCK) {
-        return Promise.resolve(mockDriverData.notifications);
-    }
-    return apiClient.get('/driver/notifications').then(res => res.data);
+export const getNotifications = async (fleetId: string = '1') => {
+    return apiClient.get(`/fleets/${fleetId}/alerts`).then(res => res.data);
 };

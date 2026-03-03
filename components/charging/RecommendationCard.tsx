@@ -59,16 +59,18 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
             <View style={styles.details}>
                 <Text style={[styles.detailText, { color: textSecondary }]}>
-                    {recommendation.distanceKm} km • {recommendation.etaMinutes} mins
+                    {recommendation.distanceKm || '0'} km • {recommendation.etaMinutes || '0'} mins
                 </Text>
                 <Text style={styles.availability}>
-                    {recommendation.availableChargers || 0}/{recommendation.totalChargers || 0} {t.available}
+                    {recommendation.availableChargers ?? 0}/{recommendation.totalChargers ?? 0} {t.available}
                 </Text>
             </View>
 
-            <View style={styles.aiBadge}>
-                <Text style={styles.aiText}>{t.ai} {recommendation.aiReason}</Text>
-            </View>
+            {recommendation.aiReason && (
+                <View style={styles.aiBadge}>
+                    <Text style={styles.aiText}>{t.ai} {recommendation.aiReason}</Text>
+                </View>
+            )}
 
             <View style={styles.actionRow}>
                 {onRate && (

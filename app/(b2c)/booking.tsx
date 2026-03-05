@@ -52,8 +52,8 @@ export default function B2CBooking() {
     const estimatedCost = estimatedKwh * ratePerKwh;
     const creditsEarned = Math.round(estimatedCost * 0.1);
 
-    const handleNavigate = () => {
-        const url = `maps://app?daddr=${STATION.lat},${STATION.lng}`;
+    const openGoogleMaps = () => {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${STATION.lat},${STATION.lng}&travelmode=driving`;
         Linking.canOpenURL(url).then(ok => {
             if (ok) Linking.openURL(url);
             else Linking.openURL(`https://maps.google.com/?q=${STATION.lat},${STATION.lng}`);
@@ -67,15 +67,38 @@ export default function B2CBooking() {
         }
         scale.value = withSpring(0.95, {}, () => { scale.value = withSpring(1); });
         setConfirmed(true);
-        setTimeout(() => router.replace('/(b2c)/session'), 1800);
     };
 
+    // Booking Confirmed screen
     if (confirmed) {
         return (
-            <SafeAreaView style={[styles.container, { backgroundColor: bg, justifyContent: 'center', alignItems: 'center' }]}>
-                <CheckCircle size={80} color={COLORS.successGreen} />
-                <Text style={[styles.confirmedTitle, { color: textPrimary }]}>Booking Confirmed!</Text>
-                <Text style={[styles.confirmedSub, { color: textSecondary }]}>Starting session…</Text>
+            <SafeAreaView style={[styles.container, { backgroundColor: bg }]}>
+                <ScrollView contentContainerStyle={styles.confirmedContent}>
+                    <CheckCircle size={80} color={COLORS.successGreen} />
+                    <Text style={[styles.confirmedTitle, { color: textPrimary }]}>Booking Confirmed!</Text>
+                    <Text style={[styles.confirmedSub, { color: textSecondary }]}>
+                        {STATION.name}
+                    </Text>
+                    <Text style={[styles.confirmedSlot, { color: textSecondary }]}>
+                        Slot: {slotData?.time} · ₹{slotData?.price}/kWh
+                    </Text>
+
+                    {/* Navigate to station */}
+                    <TouchableOpacity style={styles.mapsBtn} onPress={openGoogleMaps} activeOpacity={0.85}>
+                        <Navigation size={20} color="#000" />
+                        <Text style={styles.mapsBtnText}>Navigate in Google Maps</Text>
+                    </TouchableOpacity>
+
+                    {/* Start Charging */}
+                    <TouchableOpacity
+                        style={styles.startChargingBtn}
+                        onPress={() => router.replace('/(b2c)/session')}
+                        activeOpacity={0.85}
+                    >
+                        <Zap size={20} color="#000" />
+                        <Text style={styles.startChargingText}>Start Charging</Text>
+                    </TouchableOpacity>
+                </ScrollView>
             </SafeAreaView>
         );
     }
@@ -100,10 +123,6 @@ export default function B2CBooking() {
                         <View style={styles.metaItem}><Clock size={14} color={textSecondary} /><Text style={[styles.metaText, { color: textSecondary }]}>{STATION.etaMin} min ETA</Text></View>
                         <View style={styles.metaItem}><Zap size={14} color={COLORS.successGreen} /><Text style={[styles.metaText, { color: textSecondary }]}>{STATION.chargerType}</Text></View>
                     </View>
-                    <TouchableOpacity style={styles.navigateBtn} onPress={handleNavigate}>
-                        <Navigation size={16} color={COLORS.brandBlue} />
-                        <Text style={styles.navigateText}>Navigate to Station</Text>
-                    </TouchableOpacity>
                 </GlassCard>
 
                 {/* Cancellation Policy Note */}
@@ -164,7 +183,7 @@ export default function B2CBooking() {
                     </View>
                 </GlassCard>
 
-                {/* Confirm Button — inside scroll so it's always reachable */}
+                {/* Confirm Button */}
                 <Animated.View style={animStyle}>
                     <TouchableOpacity
                         style={[styles.confirmBtn, { backgroundColor: selectedSlot ? COLORS.brandBlue : 'rgba(255,255,255,0.1)' }]}
@@ -190,11 +209,9 @@ const styles = StyleSheet.create({
     stationCard: { padding: SPACING.lg, borderRadius: BORDER_RADIUS.xl, marginBottom: SPACING.md },
     stationName: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, marginBottom: 4 },
     cpoName: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: SPACING.md },
-    metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md, marginBottom: SPACING.md },
+    metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md },
     metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     metaText: { ...TYPOGRAPHY.label },
-    navigateBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    navigateText: { ...TYPOGRAPHY.label, color: COLORS.brandBlue, fontWeight: '700' },
     policyNote: { borderWidth: 1, borderRadius: BORDER_RADIUS.md, padding: SPACING.md, marginBottom: SPACING.lg },
     policyText: { ...TYPOGRAPHY.label, color: COLORS.warningOrange, lineHeight: 18 },
     sectionLabel: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: SPACING.sm },
@@ -215,6 +232,41 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.xl, justifyContent: 'center', alignItems: 'center',
     },
     confirmText: { ...TYPOGRAPHY.body, fontSize: 16, fontWeight: '700' },
+    // Confirmed screen
+    confirmedContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.xl,
+        paddingTop: 80,
+    },
     confirmedTitle: { ...TYPOGRAPHY.hero, fontSize: 28, marginTop: SPACING.xl, textAlign: 'center' },
-    confirmedSub: { ...TYPOGRAPHY.body, marginTop: SPACING.sm, textAlign: 'center' },
+    confirmedSub: { ...TYPOGRAPHY.body, marginTop: SPACING.sm, textAlign: 'center', fontWeight: '600' },
+    confirmedSlot: { ...TYPOGRAPHY.label, marginTop: 6, textAlign: 'center' },
+    mapsBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        backgroundColor: COLORS.brandBlue,
+        borderRadius: BORDER_RADIUS.xl,
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        marginTop: SPACING.xl * 1.5,
+        width: '100%',
+        justifyContent: 'center',
+    },
+    mapsBtnText: { ...TYPOGRAPHY.body, color: '#000', fontWeight: '700', fontSize: 15 },
+    startChargingBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        backgroundColor: COLORS.successGreen,
+        borderRadius: BORDER_RADIUS.xl,
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        marginTop: SPACING.md,
+        width: '100%',
+        justifyContent: 'center',
+    },
+    startChargingText: { ...TYPOGRAPHY.body, color: '#000', fontWeight: '700', fontSize: 15 },
 });

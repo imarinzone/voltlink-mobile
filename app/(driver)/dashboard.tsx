@@ -144,8 +144,6 @@ const DriverDashboard = () => {
 
                 <SectionHeader
                     title={t.aiRecs}
-                    actionLabel={t.viewAll}
-                    onActionPress={() => router.push('/(driver)/recommendations' as any)}
                 />
 
                 {recommendations.slice(0, 2).map((item, index) => (
@@ -153,7 +151,8 @@ const DriverDashboard = () => {
                         key={item.id}
                         recommendation={item}
                         rank={index + 1}
-                        onBook={() => router.push('/(driver)/booking' as any)}
+                        isPrimary={index === 0}
+                        onBook={() => router.push(`/(driver)/booking?rank=${index + 1}` as any)}
                     />
                 ))}
             </ScrollView>

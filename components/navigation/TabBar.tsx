@@ -37,7 +37,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 {state.routes.map((route, index) => {
                     const { options } = descriptors[route.key];
                     // Skip non-tab screens — booking/session are navigated to programmatically
-                    if (['booking', 'session'].includes(route.name)) return null;
+                    if (['booking', 'session', 'recommendations'].includes(route.name)) return null;
                     const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
                     const isFocused = state.index === index;
 

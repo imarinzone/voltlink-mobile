@@ -12,20 +12,23 @@ const translations = {
         ai: 'AI:',
         rate: 'Rate',
         report: 'Report',
-        bookNow: 'Book Now'
+        bookNow: 'Book Now',
+        bestMatch: '✓ RECOMMENDED',
     },
     'हिंदी': {
         available: 'उपलब्ध',
         ai: 'AI:',
         rate: 'रेट',
         report: 'रिपोर्ट',
-        bookNow: 'अभी बुक करें'
+        bookNow: 'अभी बुक करें',
+        bestMatch: '✓ RECOMMENDED',
     }
 };
 
 interface RecommendationCardProps {
     recommendation: Station;
     rank: number;
+    isPrimary?: boolean;
     onBook: () => void;
     onRate?: () => void;
     onReport?: () => void;
@@ -34,6 +37,7 @@ interface RecommendationCardProps {
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     recommendation,
     rank,
+    isPrimary = false,
     onBook,
     onRate,
     onReport
@@ -47,10 +51,23 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     const borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)';
 
     return (
-        <GlassCard style={styles.card as any} intensity={25}>
+        <GlassCard
+            style={[
+                styles.card,
+                isPrimary && styles.primaryCard,
+            ] as any}
+            intensity={isPrimary ? 40 : 25}
+        >
+            {/* Primary highlight banner */}
+            {isPrimary && (
+                <View style={styles.primaryBanner}>
+                    <Text style={styles.primaryBannerText}>{t.bestMatch}</Text>
+                </View>
+            )}
+
             <View style={styles.header}>
-                <View style={styles.rankBadge}>
-                    <Text style={styles.rankText}>#{rank}</Text>
+                <View style={[styles.rankBadge, isPrimary && styles.primaryRankBadge]}>
+                    <Text style={[styles.rankText, isPrimary && styles.primaryRankText]}>#{rank}</Text>
                 </View>
                 <Text style={styles.price}>₹{recommendation.effectivePrice || recommendation.pricePerKwh}/kWh</Text>
             </View>
@@ -67,7 +84,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             </View>
 
             {recommendation.aiReason && (
-                <View style={styles.aiBadge}>
+                <View style={[styles.aiBadge, isPrimary && styles.primaryAiBadge]}>
                     <Text style={styles.aiText}>{t.ai} {recommendation.aiReason}</Text>
                 </View>
             )}
@@ -83,8 +100,11 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         <Text style={[styles.actionText, { color: COLORS.alertRed }]}>{t.report}</Text>
                     </TouchableOpacity>
                 )}
-                <TouchableOpacity style={styles.bookButton} onPress={onBook}>
-                    <Text style={styles.bookText}>{t.bookNow}</Text>
+                <TouchableOpacity
+                    style={[styles.bookButton, isPrimary && styles.primaryBookButton]}
+                    onPress={onBook}
+                >
+                    <Text style={[styles.bookText, isPrimary && styles.primaryBookText]}>{t.bookNow}</Text>
                 </TouchableOpacity>
             </View>
         </GlassCard>
@@ -100,8 +120,25 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255, 255, 255, 0.1)',
         overflow: 'hidden',
     },
-    borderColor: { // helper for dynamic borderColor use
-        borderColor: 'rgba(255, 255, 255, 0.1)'
+    primaryCard: {
+        borderColor: COLORS.brandBlue,
+        borderWidth: 2,
+        backgroundColor: 'rgba(0, 212, 255, 0.06)',
+    },
+    primaryBanner: {
+        backgroundColor: COLORS.brandBlue,
+        marginHorizontal: -SPACING.lg,
+        marginTop: -SPACING.lg,
+        marginBottom: SPACING.md,
+        paddingVertical: 6,
+        paddingHorizontal: SPACING.lg,
+        alignItems: 'center',
+    },
+    primaryBannerText: {
+        color: '#000',
+        fontWeight: '800',
+        fontSize: 11,
+        letterSpacing: 0.8,
     },
     header: {
         flexDirection: 'row',
@@ -115,9 +152,12 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         borderRadius: 4,
     },
+    primaryRankBadge: {
+        backgroundColor: '#000',
+    },
     rankText: { color: '#000', fontSize: 10, fontWeight: '800' },
+    primaryRankText: { color: COLORS.brandBlue },
     price: { ...TYPOGRAPHY.label, fontWeight: '700', color: COLORS.successGreen },
-    // name color is now dynamic — passed as style prop via textPrimary
     name: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, marginBottom: 4 },
     details: {
         flexDirection: 'row',
@@ -131,6 +171,9 @@ const styles = StyleSheet.create({
         padding: SPACING.sm,
         borderRadius: BORDER_RADIUS.sm,
         marginBottom: SPACING.md,
+    },
+    primaryAiBadge: {
+        backgroundColor: 'rgba(0, 212, 255, 0.18)',
     },
     aiText: { ...TYPOGRAPHY.label, color: COLORS.brandBlue, fontSize: 11, fontStyle: 'italic' },
     actionBtn: {
@@ -150,7 +193,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flex: 1,
     },
+    primaryBookButton: {
+        backgroundColor: '#000',
+    },
     bookText: { color: '#000', fontWeight: '800', fontSize: 13 },
+    primaryBookText: { color: COLORS.brandBlue },
     actionRow: {
         flexDirection: 'row',
         gap: SPACING.sm,

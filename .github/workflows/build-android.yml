@@ -10,11 +10,13 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to create a GitHub Release
+      contents: write # Needed to create a GitHub Release and Tag
 
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessary to fetch all tags for versioning
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -33,9 +35,20 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Create .env file
+        # Expo Public variables are baked into the JS bundle during 'prebuild' and 'assemble'
+        # These secrets should be added to your GitHub Repository Settings
+        run: |
+          echo "EXPO_PUBLIC_API_URL=${{ secrets.EXPO_PUBLIC_API_URL }}" >> .env
+          echo "EXPO_PUBLIC_API_TIMEOUT=${{ secrets.EXPO_PUBLIC_API_TIMEOUT }}" >> .env
+          echo "EXPO_PUBLIC_DEFAULT_FLEET_ID=${{ secrets.EXPO_PUBLIC_DEFAULT_FLEET_ID }}" >> .env
+          echo "EXPO_PUBLIC_DEFAULT_USER_ID=${{ secrets.EXPO_PUBLIC_DEFAULT_USER_ID }}" >> .env
+          echo "EXPO_PUBLIC_DEFAULT_DRIVER_ID=${{ secrets.EXPO_PUBLIC_DEFAULT_DRIVER_ID }}" >> .env
+          echo "EXPO_PUBLIC_DEFAULT_LAT=${{ secrets.EXPO_PUBLIC_DEFAULT_LAT }}" >> .env
+          echo "EXPO_PUBLIC_DEFAULT_LNG=${{ secrets.EXPO_PUBLIC_DEFAULT_LNG }}" >> .env
+          echo "EXPO_PUBLIC_ENV=${{ secrets.EXPO_PUBLIC_ENV }}" >> .env
+
       - name: Generate Native Android Project
-        # This creates the ./android directory from your Expo config.
-        # It is required because the native folder is not committed to the repo.
         run: npx expo prebuild --platform android --clean --no-install
 
       - name: Grant execute permission for gradlew
@@ -46,19 +59,38 @@ jobs:
         working-directory: ./android
         run: ./gradlew assembleDebug --no-daemon
 
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/Voltlink-mobile.apk
+
+      - name: Get Next Version Tag
+        id: next_version
+        run: |
+          LATEST_TAG=$(git tag -l "v0.*" | sort -V | tail -n1)
+          if [ -z "$LATEST_TAG" ]; then
+            NEXT_TAG="v0.1"
+          else
+            # Extract the number after v0. and increment it
+            VERSION_NUM=$(echo $LATEST_TAG | sed 's/v0\.//')
+            NEXT_NUM=$((VERSION_NUM + 1))
+            NEXT_TAG="v0.$NEXT_NUM"
+          fi
+          echo "tag=$NEXT_TAG" >> $GITHUB_OUTPUT
+          echo "Determined next version: $NEXT_TAG"
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Voltlink-mobile
+          path: android/app/build/outputs/apk/debug/Voltlink-mobile.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: build-${{ github.run_number }}
-          name: Development Build ${{ github.run_number }}
+          tag_name: ${{ steps.next_version.outputs.tag }}
+          name: Release ${{ steps.next_version.outputs.tag }}
           body: 'Auto-generated Android APK from the latest push to the main branch.'
-          prerelease: true
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          prerelease: false
+          files: android/app/build/outputs/apk/debug/Voltlink-mobile.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

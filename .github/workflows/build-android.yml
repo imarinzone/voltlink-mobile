@@ -18,20 +18,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Node.js (LTS compatible with Expo)
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install NPM Dependencies
         run: npm install
 
-      - name: Setup Java JDK
+      - name: Setup Java JDK (AGP-compatible)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '17'
           cache: 'gradle'
 
       - name: Create .env file
@@ -52,11 +52,11 @@ jobs:
         working-directory: ./android
         run: chmod +x gradlew
 
-      - name: Build Android Release APK
+      - name: Build Android Release APK (embed JS bundle)
         working-directory: ./android
-        # Using assembleRelease instead of assembleDebug. 
-        # Release builds bundle the JS code into the APK so it works without Metro.
-        run: ./gradlew assembleRelease --no-daemon --build-cache
+        # Explicitly run the JS bundling task before assembleRelease to ensure
+        # index.android.bundle and assets are packaged into the APK.
+        run: ./gradlew :app:bundleReleaseJsAndAssets :app:assembleRelease --no-daemon --build-cache
 
       - name: Rename APK
         run: |

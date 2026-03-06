@@ -30,15 +30,21 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Generate Native Android Project
+        # This creates the ./android directory from your Expo config.
+        # It is required because the native folder is not committed to the repo.
+        run: npx expo prebuild --platform android --clean --no-install
+
       - name: Grant execute permission for gradlew
         working-directory: ./android
         run: chmod +x gradlew
 
       - name: Build Android Debug APK
         working-directory: ./android
-        # Compiles the debug APK. 
-        # The React Native Gradle plugin handles bundling the JS automatically.
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

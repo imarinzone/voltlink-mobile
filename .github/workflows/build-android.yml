@@ -54,9 +54,7 @@ jobs:
 
       - name: Build Android Release APK (embed JS bundle)
         working-directory: ./android
-        # Explicitly run the JS bundling task before assembleRelease to ensure
-        # index.android.bundle and assets are packaged into the APK.
-        run: ./gradlew :app:bundleReleaseJsAndAssets :app:assembleRelease --no-daemon --build-cache
+        run: ./gradlew assembleRelease --no-daemon --build-cache
 
       - name: Rename APK
         run: |

@@ -7,8 +7,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
-import { Search, MapPin, Zap, Clock, ChevronRight, Star, AlertCircle, Car } from 'lucide-react-native';
+import { Search, MapPin, Zap, Clock, ChevronRight, Star, AlertCircle, Car, Menu, SlidersHorizontal, User } from 'lucide-react-native';
 import MapComponent from '../../components/map/MapComponent';
+import FilterModal, { FilterState } from '../../components/filters/FilterModal';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import RatingModal from '../../components/feedback/RatingModal';
 import ReportIssueModal from '../../components/feedback/ReportIssueModal';
@@ -17,8 +18,6 @@ import { useVehicleStore } from '../../store/vehicleStore';
 import { getStations } from '../../services/stations.service';
 import { Station } from '../../types/station.types';
 import { useLanguageStore } from '../../store/languageStore';
-
-const FILTERS = ['All', 'AC', 'DC', 'Available Now'];
 
 const T = {
     English: {
@@ -52,11 +51,11 @@ export default function DiscoverScreen() {
     const insets = useSafeAreaInsets();
     const isDark = theme === 'dark';
     const router = useRouter();
-    const t = T[language];
+    const t = T[language as keyof typeof T] || T.English;
 
     // ── Dynamic snap points (device-safe) ────────────────────────────────────
-    // Min: tab bar (100px hardcoded in TabBar.tsx) + bottom safe area inset + search bar content
-    const minSnap = TAB_BAR_HEIGHT + insets.bottom + SEARCH_BAR_HEIGHT;
+    // Min: tab bar (100px hardcoded in TabBar.tsx) + bottom safe area inset + filters height
+    const minSnap = TAB_BAR_HEIGHT + insets.bottom + 60;
     // Max: leave room for safe area top + "Find Stations" title
     const maxSnap = SCREEN_HEIGHT - TOP_INSET - insets.top;
     const snapPoints = useMemo(
@@ -64,12 +63,21 @@ export default function DiscoverScreen() {
         [minSnap, maxSnap]
     );
 
-    const [filter, setFilter] = useState('All');
     const [query, setQuery] = useState('');
     const [stations, setStations] = useState<Station[]>([]);
     const [selectedStation, setSelectedStation] = useState<any>(null);
     const [showRating, setShowRating] = useState(false);
     const [showReport, setShowReport] = useState(false);
+
+    // Filters State
+    const [showFilters, setShowFilters] = useState(false);
+    const [activeFilters, setActiveFilters] = useState<FilterState>({
+        availableOnly: false,
+        connectors: [],
+        powerRatings: [],
+        cpos: []
+    });
+
     const sheetRef = useRef<BottomSheet>(null);
 
     const fetchData = async (forceRefresh: boolean = false) => {
@@ -95,11 +103,32 @@ export default function DiscoverScreen() {
     const filtered = stations.filter(s => {
         const q = query.toLowerCase();
         const matchQ = !q || s.name?.toLowerCase().includes(q) || s.cpoName?.toLowerCase().includes(q);
-        const matchF =
-            filter === 'All' ? true
-                : filter === 'Available Now' ? (s.availableChargers ?? 0) > 0
-                    : filter === 'AC' ? s.chargerTypes.includes('Type 2' as any)
-                        : s.chargerTypes.some(t => t === 'CCS2' || t === 'CHAdeMO');
+
+        let matchF = true;
+
+        // Status Filter
+        if (activeFilters.availableOnly && (s.availableChargers ?? 0) <= 0) matchF = false;
+
+        // Brand/CPO filter
+        if (matchF && activeFilters.cpos.length > 0) {
+            matchF = activeFilters.cpos.includes(s.cpoName || '');
+        }
+
+        // Connector Types filter
+        if (matchF && activeFilters.connectors.length > 0) {
+            const hasConn = s.chargerTypes.some(t => activeFilters.connectors.includes(t as string));
+            if (!hasConn) matchF = false;
+        }
+
+        // Power Rating Filter (AC / DC)
+        if (matchF && activeFilters.powerRatings.length > 0) {
+            const isAC = s.chargerTypes.some(t => t.includes('Type 2') || t.includes('AC'));
+            const isDC = s.chargerTypes.some(t => t.includes('CCS') || t.includes('CHAdeMO') || t.includes('DC'));
+
+            if (activeFilters.powerRatings.includes('AC') && !isAC && !activeFilters.powerRatings.includes('DC Fast')) matchF = false;
+            else if (activeFilters.powerRatings.includes('DC Fast') && !isDC && !activeFilters.powerRatings.includes('AC')) matchF = false;
+        }
+
         return matchQ && matchF;
     });
 
@@ -191,15 +220,27 @@ export default function DiscoverScreen() {
                 MarkerCarIcon={<Car size={14} color="#FFF" />}
             />
 
-            {/* ── "Find Stations" title — fixed at top above the map ── */}
-            <SafeAreaView style={styles.titleOverlay} edges={['top']} pointerEvents="none">
-                <View style={styles.titleRow}>
-                    <Text style={[styles.titleText, styles.shadow]}>
-                        {t.title}
-                    </Text>
-                    <Text style={[styles.countText, styles.shadow]}>
-                        {filtered.length} {t.nearYou}
-                    </Text>
+            {/* ── Google Maps Style Search Bar Overlay ── */}
+            <SafeAreaView style={styles.searchOverlay} edges={['top']} pointerEvents="box-none">
+                <View style={[styles.mainSearchBar, { backgroundColor: surfaceBg, borderColor: borderColor }]}>
+                    <TouchableOpacity style={styles.menuIcon} onPress={() => router.back()}>
+                        <ChevronRight size={24} color={textPrimary} style={{ transform: [{ rotate: '180deg' }] }} />
+                    </TouchableOpacity>
+                    <TextInput
+                        placeholder={t.placeholder}
+                        placeholderTextColor={textSecondary}
+                        value={query}
+                        onChangeText={setQuery}
+                        style={[styles.mainSearchInput, { color: textPrimary }]}
+                        autoFocus={false}
+                    />
+                    <TouchableOpacity
+                        style={[styles.iconBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', marginRight: SPACING.xs }]}
+                        onPress={() => setShowFilters(true)}
+                    >
+                        <SlidersHorizontal size={18} color={textPrimary} />
+                    </TouchableOpacity>
+
                 </View>
             </SafeAreaView>
 
@@ -213,47 +254,6 @@ export default function DiscoverScreen() {
                 backgroundStyle={[styles.sheetBg, { backgroundColor: surfaceBg }]}
                 handleIndicatorStyle={styles.indicator}
             >
-                {/* Pinned: search + filters */}
-                <View>
-                    {/* Search */}
-                    <View style={[styles.searchBar, { backgroundColor: inputBg }]}>
-                        <Search size={16} color={textSecondary} />
-                        <TextInput
-                            placeholder={t.placeholder}
-                            placeholderTextColor={textSecondary}
-                            value={query}
-                            onChangeText={setQuery}
-                            style={[styles.searchInput, { color: textPrimary }]}
-                        />
-                    </View>
-
-                    {/* Filters */}
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.filterScroll}
-                    >
-                        {FILTERS.map(f => (
-                            <TouchableOpacity
-                                key={f}
-                                style={[
-                                    styles.filterPill,
-                                    filter === f
-                                        ? { backgroundColor: COLORS.brandBlue }
-                                        : { backgroundColor: inputBg }
-                                ]}
-                                onPress={() => setFilter(f)}
-                            >
-                                <Text style={[styles.filterText, { color: filter === f ? '#000' : textPrimary }]}>
-                                    {f}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-
-                    <View style={[styles.divider, { backgroundColor: borderColor }]} />
-                </View>
-
                 {/* Scrollable station list */}
                 <BottomSheetFlatList
                     data={filtered}
@@ -284,6 +284,18 @@ export default function DiscoverScreen() {
                 onSubmit={() => { setShowReport(false); Alert.alert('Reported', 'Team notified.'); }}
                 stationName={selectedStation?.name || ''}
             />
+
+            <FilterModal
+                visible={showFilters}
+                onClose={() => setShowFilters(false)}
+                currentFilters={activeFilters}
+                onApply={(opts) => {
+                    setActiveFilters(opts);
+                    setShowFilters(false);
+                }}
+                stations={stations}
+                myVehicle={undefined}
+            />
         </View>
     );
 }
@@ -301,59 +313,40 @@ const styles = StyleSheet.create({
     root: { flex: 1 },
     markerContainer: { padding: 6, borderRadius: 12, borderWidth: 2, borderColor: '#000' },
 
-    // Title overlay (above map)
-    titleOverlay: {
+    // Search Overlay
+    searchOverlay: {
         position: 'absolute',
         top: 0, left: 0, right: 0,
         zIndex: 10,
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        justifyContent: 'space-between',
         paddingHorizontal: SPACING.lg,
         paddingTop: Platform.OS === 'ios' ? 4 : SPACING.md,
     },
-    titleText: {
-        ...TYPOGRAPHY.hero,
-        fontSize: 28,
-        fontWeight: '800',
-        color: '#FFFFFF',
+    mainSearchBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 52,
+        borderRadius: 26,
+        paddingHorizontal: SPACING.md,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 5,
+        borderWidth: StyleSheet.hairlineWidth,
     },
-    countText: {
-        ...TYPOGRAPHY.label,
-        fontSize: 13,
-        fontWeight: '600',
-        color: 'rgba(255,255,255,0.85)',
+    menuIcon: { marginRight: SPACING.sm },
+    mainSearchInput: { flex: 1, ...TYPOGRAPHY.body, fontSize: 16 },
+    iconBtn: {
+        width: 32, height: 32,
+        borderRadius: 16,
+        justifyContent: 'center', alignItems: 'center',
+        marginLeft: SPACING.sm
     },
-    shadow: {
-        textShadowColor: 'rgba(0,0,0,0.7)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 6,
-    } as any,
 
     // Sheet
     sheetBg: { borderTopLeftRadius: 22, borderTopRightRadius: 22 },
     indicator: { backgroundColor: '#C0C0C4', width: 38, height: 4 },
 
-    // Search
-    searchBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: SPACING.sm,
-        marginHorizontal: SPACING.lg,
-        marginTop: SPACING.sm,
-        marginBottom: SPACING.sm,
-        paddingHorizontal: SPACING.md,
-        height: 48,
-        borderRadius: 24,
-    },
-    searchInput: { flex: 1, ...TYPOGRAPHY.body, fontSize: 15, paddingVertical: 0 },
-
-    // Filters
-    filterScroll: { paddingHorizontal: SPACING.lg, gap: SPACING.sm, paddingBottom: SPACING.sm },
-    filterPill: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
-    filterText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 12 },
 
     divider: { height: StyleSheet.hairlineWidth, marginBottom: 4 },
 

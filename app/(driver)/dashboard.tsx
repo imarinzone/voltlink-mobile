@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Zap, Route, DollarSign, AlertTriangle } from 'lucide-react-native';
+import { Zap, Route, DollarSign, AlertTriangle, User } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { VehicleCard } from '../../components/vehicle/VehicleCard';
 import { MetricCard } from '../../components/ui/MetricCard';
@@ -111,21 +111,29 @@ const DriverDashboard = () => {
                             <Text style={[styles.greeting, { color: textSecondary }]}>{t.greeting}</Text>
                             <Text style={[styles.name, { color: textPrimary }]}>{driverProfile?.name || vehicle?.driverName || 'Driver'}</Text>
                         </View>
-                        <View style={styles.langSwitch}>
-                            {(['English', 'हिंदी'] as Language[]).map((l) => (
-                                <TouchableOpacity
-                                    key={l}
-                                    onPress={() => setLanguage(l)}
-                                    style={[
-                                        styles.langPill,
-                                        language === l && { backgroundColor: COLORS.brandBlue }
-                                    ]}
-                                >
-                                    <Text style={[styles.langText, { color: language === l ? '#000' : textSecondary }]}>
-                                        {l}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                        <View style={styles.headerRight}>
+                            <View style={styles.langSwitch}>
+                                {(['English', 'हिंदी'] as Language[]).map((l) => (
+                                    <TouchableOpacity
+                                        key={l}
+                                        onPress={() => setLanguage(l)}
+                                        style={[
+                                            styles.langPill,
+                                            language === l && { backgroundColor: COLORS.brandBlue }
+                                        ]}
+                                    >
+                                        <Text style={[styles.langText, { color: language === l ? '#000' : textSecondary }]}>
+                                            {l}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                            <TouchableOpacity
+                                style={styles.profileAvatar}
+                                onPress={() => router.push('/(driver)/profile' as any)}
+                            >
+                                <User size={18} color={textPrimary} />
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
@@ -197,6 +205,15 @@ const styles = StyleSheet.create({
     alertText: { ...TYPOGRAPHY.label, color: COLORS.alertRed, flex: 1, fontWeight: '600', lineHeight: 18 },
     statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: -4 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+    profileAvatar: {
+        width: 36, height: 36,
+        borderRadius: 18,
+        justifyContent: 'center', alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(255,255,255,0.05)'
+    },
     langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
     langText: { fontSize: 10, fontWeight: '800' },

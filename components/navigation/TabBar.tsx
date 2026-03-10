@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { useThemeStore } from '../../store/themeStore';
@@ -10,6 +11,7 @@ const { width } = Dimensions.get('window');
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const { theme } = useThemeStore();
+    const insets = useSafeAreaInsets();
     const isDark = theme === 'dark';
 
     const icons: Record<string, any> = {
@@ -30,14 +32,17 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                     styles.tabBar,
                     {
                         backgroundColor: isDark ? 'rgba(26, 26, 26, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                        borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                        borderTopColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                        paddingBottom: insets.bottom,
+                        height: 65 + insets.bottom,
                     }
                 ]}
             >
                 {state.routes.map((route, index) => {
                     const { options } = descriptors[route.key];
                     // Skip non-tab screens — booking/session are navigated to programmatically
-                    if (['booking', 'session', 'recommendations'].includes(route.name)) return null;
+                    // Skip profile screen — moved to top search bar
+                    if (['booking', 'session', 'recommendations', 'profile'].includes(route.name)) return null;
                     const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
                     const isFocused = state.index === index;
 
@@ -85,17 +90,14 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 30,
+        bottom: 0,
         width: width,
         alignItems: 'center',
-        paddingHorizontal: SPACING.lg,
     },
     tabBar: {
         flexDirection: 'row',
-        height: 70,
         width: '100%',
-        borderRadius: 35,
-        borderWidth: 1,
+        borderTopWidth: 1,
         overflow: 'hidden',
         justifyContent: 'space-around',
         alignItems: 'center',

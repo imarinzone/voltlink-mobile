@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity, Modal, TextInput, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Wallet, Leaf, Zap, ChevronRight, Map, Plus, X, MapPin, Bot } from 'lucide-react-native';
+import { Wallet, Leaf, Zap, ChevronRight, Map, Plus, X, MapPin, Bot, User } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { MetricCard } from '../../components/ui/MetricCard';
@@ -73,8 +73,6 @@ const B2CDashboard = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [aiStations, setAiStations] = useState<Station[]>([]);
-    const [showAddVehicle, setShowAddVehicle] = useState(false);
-    const [newVehicle, setNewVehicle] = useState({ memberName: '', vehicleModel: '', batteryLevel: 80 });
 
     const fetchData = async (forceRefresh: boolean = false) => {
         try {
@@ -111,16 +109,6 @@ const B2CDashboard = () => {
         setRefreshing(false);
     };
 
-    const handleAddVehicle = () => {
-        if (!newVehicle.memberName || !newVehicle.vehicleModel) return;
-        addFamilyVehicle({
-            ...newVehicle,
-            coordinates: { latitude: 28.495, longitude: 77.088 }
-        });
-        setShowAddVehicle(false);
-        setNewVehicle({ memberName: '', vehicleModel: '', batteryLevel: 80 });
-    };
-
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
@@ -140,21 +128,29 @@ const B2CDashboard = () => {
                             <Text style={[styles.greeting, { color: textSecondary }]}>{t.welcome}</Text>
                             <Text style={[styles.name, { color: textPrimary }]}>{stats?.user?.name || 'User'}</Text>
                         </View>
-                        <View style={styles.langSwitch}>
-                            {(['English', 'हिंदी'] as Language[]).map((l) => (
-                                <TouchableOpacity
-                                    key={l}
-                                    onPress={() => setLanguage(l)}
-                                    style={[
-                                        styles.langPill,
-                                        language === l && { backgroundColor: COLORS.brandBlue }
-                                    ]}
-                                >
-                                    <Text style={[styles.langText, { color: language === l ? '#000' : textSecondary }]}>
-                                        {l}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                        <View style={styles.headerRight}>
+                            <View style={styles.langSwitch}>
+                                {(['English', 'हिंदी'] as Language[]).map((l) => (
+                                    <TouchableOpacity
+                                        key={l}
+                                        onPress={() => setLanguage(l)}
+                                        style={[
+                                            styles.langPill,
+                                            language === l && { backgroundColor: COLORS.brandBlue }
+                                        ]}
+                                    >
+                                        <Text style={[styles.langText, { color: language === l ? '#000' : textSecondary }]}>
+                                            {l}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                            <TouchableOpacity
+                                style={[styles.profileAvatar, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}
+                                onPress={() => router.push('/(b2c)/profile' as any)}
+                            >
+                                <User size={20} color={textPrimary} />
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
@@ -164,41 +160,6 @@ const B2CDashboard = () => {
                     vehicle={myVehicle as any}
                     onPress={() => router.push('/(b2c)/discover' as any)}
                 />
-
-                {/* Family Members Strip */}
-                <View style={styles.sectionHeaderRow}>
-                    <Text style={[styles.familyTitle, { color: textSecondary }]}>{t.familyVehicles}</Text>
-                    <TouchableOpacity onPress={() => setShowAddVehicle(true)}>
-                        <Plus size={16} color={COLORS.primaryGreen} />
-                    </TouchableOpacity>
-                </View>
-
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.familyScroll}>
-                    {familyVehicles.map((member) => (
-                        <GlassCard key={member.id} style={styles.familyCard as any} intensity={20}>
-                            <View style={styles.familyAvatar}>
-                                <Text style={styles.familyInitial}>{member.memberName[0]}</Text>
-                            </View>
-                            <Text style={[styles.familyName, { color: textPrimary }]} numberOfLines={1}>{member.memberName}</Text>
-                            <Text style={[styles.familyVehicle, { color: textSecondary }]} numberOfLines={1}>{member.vehicleModel}</Text>
-                            <Text style={[styles.familyBattery, {
-                                color: member.batteryLevel < 30 ? COLORS.alertRed
-                                    : member.batteryLevel < 60 ? COLORS.warningOrange
-                                        : COLORS.successGreen
-                            }]}>
-                                {member.batteryLevel}%
-                            </Text>
-                        </GlassCard>
-                    ))}
-
-                    {/* Add Vehicle Button Card */}
-                    <TouchableOpacity onPress={() => setShowAddVehicle(true)}>
-                        <View style={[styles.addVehicleCard, { borderColor: COLORS.primaryGreen + '40' }]}>
-                            <Plus size={24} color={COLORS.primaryGreen} />
-                            <Text style={[styles.addVehicleText, { color: COLORS.primaryGreen }]}>{t.add}</Text>
-                        </View>
-                    </TouchableOpacity>
-                </ScrollView>
 
                 {/* Quick Stats */}
                 <View style={styles.statsRow}>
@@ -342,49 +303,6 @@ const B2CDashboard = () => {
                 </TouchableOpacity>
             </ScrollView>
 
-            {/* Add Family Vehicle Modal */}
-            <Modal visible={showAddVehicle} transparent animationType="fade">
-                <View style={styles.modalOverlay}>
-                    <GlassCard style={styles.modalContent} intensity={60}>
-                        <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, { color: textPrimary }]}>{t.addFamilyVehicle}</Text>
-                            <TouchableOpacity onPress={() => setShowAddVehicle(false)}>
-                                <X color={textPrimary} size={24} />
-                            </TouchableOpacity>
-                        </View>
-
-                        <TextInput
-                            style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor, color: textPrimary }]}
-                            placeholder={t.familyName}
-                            placeholderTextColor={textSecondary}
-                            value={newVehicle.memberName}
-                            onChangeText={t => setNewVehicle(p => ({ ...p, memberName: t }))}
-                        />
-
-                        <TextInput
-                            style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor, color: textPrimary }]}
-                            placeholder={t.vehicleModel}
-                            placeholderTextColor={textSecondary}
-                            value={newVehicle.vehicleModel}
-                            onChangeText={t => setNewVehicle(p => ({ ...p, vehicleModel: t }))}
-                        />
-
-                        <TextInput
-                            style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor, color: textPrimary }]}
-                            placeholder={t.batteryLevel}
-                            placeholderTextColor={textSecondary}
-                            value={String(newVehicle.batteryLevel)}
-                            keyboardType="numeric"
-                            onChangeText={t => setNewVehicle(p => ({ ...p, batteryLevel: parseInt(t) || 0 }))}
-                        />
-
-                        <View style={styles.modalActions}>
-                            <GlassButton title={t.cancel} variant="secondary" style={{ flex: 1 }} onPress={() => setShowAddVehicle(false)} />
-                            <GlassButton title={t.addVehicle} style={{ flex: 2 }} onPress={handleAddVehicle} />
-                        </View>
-                    </GlassCard>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 };
@@ -394,9 +312,15 @@ const styles = StyleSheet.create({
     scrollContent: { padding: SPACING.lg, paddingBottom: 120 },
     header: { marginBottom: SPACING.lg, marginTop: Platform.OS === 'android' ? SPACING.md : 0 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
     langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
     langText: { fontSize: 10, fontWeight: '800' },
+    profileAvatar: {
+        width: 36, height: 36,
+        borderRadius: 18,
+        justifyContent: 'center', alignItems: 'center',
+    },
     greeting: { ...TYPOGRAPHY.label, fontSize: 15 },
     name: { ...TYPOGRAPHY.hero, fontSize: 28 },
     sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm, marginTop: SPACING.md },

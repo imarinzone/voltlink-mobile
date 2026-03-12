@@ -21,17 +21,18 @@ export const getB2CStats = async (userId: string = DEFAULT_USER_ID, forceRefresh
     };
 };
 
-export const getCreditTransactions = async (userId: string = DEFAULT_USER_ID, forceRefresh?: boolean) =>
-    fetchWithCache(`/users/${userId}/energy-credits/ledger`, { forceRefresh }).then(data => {
-        const transactions = data.items || [];
-        return transactions.map((t: any) => ({
-            id: t.id.toString(),
-            amount: t.amount,
-            description: t.reason,
-            date: t.created_at,
-            type: t.entry_type === 'credit' ? 'earned' : 'spent',
-        }));
-    });
+export const getCreditBalance = async (userId: string = DEFAULT_USER_ID) =>
+    apiClient.get(`/users/${userId}/energy-credits/balance`).then(res => res.data);
+
+export const getCreditTransactions = async (userId: string = DEFAULT_USER_ID, page = 1, pageSize = 20) =>
+    apiClient
+        .get(`/users/${userId}/energy-credits/ledger`, { params: { page, page_size: pageSize } })
+        .then(res => (res.data?.entries ?? []) as any[]);
+
+export const transferCredits = async (
+    userId: string = DEFAULT_USER_ID,
+    payload: { recipient_user_id: number; amount: number; energy_source_id?: string; description?: string }
+) => apiClient.post(`/users/${userId}/energy-credits/transfer`, payload).then(res => res.data);
 
 export const getSustainabilityStats = async (userId: string = DEFAULT_USER_ID, forceRefresh?: boolean) =>
     fetchWithCache(`/users/${userId}/sustainability`, { forceRefresh }).then(data => ({

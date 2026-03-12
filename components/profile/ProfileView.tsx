@@ -9,7 +9,8 @@ import { useThemeStore } from '../../store/themeStore';
 import { useRoleStore } from '../../store/roleStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { useRouter } from 'expo-router';
-import { getSustainabilityStats } from '../../services/b2c.service'; // Added
+import { getSustainabilityStats } from '../../services/b2c.service';
+import { useLanguageStore, Language } from '../../store/languageStore';
 
 interface ProfileViewProps {
     name: string;
@@ -23,6 +24,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
     const { theme, toggleTheme } = useThemeStore();
     const { switchRole, setRole } = useRoleStore();
     const { familyVehicles, fetchFamilyVehicles, addFamilyMemberApi, removeFamilyMemberApi } = useVehicleStore();
+    const { language, setLanguage } = useLanguageStore();
     const isDark = theme === 'dark';
     const router = useRouter();
 
@@ -184,6 +186,28 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                         />
                     </View>
 
+                    <View style={[styles.menuItem, { borderBottomColor: borderColor, flexDirection: 'column', alignItems: 'flex-start' }]}>
+                        <View style={styles.menuLeft}>
+                            <Globe size={20} color={COLORS.brandBlue} />
+                            <Text style={[styles.menuText, { color: textPrimary }]}>Language</Text>
+                        </View>
+                        <View style={styles.languageRow}>
+                            {(['English', 'हिंदी'] as Language[]).map((l) => (
+                                <TouchableOpacity
+                                    key={l}
+                                    onPress={() => setLanguage(l)}
+                                    style={[
+                                        styles.languagePill,
+                                        language === l && { backgroundColor: COLORS.brandBlue, borderColor: COLORS.brandBlue }
+                                    ]}
+                                >
+                                    <Text style={[styles.languageText, { color: language === l ? '#000' : textSecondary }]}>
+                                        {l}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
 
                     <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={handleSwitchRole}>
                         <View style={styles.menuLeft}>

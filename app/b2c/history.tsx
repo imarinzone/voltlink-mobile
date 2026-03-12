@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, FlatList, Text, TouchableOpacity, Alert, Pressable, ActivityIndicator, Platform, Linking, Modal } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Zap, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info } from 'lucide-react-native';
+import { Zap, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info, XCircle } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
 import { getUserSessions } from '../../services/b2c.service';
+import { deleteBooking } from '../../services/booking.service';
 import { format } from 'date-fns';
 
 const TABS = ['Active', 'Past'];
@@ -48,18 +49,25 @@ export default function HistoryScreen() {
         setLoading(true);
         try {
             if (activeTab === 'Active') {
-                const sessions = await getUserSessions(undefined, 'active', forceRefresh);
-                const mappedItems: HistoryItem[] = sessions.map((s: any) => ({
+                const [activeSessions, pendingSessions] = await Promise.all([
+                    getUserSessions(undefined, 'active', forceRefresh),
+                    getUserSessions(undefined, 'pending', forceRefresh),
+                ]);
+                const mapSession = (s: any) => ({
                     id: s.id,
-                    status: 'active',
-                    time: 'Charging Now',
+                    status: s.status || 'active',
+                    time: s.status === 'pending' ? 'Pending' : 'Charging Now',
                     station: s.station_name || 'Charging Station',
                     type: s.session_type || 'Charging',
                     cost: s.total_cost,
                     kWh: s.kwh,
                     connectorId: s.connector_id,
                     currentSoc: s.current_soc,
-                }));
+                });
+                const mappedItems: HistoryItem[] = [
+                    ...activeSessions.map(mapSession),
+                    ...pendingSessions.map(mapSession),
+                ];
                 setItems(mappedItems);
             } else {
                 const sessions = await getUserSessions(undefined, 'completed', forceRefresh);
@@ -124,11 +132,40 @@ export default function HistoryScreen() {
         Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
     };
 
+    const handleDelete = (item: HistoryItem) => {
+        Alert.alert(
+            'Delete Booking',
+            `Are you sure you want to delete this booking at ${item.station}?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deleteBooking(String(item.id));
+                            fetchData(true);
+                        } catch (error) {
+                            console.error('Error deleting booking:', error);
+                            Alert.alert('Error', 'Failed to delete booking');
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     const renderItem = ({ item }: { item: HistoryItem }) => {
         if (activeTab === 'Active') {
             return (
                 <View style={{ marginBottom: SPACING.md }}>
                     <GlassCard style={{ ...(styles.bookingCard as any), padding: 0 }} intensity={25}>
+                        <TouchableOpacity
+                            style={{ position: 'absolute', right: SPACING.lg, top: SPACING.lg, zIndex: 10, padding: 4 }}
+                            onPress={() => handleDelete(item)}
+                        >
+                            <XCircle size={20} color={COLORS.alertRed} />
+                        </TouchableOpacity>
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => router.push({

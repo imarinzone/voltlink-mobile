@@ -28,3 +28,7 @@ export const cancelBooking = async (
 ): Promise<void> => {
     return apiClient.post(`/bookings/${id}/cancel`, data).then(res => res.data);
 };
+
+export const deleteBooking = async (id: string): Promise<void> => {
+    return apiClient.delete(`/bookings/${id}`).then(res => res.data);
+};

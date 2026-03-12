@@ -11,6 +11,7 @@ import { SectionHeader } from '../../components/ui/SectionHeader';
 import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { getDriverSessions } from '../../services/driver.service';
+import { deleteBooking } from '../../services/booking.service';
 import { format } from 'date-fns';
 
 type SessionItem = {
@@ -128,6 +129,28 @@ export default function DriverHistory() {
         Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
     };
 
+    const handleDelete = (item: SessionItem) => {
+        Alert.alert(
+            'Delete Booking',
+            `Are you sure you want to delete this booking at ${item.stationName}?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deleteBooking(String(item.id));
+                            fetchSessions(true);
+                        } catch (error) {
+                            console.error('Error deleting booking:', error);
+                            Alert.alert('Error', 'Failed to delete booking');
+                        }
+                    },
+                },
+            ]
+        );
+    };
 
     // Stats always use the full session list, not the filtered view
     const totalKwh = allSessions.reduce((s, i) => s + (i.kwh || 0), 0);
@@ -138,10 +161,9 @@ export default function DriverHistory() {
         <View style={{ marginBottom: SPACING.sm }}>
             <GlassCard style={{ ...(styles.sessionCard as any), padding: 0 }} intensity={20}>
 
-                {/* Cancel Button Absolute */}
-                {item.status === 'pending' && (
+                {(item.status === 'pending' || item.status === 'active') && (
                     <TouchableOpacity
-                        onPress={() => router.push({ pathname: '/driver/session', params: { sessionId: item.id } })}
+                        onPress={() => handleDelete(item)}
                         style={{ position: 'absolute', right: SPACING.lg, top: SPACING.md, zIndex: 10, padding: 4 }}
                     >
                         <XCircle size={20} color={COLORS.alertRed} />
@@ -166,7 +188,7 @@ export default function DriverHistory() {
                                 <Text style={[styles.sessionMetaText, { color: textSecondary }]}>{item.duration}</Text>
                             </View>
                         </View>
-                        {item.status === 'pending' ? (
+                        {(item.status === 'pending' || item.status === 'active') ? (
                             <View style={{ width: 45 }} />
                         ) : (
                             <Text style={[styles.sessionDate, { color: textSecondary }]}>{item.date}</Text>

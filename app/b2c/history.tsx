@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, FlatList, Text, TouchableOpacity, Alert, Pressable, ActivityIndicator, Platform, Linking, Modal } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Zap, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info, XCircle } from 'lucide-react-native';
+import { Zap, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info, XCircle, Play } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
 import { getUserSessions } from '../../services/b2c.service';
-import { deleteBooking } from '../../services/booking.service';
+import { cancelBooking, getPendingBookings } from '../../services/booking.service';
 import { format } from 'date-fns';
 
 const TABS = ['Active', 'Past'];
@@ -29,6 +29,8 @@ type HistoryItem = {
     currentSoc?: number;
     isLive?: boolean;
     estimatedCompletion?: string;
+    source: 'booking' | 'session';
+    bookingTime?: string;
 };
 
 export default function HistoryScreen() {
@@ -49,30 +51,56 @@ export default function HistoryScreen() {
         setLoading(true);
         try {
             if (activeTab === 'Active') {
-                const [activeSessions, pendingSessions] = await Promise.all([
+                const [pendingBookings, activeSessions] = await Promise.all([
+                    getPendingBookings(undefined, forceRefresh),
                     getUserSessions(undefined, 'active', forceRefresh),
-                    getUserSessions(undefined, 'pending', forceRefresh),
                 ]);
-                const mapSession = (s: any) => ({
-                    id: s.id,
-                    status: s.status || 'active',
-                    time: s.status === 'pending' ? 'Pending' : 'Charging Now',
+
+                const bookingItems: HistoryItem[] = (pendingBookings || []).map((b: any) => {
+                    let timeLabel = 'Pending';
+                    if (b.booking_time) {
+                        try {
+                            timeLabel = format(new Date(b.booking_time), 'hh:mm a');
+                        } catch {}
+                    }
+                    return {
+                        id: String(b.id),
+                        status: 'pending',
+                        time: timeLabel,
+                        station: b.station_name || b.connector_id || 'Charging Station',
+                        type: 'Booking',
+                        cost: b.total_cost,
+                        kWh: b.kwh,
+                        connectorId: b.connector_id,
+                        currentSoc: b.current_soc,
+                        source: 'booking' as const,
+                        bookingTime: b.booking_time,
+                    };
+                });
+
+                const sessionItems: HistoryItem[] = (activeSessions || []).map((s: any) => ({
+                    id: String(s.id),
+                    status: 'active',
+                    time: 'Charging Now',
                     station: s.station_name || 'Charging Station',
                     type: s.session_type || 'Charging',
                     cost: s.total_cost,
                     kWh: s.kwh,
                     connectorId: s.connector_id,
                     currentSoc: s.current_soc,
+                    source: 'session' as const,
+                }));
+
+                const merged = [...bookingItems, ...sessionItems];
+                merged.sort((a, b) => {
+                    const tA = a.bookingTime ? new Date(a.bookingTime).getTime() : 0;
+                    const tB = b.bookingTime ? new Date(b.bookingTime).getTime() : 0;
+                    return tB - tA;
                 });
-                const mappedItems: HistoryItem[] = [
-                    ...activeSessions.map(mapSession),
-                    ...pendingSessions.map(mapSession),
-                ];
-                setItems(mappedItems);
+                setItems(merged);
             } else {
                 const sessions = await getUserSessions(undefined, 'completed', forceRefresh);
                 const mappedItems: HistoryItem[] = sessions.map((s: any) => {
-                    // Duration from elapsed_seconds (new API) or start/end times (legacy)
                     let duration = 'N/A';
                     if (s.elapsed_seconds) {
                         const totalMins = Math.round(s.elapsed_seconds / 60);
@@ -84,7 +112,6 @@ export default function HistoryScreen() {
                         duration = `${mins} min`;
                     }
 
-                    // Date from start_time or fallback label
                     let date = 'Past session';
                     if (s.start_time) {
                         try { date = format(new Date(s.start_time), 'dd MMM yyyy'); } catch { }
@@ -102,7 +129,8 @@ export default function HistoryScreen() {
                         isLive: s.is_live,
                         estimatedCompletion: s.estimated_completion,
                         status: s.status,
-                        rating: undefined
+                        rating: undefined,
+                        source: 'session' as const,
                     };
                 });
                 setItems(mappedItems);
@@ -125,29 +153,27 @@ export default function HistoryScreen() {
         }, [activeTab])
     );
 
-
-
     const openDirections = () => {
         const url = `https://www.google.com/maps/dir/?api=1&destination=12.9716,77.5946`;
         Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
     };
 
-    const handleDelete = (item: HistoryItem) => {
+    const handleCancel = (item: HistoryItem) => {
         Alert.alert(
-            'Delete Booking',
-            `Are you sure you want to delete this booking at ${item.station}?`,
+            'Cancel Booking',
+            'Cancelling within 15 mins incurs a ₹20 penalty. Do you want to proceed?',
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: 'No', style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: 'Yes, Cancel',
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            await deleteBooking(String(item.id));
+                            await cancelBooking(String(item.id));
                             fetchData(true);
                         } catch (error) {
-                            console.error('Error deleting booking:', error);
-                            Alert.alert('Error', 'Failed to delete booking');
+                            console.error('Error cancelling booking:', error);
+                            Alert.alert('Error', 'Failed to cancel booking');
                         }
                     },
                 },
@@ -160,23 +186,29 @@ export default function HistoryScreen() {
             return (
                 <View style={{ marginBottom: SPACING.md }}>
                     <GlassCard style={{ ...(styles.bookingCard as any), padding: 0 }} intensity={25}>
-                        <TouchableOpacity
-                            style={{ position: 'absolute', right: SPACING.lg, top: SPACING.lg, zIndex: 10, padding: 4 }}
-                            onPress={() => handleDelete(item)}
-                        >
-                            <XCircle size={20} color={COLORS.alertRed} />
-                        </TouchableOpacity>
+                        {item.source === 'booking' && (
+                            <TouchableOpacity
+                                style={{ position: 'absolute', right: SPACING.lg, top: SPACING.lg, zIndex: 10, padding: 4 }}
+                                onPress={() => handleCancel(item)}
+                            >
+                                <XCircle size={20} color={COLORS.alertRed} />
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            onPress={() => router.push({
-                                pathname: '/b2c/session',
-                                params: { sessionId: item.id }
-                            })}
+                            onPress={() => {
+                                if (item.source === 'session') {
+                                    router.push({
+                                        pathname: '/b2c/session',
+                                        params: { sessionId: item.id }
+                                    });
+                                }
+                            }}
                             style={{ padding: SPACING.lg }}
                         >
                             <View style={styles.cardHeader}>
-                                <View style={[styles.iconBox, { backgroundColor: COLORS.successGreen + '20' }]}>
-                                    <Zap size={18} color={COLORS.successGreen} />
+                                <View style={[styles.iconBox, { backgroundColor: item.status === 'pending' ? COLORS.brandBlue + '20' : COLORS.successGreen + '20' }]}>
+                                    <Zap size={18} color={item.status === 'pending' ? COLORS.brandBlue : COLORS.successGreen} />
                                 </View>
                                 <View style={styles.headerInfo}>
                                     <Text style={[styles.bookingTime, { color: textPrimary }]}>{item.time}</Text>
@@ -201,6 +233,18 @@ export default function HistoryScreen() {
                                     <MapPin size={14} color={COLORS.brandBlue} />
                                     <Text style={[styles.actionBtnText, { color: COLORS.brandBlue }]}>View Directions</Text>
                                 </TouchableOpacity>
+                                {item.source === 'session' && (
+                                    <TouchableOpacity
+                                        style={[styles.actionBtn, { borderColor: COLORS.successGreen }]}
+                                        onPress={() => router.push({
+                                            pathname: '/b2c/session',
+                                            params: { sessionId: item.id }
+                                        })}
+                                    >
+                                        <Play size={14} color={COLORS.successGreen} />
+                                        <Text style={[styles.actionBtnText, { color: COLORS.successGreen }]}>Open Session</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </TouchableOpacity>
                     </GlassCard>
@@ -212,7 +256,6 @@ export default function HistoryScreen() {
         return (
             <GlassCard style={styles.sessionCard as any} intensity={15}>
                 <Pressable onPress={() => setExpandedSession(isExpanded ? null : item.id)}>
-                    {/* Collapsed row */}
                     <View style={styles.sessionMain}>
                         <View style={[styles.iconBox, { backgroundColor: COLORS.successGreen + '15' }]}>
                             <Zap size={18} color={COLORS.successGreen} />
@@ -293,7 +336,7 @@ export default function HistoryScreen() {
             ) : (
                 <FlatList
                     data={items}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, index) => `${item.source}-${item.id}-${index}`}
                     renderItem={renderItem}
                     onRefresh={() => fetchData(true)}
                     refreshing={loading}

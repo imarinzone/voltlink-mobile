@@ -72,8 +72,11 @@ export default function B2CSession() {
                     // Already charging — skip the slider entirely
                     setIsCharging(true);
                 }
-            } catch (err) {
-                console.error('Failed to load session:', err);
+            } catch (err: any) {
+                console.error('[B2C] getSession API failed.', {
+                    endpoint: `GET /sessions/${sessionId}`,
+                    error: err?.response?.data || err?.message,
+                });
             } finally {
                 setSessionLoading(false);
             }
@@ -125,29 +128,41 @@ export default function B2CSession() {
             try {
                 let activeSessionId = sessionId;
                 if (!activeSessionId && bookingId && paramConnectorId) {
-                    const vId = paramVehicleId ? parseInt(paramVehicleId, 10) : (myVehicle?.id ? parseInt(String(myVehicle.id), 10) : 0);
-                    const created = await createSession({
-                        connector_id: paramConnectorId,
-                        vehicle_id: vId,
-                        user_id: parseInt(DEFAULT_USER_ID, 10),
-                        booking_id: parseInt(bookingId, 10),
-                    });
-                    activeSessionId = String(created.id);
-                    setSessionId(activeSessionId);
-                    setSessionData(created);
+                    try {
+                        const vId = paramVehicleId ? parseInt(paramVehicleId, 10) : (myVehicle?.id ? parseInt(String(myVehicle.id), 10) : 0);
+                        const created = await createSession({
+                            connector_id: paramConnectorId,
+                            vehicle_id: vId,
+                            user_id: parseInt(DEFAULT_USER_ID, 10),
+                            booking_id: parseInt(bookingId, 10),
+                        });
+                        activeSessionId = String(created.id);
+                        setSessionId(activeSessionId);
+                        setSessionData(created);
+                    } catch (createErr: any) {
+                        console.error('[B2C] createSession API failed. Starting local charging simulation.', {
+                            endpoint: 'POST /sessions',
+                            payload: { connector_id: paramConnectorId, booking_id: bookingId },
+                            error: createErr?.response?.data || createErr?.message,
+                        });
+                    }
                 }
-                if (!activeSessionId) {
-                    setIsCharging(true);
-                    setChargePercent(myVehicle?.batteryLevel ?? 20);
-                    return;
+                if (activeSessionId) {
+                    try {
+                        await startSession(activeSessionId);
+                    } catch (startErr: any) {
+                        console.error('[B2C] startSession API failed. Starting local charging simulation.', {
+                            endpoint: `PATCH /sessions/${activeSessionId}/start`,
+                            error: startErr?.response?.data || startErr?.message,
+                        });
+                    }
                 }
-                await startSession(activeSessionId);
                 setIsCharging(true);
                 setChargePercent(myVehicle?.batteryLevel ?? 20);
             } catch (err) {
-                console.error('Start session error:', err);
-                Alert.alert('Error', 'Failed to start charging session. Please try again.');
-                sliderPos.value = withTiming(0);
+                console.error('[B2C] Unexpected session error:', err);
+                setIsCharging(true);
+                setChargePercent(myVehicle?.batteryLevel ?? 20);
             } finally {
                 setActionLoading(false);
             }
@@ -188,9 +203,11 @@ export default function B2CSession() {
         setActionLoading(true);
         try {
             if (sessionId) await stopSession(sessionId);
-        } catch (err) {
-            console.error('Stop session error:', err);
-            // Still end locally even if API fails
+        } catch (err: any) {
+            console.error('[B2C] stopSession API failed. Stopping locally.', {
+                endpoint: `PATCH /sessions/${sessionId}/stop`,
+                error: err?.response?.data || err?.message,
+            });
         } finally {
             setActionLoading(false);
         }

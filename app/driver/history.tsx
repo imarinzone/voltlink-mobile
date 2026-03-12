@@ -114,9 +114,18 @@ export default function DriverHistory() {
         try {
             if (filter === 'active') {
                 const [pendingBookings, activeSessions, allData] = await Promise.all([
-                    getPendingBookings(DEFAULT_USER_ID, forceRefresh),
-                    getDriverSessions(undefined, currentVehicleId || '', 'active', forceRefresh),
-                    getDriverSessions(undefined, currentVehicleId || '', undefined, forceRefresh),
+                    getPendingBookings(DEFAULT_USER_ID, forceRefresh).catch(err => {
+                        console.error('[Driver] Failed to fetch pending bookings:', err?.response?.data || err?.message);
+                        return [];
+                    }),
+                    getDriverSessions(undefined, currentVehicleId || '', 'active', forceRefresh).catch(err => {
+                        console.error('[Driver] Failed to fetch active sessions:', err?.response?.data || err?.message);
+                        return [];
+                    }),
+                    getDriverSessions(undefined, currentVehicleId || '', undefined, forceRefresh).catch(err => {
+                        console.error('[Driver] Failed to fetch all sessions:', err?.response?.data || err?.message);
+                        return [];
+                    }),
                 ]);
 
                 const bookingItems = mapSessions(pendingBookings, 'booking');
@@ -132,18 +141,24 @@ export default function DriverHistory() {
             } else {
                 const status = filter === 'all' ? undefined : filter;
                 const [filtered, all] = await Promise.all([
-                    getDriverSessions(undefined, currentVehicleId || '', status as any, forceRefresh),
+                    getDriverSessions(undefined, currentVehicleId || '', status as any, forceRefresh).catch(err => {
+                        console.error('[Driver] Failed to fetch sessions:', err?.response?.data || err?.message);
+                        return [];
+                    }),
                     filter === 'all'
                         ? Promise.resolve(null)
-                        : getDriverSessions(undefined, currentVehicleId || '', undefined, forceRefresh),
+                        : getDriverSessions(undefined, currentVehicleId || '', undefined, forceRefresh).catch(err => {
+                            console.error('[Driver] Failed to fetch all sessions:', err?.response?.data || err?.message);
+                            return [];
+                        }),
                 ]);
                 const mappedFiltered = mapSessions(filtered);
                 const mappedAll = all ? mapSessions(all) : mappedFiltered;
                 setSessions(mappedFiltered);
                 setAllSessions(mappedAll);
             }
-        } catch (error) {
-            console.error('Error loading history:', error);
+        } catch (error: any) {
+            console.error('[Driver] Error loading history:', error?.response?.data || error?.message);
         } finally {
             setLoading(false);
         }
@@ -165,50 +180,44 @@ export default function DriverHistory() {
     };
 
     const handleCancelPress = (item: SessionItem) => {
-        if (item.source === 'session') {
-            Alert.alert(
-                'Stop Session',
-                'Are you sure you want to stop this charging session?',
-                [
-                    { text: 'No', style: 'cancel' },
-                    {
-                        text: 'Yes, Stop',
-                        style: 'destructive',
-                        onPress: async () => {
-                            try {
-                                await stopSession(String(item.id));
-                                fetchSessions(true);
-                            } catch (error) {
-                                console.error('Error stopping session:', error);
-                                Alert.alert('Error', 'Failed to stop session');
-                            }
-                        },
-                    },
-                ]
-            );
-        } else {
-            setCancelTarget(item);
-            setCancelReason('');
-        }
+        setCancelTarget(item);
+        setCancelReason('');
     };
 
     const submitCancel = async () => {
         if (!cancelTarget) return;
-        if (!cancelReason.trim()) {
+        if (cancelTarget.source === 'booking' && !cancelReason.trim()) {
             Alert.alert('Reason Required', 'Please provide a reason for cancellation.');
             return;
         }
         setCancelling(true);
+        let apiFailed = false;
         try {
-            await cancelBooking(String(cancelTarget.id), { reason: cancelReason.trim() });
-            setCancelTarget(null);
-            setCancelReason('');
-            fetchSessions(true);
-        } catch (error) {
-            console.error('Error cancelling booking:', error);
-            Alert.alert('Error', 'Failed to cancel booking');
+            if (cancelTarget.source === 'session') {
+                await stopSession(String(cancelTarget.id));
+            } else {
+                await cancelBooking(String(cancelTarget.id), { reason: cancelReason.trim() });
+            }
+        } catch (error: any) {
+            apiFailed = true;
+            const label = cancelTarget.source === 'session' ? 'stopSession' : 'cancelBooking';
+            const endpoint = cancelTarget.source === 'session'
+                ? `PATCH /sessions/${cancelTarget.id}/stop`
+                : `POST /bookings/${cancelTarget.id}/cancel`;
+            console.error(`[Driver] ${label} API failed. Removing from active list locally.`, {
+                endpoint,
+                payload: cancelTarget.source === 'booking' ? { reason: cancelReason.trim() } : undefined,
+                error: error?.response?.data || error?.message,
+            });
         } finally {
             setCancelling(false);
+        }
+        setCancelTarget(null);
+        setCancelReason('');
+        if (apiFailed) {
+            setSessions(prev => prev.filter(i => i.id !== cancelTarget.id));
+        } else {
+            fetchSessions(true);
         }
     };
 
@@ -401,33 +410,48 @@ export default function DriverHistory() {
                         <View style={[styles.modalIcon, { backgroundColor: COLORS.alertRed + '15' }]}>
                             <AlertTriangle size={28} color={COLORS.alertRed} />
                         </View>
-                        <Text style={[styles.modalTitle, { color: textPrimary }]}>Cancel Booking</Text>
+                        <Text style={[styles.modalTitle, { color: textPrimary }]}>
+                            {cancelTarget?.source === 'session' ? 'Stop Session' : 'Cancel Booking'}
+                        </Text>
                         <Text style={[styles.modalSub, { color: textSecondary }]}>
-                            Cancelling within 15 mins incurs a ₹20 penalty.
+                            {cancelTarget?.source === 'session'
+                                ? 'Are you sure you want to stop this charging session?'
+                                : 'Cancelling within 15 mins incurs a ₹20 penalty.'}
                         </Text>
 
-                        <Text style={[styles.reasonLabel, { color: textSecondary }]}>Reason for cancellation *</Text>
-                        <TextInput
-                            style={[styles.reasonInput, { color: textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor }]}
-                            placeholder="Enter your reason here..."
-                            placeholderTextColor={textSecondary}
-                            multiline
-                            numberOfLines={4}
-                            value={cancelReason}
-                            onChangeText={setCancelReason}
-                        />
+                        {cancelTarget?.source === 'booking' && (
+                            <>
+                                <Text style={[styles.reasonLabel, { color: textSecondary }]}>Reason for cancellation *</Text>
+                                <TextInput
+                                    style={[styles.reasonInput, { color: textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor }]}
+                                    placeholder="Enter your reason here..."
+                                    placeholderTextColor={textSecondary}
+                                    multiline
+                                    numberOfLines={4}
+                                    value={cancelReason}
+                                    onChangeText={setCancelReason}
+                                />
+                            </>
+                        )}
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
-                                style={[styles.modalBtn, { backgroundColor: cancelReason.trim() ? COLORS.alertRed : 'rgba(255,255,255,0.1)', borderColor: COLORS.alertRed }]}
+                                style={[styles.modalBtn, {
+                                    backgroundColor: cancelTarget?.source === 'session' || cancelReason.trim()
+                                        ? COLORS.alertRed : 'rgba(255,255,255,0.1)',
+                                    borderColor: COLORS.alertRed,
+                                }]}
                                 onPress={submitCancel}
                                 disabled={cancelling}
                             >
                                 {cancelling ? (
                                     <ActivityIndicator color="#fff" size="small" />
                                 ) : (
-                                    <Text style={[styles.modalBtnText, { color: cancelReason.trim() ? '#fff' : textSecondary }]}>
-                                        Confirm Cancellation
+                                    <Text style={[styles.modalBtnText, {
+                                        color: cancelTarget?.source === 'session' || cancelReason.trim()
+                                            ? '#fff' : textSecondary,
+                                    }]}>
+                                        {cancelTarget?.source === 'session' ? 'Yes, Stop' : 'Confirm Cancellation'}
                                     </Text>
                                 )}
                             </TouchableOpacity>

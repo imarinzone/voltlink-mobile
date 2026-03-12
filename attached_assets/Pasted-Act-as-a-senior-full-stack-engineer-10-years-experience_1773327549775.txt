@@ -1,0 +1,162 @@
+Act as a **senior full-stack engineer (10+ years experience)** and fix the following issues.
+My responsibility is **frontend only**. Do **NOT modify backend code**.
+
+If any backend API is broken, clearly **log the issue and inform me**, but implement **safe fallbacks on the frontend so the user flow continues**.
+
+---
+
+GENERAL RULES
+
+1. Do not modify backend APIs.
+2. If an API fails (500, network error, EOF, etc.), the frontend must **fail safely and allow the UI flow to continue**.
+3. Log clear errors in the console for debugging.
+4. Maintain correct **state transitions in the frontend** so the user experience is not blocked.
+5. If needed, inspect API responses and DB data to understand failures, but implement fixes only in the frontend.
+
+---
+
+CURRENT API ISSUES OBSERVED
+
+Driver Flow
+
+POST /api/v1/sessions
+Request URL: http://localhost:3001/api/v1/sessions
+Error: 500 Internal Server Error
+
+Because of this failure, the charging session never starts in the UI.
+
+---
+
+B2C Flow
+
+POST /api/v1/bookings/{bookingId}/cancel
+
+Example:
+http://localhost:3001/api/v1/bookings/BK-dh0v6fig70a3/cancel
+
+Response:
+{"error":"EOF"}
+
+Also, the session start API is failing here as well.
+
+---
+
+EXPECTED USER FLOW (Driver + B2C)
+
+The UI must behave like this even if APIs fail:
+
+1. User books a charging station.
+2. Booking appears in **Active History**.
+3. User opens the booking from history.
+4. User starts a session.
+5. Session moves to **Active Sessions**.
+6. Charging starts.
+7. Charging simulation runs (+1% every 2 seconds).
+8. User can stop charging.
+9. After stopping, the app asks for **feedback**.
+
+If the **session API fails**, start the **charging simulation anyway on the frontend** and log the API error.
+
+---
+
+HISTORY STATE TRANSITIONS (IMPORTANT)
+
+Implement correct UI state transitions:
+
+1. When a booking is created
+   → it appears in **Active History**
+
+2. When a session starts from that booking
+   → move the booking to **Past History**
+   → show the session in **Active Sessions**
+
+3. When the session stops
+   → move the session to **Past Sessions**
+
+Even if the backend call fails, maintain this flow in the **frontend state/store**.
+
+---
+
+CANCELLATION UI REQUIREMENTS
+
+Add cancellation support in the UI.
+
+Active history items must show an **XCircle icon**.
+
+When clicked:
+
+For B2C:
+
+* Show confirmation modal:
+  "Cancelling within 15 minutes of the booking time may incur a penalty. Do you want to continue?"
+
+For Driver:
+
+* Show modal asking for:
+  "Cancellation Reason"
+
+After confirmation:
+Call API:
+
+POST /api/v1/bookings/:id/cancel
+
+If the API succeeds:
+
+* Move booking to **Past History**
+
+If the API fails:
+
+* Log error
+* Still remove booking from **Active History**
+* Move it to **Past History** with status "Cancelled (Pending Sync)"
+
+---
+
+SESSION STOP FLOW
+
+Use API:
+
+PATCH /api/v1/sessions/:id/stop
+
+If API succeeds:
+
+* Move session to **Past Sessions**
+
+If API fails:
+
+* Log error
+* Still stop charging simulation
+* Move session to **Past Sessions** with status "Stopped (Local)"
+
+---
+
+CHARGING SIMULATION
+
+Once charging starts:
+
+* Increase battery percentage by **+1% every 2 seconds**
+* Allow user to stop charging
+* On stop → trigger **feedback modal**
+
+This simulation must **continue even if session API fails**.
+
+---
+
+DEBUGGING
+
+If any API fails:
+
+1. Log:
+
+* endpoint
+* request payload
+* response error
+
+2. Clearly print messages like:
+   "Session API failed. Starting local charging simulation."
+
+---
+
+OBJECTIVE
+
+Ensure the **entire booking → session → charging → stop → feedback flow works smoothly in the frontend**, even when backend APIs fail.

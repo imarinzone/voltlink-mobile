@@ -56,8 +56,14 @@ export default function HistoryScreen() {
         try {
             if (activeTab === 'Active') {
                 const [pendingBookings, activeSessions] = await Promise.all([
-                    getPendingBookings(undefined, forceRefresh),
-                    getUserSessions(undefined, 'active', forceRefresh),
+                    getPendingBookings(undefined, forceRefresh).catch(err => {
+                        console.error('[B2C] Failed to fetch pending bookings:', err?.response?.data || err?.message);
+                        return [];
+                    }),
+                    getUserSessions(undefined, 'active', forceRefresh).catch(err => {
+                        console.error('[B2C] Failed to fetch active sessions:', err?.response?.data || err?.message);
+                        return [];
+                    }),
                 ]);
 
                 const bookingItems: HistoryItem[] = (pendingBookings || []).map((b: any) => {
@@ -104,7 +110,10 @@ export default function HistoryScreen() {
                 });
                 setItems(merged);
             } else {
-                const sessions = await getUserSessions(undefined, 'completed', forceRefresh);
+                const sessions = await getUserSessions(undefined, 'completed', forceRefresh).catch(err => {
+                    console.error('[B2C] Failed to fetch completed sessions:', err?.response?.data || err?.message);
+                    return [];
+                });
                 const mappedItems: HistoryItem[] = sessions.map((s: any) => {
                     let duration = 'N/A';
                     if (s.elapsed_seconds) {
@@ -140,9 +149,8 @@ export default function HistoryScreen() {
                 });
                 setItems(mappedItems);
             }
-        } catch (error) {
-            console.error('Error fetching history:', error);
-            Alert.alert('Error', 'Failed to load history data');
+        } catch (error: any) {
+            console.error('[B2C] Error fetching history:', error?.response?.data || error?.message);
         } finally {
             setLoading(false);
         }
@@ -174,19 +182,31 @@ export default function HistoryScreen() {
     const submitCancel = async () => {
         if (!cancelTarget) return;
         setCancelling(true);
+        let apiFailed = false;
         try {
             if (cancelTarget.source === 'session') {
                 await stopSession(String(cancelTarget.id));
             } else {
                 await cancelBooking(String(cancelTarget.id));
             }
-            setCancelTarget(null);
-            fetchData(true);
-        } catch (error) {
-            console.error('Error cancelling:', error);
-            Alert.alert('Error', cancelTarget.source === 'session' ? 'Failed to stop session' : 'Failed to cancel booking');
+        } catch (error: any) {
+            apiFailed = true;
+            const label = cancelTarget.source === 'session' ? 'stopSession' : 'cancelBooking';
+            const endpoint = cancelTarget.source === 'session'
+                ? `PATCH /sessions/${cancelTarget.id}/stop`
+                : `POST /bookings/${cancelTarget.id}/cancel`;
+            console.error(`[B2C] ${label} API failed. Removing from active list locally.`, {
+                endpoint,
+                error: error?.response?.data || error?.message,
+            });
         } finally {
             setCancelling(false);
+        }
+        setCancelTarget(null);
+        if (apiFailed) {
+            setItems(prev => prev.filter(i => i.id !== cancelTarget.id));
+        } else {
+            fetchData(true);
         }
     };
 

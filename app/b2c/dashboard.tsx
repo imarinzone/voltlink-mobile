@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity, Modal, TextInput, Platform } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity, Modal, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Wallet, Leaf, Zap, ChevronRight, Map, Plus, X, MapPin, Bot, User } from 'lucide-react-native';
+import {
+    Wallet, Leaf, Zap, ChevronRight, Map, Plus, X, MapPin, Bot, User,
+    Car, BatteryCharging, Plug, IndianRupee, CalendarCheck, CheckCircle
+} from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { MetricCard } from '../../components/ui/MetricCard';
@@ -9,6 +12,8 @@ import { VehicleCard } from '../../components/vehicle/VehicleCard';
 import { GlassButton } from '../../components/ui/GlassButton';
 import { getB2CStats } from '../../services/b2c.service';
 import { getAIRecommendations } from '../../services/stations.service';
+import { getStationSlots } from '../../services/session.service';
+import { createBooking } from '../../services/booking.service';
 import { Station } from '../../types/station.types';
 import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore } from '../../store/vehicleStore';
@@ -62,10 +67,20 @@ const translations = {
     }
 };
 
+const AI_STEPS = [
+    { title: 'Vehicle Detected', sub: 'Reading vehicle telemetry', detail: 'Battery: 35% · Capacity: 72 kWh · Location acquired', Icon: Car },
+    { title: 'Battery Analyzed', sub: 'Determining charge type', detail: 'Battery < 50% → AC Fast charging recommended', Icon: BatteryCharging },
+    { title: 'Route Scanned', sub: 'Finding CPOs within 5 km', detail: '3 CPOs found on Bangalore → Chennai route', Icon: MapPin },
+    { title: 'Charger Matched', sub: 'Checking slot availability', detail: 'AC Fast @ ChargeZone Hub — slot in 30 min', Icon: Plug },
+    { title: 'Price Calculated', sub: 'Applying dynamic pricing', detail: '₹8.00/kWh · Off-peak discount applied (−20%)', Icon: IndianRupee },
+    { title: 'Slot Booked', sub: 'Reservation confirmed', detail: 'Booked 14:30–15:30 · Est. cost ₹259.20', Icon: CalendarCheck },
+    { title: 'Charging Active', sub: 'Session in progress', detail: 'Charging to 80% · ETA 47 min remaining', Icon: Zap },
+];
+
 const B2CDashboard = () => {
     const { theme } = useThemeStore();
     const { language, setLanguage } = useLanguageStore();
-    const { myVehicle, setMyVehicleFromUserData } = useVehicleStore();
+    const { myVehicle, currentVehicleId, setMyVehicleFromUserData } = useVehicleStore();
     const isDark = theme === 'dark';
     const router = useRouter();
     const t = translations[language];
@@ -74,16 +89,21 @@ const B2CDashboard = () => {
     const [stats, setStats] = useState<any>(null);
     const [aiStations, setAiStations] = useState<Station[]>([]);
 
+    const [simVisible, setSimVisible] = useState(false);
+    const [simStation, setSimStation] = useState<Station | null>(null);
+    const [simStep, setSimStep] = useState(0);
+    const [simLoading, setSimLoading] = useState(false);
+    const simScrollRef = useRef<ScrollView>(null);
+    const simIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
     const fetchData = async (forceRefresh: boolean = false) => {
         try {
             const sData = await getB2CStats(DEFAULT_USER_ID, forceRefresh);
             setStats(sData);
 
-            // Map vehicle directly from the embedded user API response
             const vehicle = sData?.vehicle ?? null;
             setMyVehicleFromUserData(vehicle);
 
-            // Fetch AI recommendations if vehicle is available
             if (vehicle?.id) {
                 const aiData = await getAIRecommendations(vehicle.id.toString(), forceRefresh);
                 setAiStations(aiData.slice(0, 3));
@@ -100,6 +120,87 @@ const B2CDashboard = () => {
         await fetchData(true);
         setRefreshing(false);
     };
+
+    useEffect(() => {
+        if (simVisible && simStep > 0 && simScrollRef.current) {
+            let stepY = Math.max(0, (simStep - 2) * 85);
+            if (simStep === 7) stepY += 260;
+            simScrollRef.current.scrollTo({ y: stepY, animated: true });
+        }
+    }, [simStep, simVisible]);
+
+    const handleBookNow = async (station: Station) => {
+        setSimStation(station);
+        setSimStep(0);
+        setSimLoading(true);
+        setSimVisible(true);
+
+        try {
+            const slotsData = await getStationSlots(station.id);
+
+            let matchedConnector: any = null;
+            let firstAvailableSlot: any = null;
+            for (const conn of slotsData) {
+                const slot = conn.slots.find(s => s.available);
+                if (slot) {
+                    matchedConnector = conn;
+                    firstAvailableSlot = slot;
+                    break;
+                }
+            }
+
+            if (!firstAvailableSlot || !matchedConnector) {
+                throw new Error('No available slots at this station right now.');
+            }
+
+            let timeStr = firstAvailableSlot.time || "12:00";
+            let [hours, minutes] = timeStr.split(':');
+            hours = hours || "12";
+            minutes = minutes?.substring(0, 2) || "00";
+            if (timeStr.toLowerCase().includes('pm') && parseInt(hours) < 12) {
+                hours = (parseInt(hours) + 12).toString();
+            } else if (timeStr.toLowerCase().includes('am') && parseInt(hours) === 12) {
+                hours = "00";
+            }
+            const now = new Date();
+            now.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+            await createBooking({
+                connector_id: matchedConnector.connector_id,
+                vehicle_id: currentVehicleId || '',
+                user_id: parseInt(DEFAULT_USER_ID, 10),
+                booking_time: now.toISOString(),
+            });
+
+            setSimLoading(false);
+            setSimStep(1);
+
+            let step = 2;
+            simIntervalRef.current = setInterval(() => {
+                setSimStep(step);
+                if (step === 7) {
+                    if (simIntervalRef.current) clearInterval(simIntervalRef.current);
+                    setTimeout(() => {
+                        setSimVisible(false);
+                        setSimStep(0);
+                        router.push('/b2c/session' as any);
+                    }, 2500);
+                }
+                step++;
+            }, 1000);
+        } catch (error: any) {
+            console.error('AI booking error:', error);
+            setSimLoading(false);
+            setSimVisible(false);
+            Alert.alert('Booking Failed', error.message || 'Something went wrong. Please try again.');
+        }
+    };
+
+    useEffect(() => {
+        return () => {
+            if (simIntervalRef.current) clearInterval(simIntervalRef.current);
+        };
+    }, []);
 
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
@@ -201,10 +302,8 @@ const B2CDashboard = () => {
                                     <TouchableOpacity
                                         key={station.id}
                                         activeOpacity={0.85}
-                                        onPress={() => router.push({
-                                            pathname: '/b2c/booking',
-                                            params: { stationId: station.id, isAI: 'true' }
-                                        } as any)}
+                                        onPress={() => handleBookNow(station)}
+                                        disabled={!ok}
                                     >
                                         <GlassCard style={styles.aiCard as any} intensity={20}>
                                             {/* Status dot + name */}
@@ -252,10 +351,7 @@ const B2CDashboard = () => {
                                             {/* Book Now */}
                                             <TouchableOpacity
                                                 style={[styles.aiBookBtn, !ok && { opacity: 0.4 }]}
-                                                onPress={() => router.push({
-                                                    pathname: '/b2c/booking',
-                                                    params: { stationId: station.id, isAI: 'true' }
-                                                } as any)}
+                                                onPress={() => handleBookNow(station)}
                                                 disabled={!ok}
                                             >
                                                 <Text style={styles.aiBookText}>{ok ? t.bookNow : t.full}</Text>
@@ -280,6 +376,100 @@ const B2CDashboard = () => {
                     <ChevronRight size={18} color={COLORS.brandBlue} />
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* AI Simulation Modal */}
+            <Modal visible={simVisible} animationType="slide" transparent={false}>
+                <SafeAreaView style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
+                    {simLoading ? (
+                        <View style={styles.simLoadingContainer}>
+                            <ActivityIndicator color={COLORS.brandBlue} size="large" />
+                            <Text style={[styles.simLoadingText, { color: textSecondary }]}>
+                                🤖 AI is finding the best slot for you...
+                            </Text>
+                        </View>
+                    ) : (
+                        <>
+                            <View style={styles.loopHeader}>
+                                <GlassCard style={styles.botBadge as any} intensity={15}>
+                                    <Bot size={16} color={COLORS.brandBlue} />
+                                    <Text style={[styles.botText, { color: textPrimary }]}>VoltLink AI Optimizer</Text>
+                                </GlassCard>
+                                <Text style={[styles.loopTitle, { color: textPrimary }]}>Processing your booking...</Text>
+                            </View>
+
+                            <ScrollView
+                                ref={simScrollRef}
+                                contentContainerStyle={styles.loopContent}
+                                showsVerticalScrollIndicator={false}
+                            >
+                                <View style={styles.timelineContainer}>
+                                    {AI_STEPS.map((s, i) => {
+                                        const stepIdx = i + 1;
+                                        const isActive = simStep === stepIdx;
+                                        const isCompleted = simStep > stepIdx;
+                                        const isLast = i === AI_STEPS.length - 1;
+                                        const statusColor = isCompleted ? COLORS.successGreen : isActive ? COLORS.brandBlue : textSecondary;
+
+                                        return (
+                                            <View key={i} style={styles.stepRow}>
+                                                <View style={styles.iconCol}>
+                                                    {!isLast && (
+                                                        <View style={[
+                                                            styles.timelineSegment,
+                                                            { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }
+                                                        ]} />
+                                                    )}
+                                                    {!isLast && isCompleted && (
+                                                        <View style={[styles.timelineSegmentProgress, { backgroundColor: COLORS.successGreen }]} />
+                                                    )}
+                                                    <View style={[
+                                                        styles.stepCircle,
+                                                        { borderColor: statusColor, backgroundColor: bg },
+                                                        isActive && styles.activeCircle
+                                                    ]}>
+                                                        <s.Icon size={20} color={statusColor} />
+                                                    </View>
+                                                </View>
+
+                                                <View style={styles.stepMain}>
+                                                    <View style={styles.stepHeaderRow}>
+                                                        <Text style={[styles.stepTitle, { color: isCompleted || isActive ? textPrimary : textSecondary }]}>
+                                                            {s.title}
+                                                        </Text>
+                                                        {isCompleted && <CheckCircle size={16} color={COLORS.successGreen} style={{ marginLeft: 8 }} />}
+                                                    </View>
+                                                    <Text style={[styles.stepSub, { color: textSecondary }]}>{s.sub}</Text>
+
+                                                    {(isActive || isCompleted) && (
+                                                        <GlassCard style={styles.detailBadge as any} intensity={isActive ? 20 : 10}>
+                                                            <Text style={[styles.detailText, { color: textSecondary }]}>{s.detail}</Text>
+                                                        </GlassCard>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+
+                                {simStep === 7 && (
+                                    <View style={[styles.successBox, { backgroundColor: isDark ? 'rgba(0,255,136,0.08)' : 'rgba(0,255,136,0.05)' }]}>
+                                        <CheckCircle color={COLORS.successGreen} size={32} />
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={[styles.successTitle, { color: textPrimary }]}>Success!</Text>
+                                            <Text style={[styles.successSub, { color: textSecondary }]}>
+                                                Your booking at {simStation?.name} is confirmed and AI has initiated the session.
+                                            </Text>
+                                            <Text style={[styles.successSub, { color: textSecondary, marginTop: 12, fontStyle: 'italic' }]}>
+                                                Redirecting to session...
+                                            </Text>
+                                        </View>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        </>
+                    )}
+                </SafeAreaView>
+            </Modal>
 
         </SafeAreaView>
     );
@@ -357,7 +547,6 @@ const styles = StyleSheet.create({
     discoverText: { ...TYPOGRAPHY.body, color: COLORS.brandBlue, flex: 1, fontWeight: '600' },
     seeAllText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 12 },
 
-    // AI Recommendations
     aiSection: { marginBottom: SPACING.md },
     aiScroll: { gap: SPACING.sm, paddingBottom: SPACING.sm },
     aiCard: {
@@ -388,7 +577,69 @@ const styles = StyleSheet.create({
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.xl },
     modalTitle: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: 'bold' },
     input: { height: 48, borderRadius: BORDER_RADIUS.md, borderWidth: 1, paddingHorizontal: SPACING.md, marginBottom: SPACING.md, ...TYPOGRAPHY.body, fontSize: 14 },
-    modalActions: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.sm }
+    modalActions: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.sm },
+
+    simLoadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    simLoadingText: { ...TYPOGRAPHY.body, textAlign: 'center', fontWeight: '600', marginTop: 20 },
+    loopHeader: { paddingTop: SPACING.lg, paddingBottom: SPACING.sm, alignItems: 'center' },
+    botBadge: {
+        flexDirection: 'row', alignItems: 'center', gap: 6,
+        paddingHorizontal: 12, paddingVertical: 4,
+        borderRadius: 20, marginBottom: SPACING.sm,
+    },
+    botText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 11 },
+    loopTitle: { ...TYPOGRAPHY.hero, fontSize: 22, textAlign: 'center' },
+    loopContent: { paddingHorizontal: SPACING.xl, paddingTop: SPACING.lg, paddingBottom: 200 },
+    timelineContainer: { marginTop: SPACING.md },
+    timelineSegment: {
+        position: 'absolute', left: 21, top: 40, bottom: -24,
+        width: 2, borderRadius: 1, zIndex: 1,
+    },
+    timelineSegmentProgress: {
+        position: 'absolute', left: 21, top: 40, bottom: -24,
+        width: 2, borderRadius: 1, zIndex: 2,
+    },
+    stepRow: { flexDirection: 'row', marginBottom: 24, minHeight: 60 },
+    iconCol: { width: 44, alignItems: 'center', zIndex: 10 },
+    stepCircle: {
+        width: 44, height: 44, borderRadius: 22,
+        justifyContent: 'center', alignItems: 'center',
+        borderWidth: 2, zIndex: 10,
+    },
+    activeCircle: {
+        shadowColor: COLORS.brandBlue,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8, shadowRadius: 10,
+        elevation: 10,
+    },
+    stepMain: { flex: 1, paddingLeft: SPACING.md, paddingTop: 6 },
+    stepHeaderRow: { flexDirection: 'row', alignItems: 'center' },
+    stepTitle: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 16 },
+    stepSub: { ...TYPOGRAPHY.label, fontSize: 12, marginTop: 2, opacity: 0.8 },
+    detailBadge: {
+        marginTop: 8, paddingHorizontal: 10, paddingVertical: 6,
+        borderRadius: 8, alignSelf: 'flex-start',
+    },
+    detailText: { ...TYPOGRAPHY.label, fontSize: 11, fontStyle: 'italic' },
+    successBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: SPACING.lg,
+        borderRadius: BORDER_RADIUS.lg,
+        gap: SPACING.md,
+        marginTop: SPACING.xl,
+    },
+    successTitle: {
+        ...TYPOGRAPHY.sectionHeader,
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    successSub: {
+        ...TYPOGRAPHY.label,
+        fontSize: 13,
+        lineHeight: 18,
+        marginTop: 4,
+    },
 });
 
 export default B2CDashboard;

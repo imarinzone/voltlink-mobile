@@ -117,19 +117,24 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                         <Text style={[styles.sectionTitle, { color: textSecondary }]}>SUSTAINABILITY SCORE</Text>
                         <View style={styles.sustainGrid}>
                             <GlassCard style={styles.sustainItem} intensity={10}>
-                                <Leaf size={20} color={COLORS.successGreen} />
-                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{sustainability?.greenScore ?? '--'}</Text>
+                                <Leaf size={18} color={COLORS.successGreen} />
+                                <Text style={[styles.sustainValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
+                                    {sustainability?.greenScore != null ? Number(sustainability.greenScore).toFixed(2) : '--'}
+                                </Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]}>Green Score</Text>
                             </GlassCard>
                             <GlassCard style={styles.sustainItem} intensity={10}>
-                                <Cloud size={20} color={COLORS.brandBlue} />
-                                <Text style={[styles.sustainValue, { color: textPrimary }]}>{sustainability?.carbonSavedKg ?? '--'}kg</Text>
+                                <Cloud size={18} color={COLORS.brandBlue} />
+                                <Text style={[styles.sustainValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
+                                    {sustainability?.carbonSavedKg != null ? Number(sustainability.carbonSavedKg).toFixed(2) : '--'}kg
+                                </Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]}>CO2 Saved</Text>
                             </GlassCard>
-
                             <GlassCard style={styles.sustainItem} intensity={10}>
-                                <Trophy size={20} color={COLORS.warningOrange} />
-                                <Text style={[styles.sustainValue, { color: textPrimary }]}>#{sustainability?.carbonRank ?? '--'}</Text>
+                                <Trophy size={18} color={COLORS.warningOrange} />
+                                <Text style={[styles.sustainValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
+                                    #{sustainability?.carbonRank ?? '--'}
+                                </Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]}>Global Rank</Text>
                             </GlassCard>
                         </View>
@@ -297,13 +302,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center', alignItems: 'center',
     },
     memberInitial: { color: COLORS.brandBlue, fontWeight: 'bold' },
-    sustainGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md, marginBottom: SPACING.xl },
+    sustainGrid: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.xl },
     sustainItem: {
-        width: (width - SPACING.lg * 2 - SPACING.md) / 2,
-        padding: SPACING.md, gap: 4, alignItems: 'center'
+        flex: 1,
+        padding: SPACING.sm, gap: 4, alignItems: 'center',
+        minWidth: 0,
     },
-    sustainValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: '800' },
-    sustainLabel: { ...TYPOGRAPHY.label, fontSize: 10, letterSpacing: 0.5 },
+    sustainValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 15, fontWeight: '800', textAlign: 'center' },
+    sustainLabel: { ...TYPOGRAPHY.label, fontSize: 10, letterSpacing: 0.5, textAlign: 'center' },
     languageRow: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.sm, marginLeft: 36 },
     languagePill: {
         paddingHorizontal: SPACING.md, paddingVertical: 6,

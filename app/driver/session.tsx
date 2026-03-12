@@ -9,11 +9,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { PanGestureHandler, GestureHandlerRootView, TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler';
 import { Zap, AlertTriangle, ThumbsUp, ThumbsDown, ChevronRight, ChevronsRight } from 'lucide-react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
-import { getVehicleActiveSession, stopSession, rateSession } from '../../services/session.service';
+import { getVehicleActiveSession, startSession, stopSession, rateSession, getSession } from '../../services/session.service';
 import { useVehicleStore } from '../../store/vehicleStore';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -30,6 +30,7 @@ export default function SessionScreen() {
     const { currentVehicleId } = useVehicleStore();
     const isDark = theme === 'dark';
     const router = useRouter();
+    const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
 
     const { myVehicle } = useVehicleStore();
     const [chargePercent, setChargePercent] = useState(myVehicle?.batteryLevel ?? 20);
@@ -39,6 +40,9 @@ export default function SessionScreen() {
     const [appRating, setAppRating] = useState(0);
     const [ratingSubmitted, setRatingSubmitted] = useState(false);
     const [elapsed, setElapsed] = useState(0);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [sessionData, setSessionData] = useState<any>(null);
+    const [sessionLoading, setSessionLoading] = useState(true);
 
     const progress = useSharedValue(chargePercent / 100);
     const sliderPos = useSharedValue(0);
@@ -46,7 +50,30 @@ export default function SessionScreen() {
     const SLIDER_BTN_SIZE = 56;
     const pulseOpacity = useSharedValue(1);
 
-    // Pulse the ring
+    // Fetch session on mount — auto-start if already live
+    useEffect(() => {
+        if (!sessionId) { setSessionLoading(false); return; }
+        (async () => {
+            try {
+                const data = await getSession(sessionId);
+                setSessionData(data);
+                if (data?.current_soc) {
+                    setChargePercent(data.current_soc);
+                    progress.value = data.current_soc / 100;
+                }
+                if (data?.elapsed_seconds) setElapsed(data.elapsed_seconds);
+                if (data?.is_live) {
+                    setIsCharging(true);
+                }
+            } catch (err) {
+                console.error('Failed to load session:', err);
+            } finally {
+                setSessionLoading(false);
+            }
+        })();
+    }, [sessionId]);
+
+    // Pulse ring animation
     useEffect(() => {
         pulseOpacity.value = withRepeat(
             withSequence(withTiming(0.4, { duration: 900 }), withTiming(1, { duration: 900 })),
@@ -83,12 +110,26 @@ export default function SessionScreen() {
         width: sliderPos.value + SLIDER_BTN_SIZE,
     }));
 
-    const handleSlideEnd = (e: any) => {
-        // Lowered threshold for better responsiveness
+    const handleSlideEnd = async (e: any) => {
         if (e.nativeEvent.translationX > 180) {
             sliderPos.value = withTiming(320 - 56 - 16);
-            setIsCharging(true);
-            setChargePercent(myVehicle?.batteryLevel ?? 20);
+            if (!sessionId) {
+                setIsCharging(true);
+                setChargePercent(myVehicle?.batteryLevel ?? 20);
+                return;
+            }
+            setActionLoading(true);
+            try {
+                await startSession(sessionId);
+                setIsCharging(true);
+                setChargePercent(myVehicle?.batteryLevel ?? 20);
+            } catch (err) {
+                console.error('Start session error:', err);
+                Alert.alert('Error', 'Failed to start charging session. Please try again.');
+                sliderPos.value = withTiming(0);
+            } finally {
+                setActionLoading(false);
+            }
         } else {
             sliderPos.value = withTiming(0);
         }
@@ -105,11 +146,13 @@ export default function SessionScreen() {
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
 
-    const kwhDelivered = (chargePercent - (myVehicle?.batteryLevel ?? 20)) * 0.4; // Simulated kWh
-    const estimatedCost = (kwhDelivered * 15).toFixed(0);
-    const stationName = "AI Recommended Station";
-    const connectorType = "CCS2 DC Fast";
-    const connectorId = "CSS2-FAST-01";
+    // Use real session data when available, fall back to simulated values
+    const stationName = sessionData?.station_name || 'Charging Station';
+    const connectorId = sessionData?.connector_id || '';
+    const connectorType = sessionData?.connector_type || '';
+    const kwhDelivered = sessionData?.kwh ?? ((chargePercent - (myVehicle?.batteryLevel ?? 20)) * 0.4);
+    const estimatedCost = sessionData?.total_cost ?? Math.round(kwhDelivered * 15);
+    const estimatedCompletion = sessionData?.estimated_completion;
 
     const formatTime = (secs: number) => {
         const m = Math.floor(secs / 60);
@@ -117,11 +160,20 @@ export default function SessionScreen() {
         return `${m}m ${s < 10 ? '0' : ''}${s}s`;
     };
 
-    const timeRemainingMin = Math.max(0, 100 - chargePercent) * 2;
+    const timeRemainingMin = estimatedCompletion ?? Math.max(0, 100 - chargePercent) * 2;
 
-    const handleStop = () => {
+    const handleStop = async () => {
+        if (actionLoading) return;
+        setActionLoading(true);
+        try {
+            if (sessionId) await stopSession(sessionId);
+        } catch (err) {
+            console.error('Stop session error:', err);
+            // Still end session locally even if API call fails
+        } finally {
+            setActionLoading(false);
+        }
         setIsCharging(false);
-        setChargePercent(prev => prev);
         setTimeout(() => setSessionEnded(true), 100);
     };
 
@@ -140,6 +192,14 @@ export default function SessionScreen() {
     };
 
 
+    if (sessionLoading) {
+        return (
+            <SafeAreaView style={[styles.container, { backgroundColor: bg, justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={COLORS.brandBlue} />
+            </SafeAreaView>
+        );
+    }
+
     if (sessionEnded && !ratingSubmitted) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: bg }]}>
@@ -149,7 +209,7 @@ export default function SessionScreen() {
                             <Zap size={48} color={COLORS.successGreen} />
                             <Text style={[styles.ratingTitle, { color: textPrimary }]}>Session Complete</Text>
                             <Text style={[styles.ratingCost, { color: COLORS.brandBlue }]}>₹{estimatedCost} charged</Text>
-                            <Text style={[styles.ratingKwh, { color: textSecondary }]}>{kwhDelivered.toFixed(2)} kWh delivered</Text>
+                            <Text style={[styles.ratingKwh, { color: textSecondary }]}>{typeof kwhDelivered === 'number' ? kwhDelivered.toFixed(2) : kwhDelivered} kWh delivered</Text>
 
                             <Text style={[styles.ratingPrompt, { color: textSecondary }]}>Rate your charging experience</Text>
 
@@ -309,7 +369,11 @@ export default function SessionScreen() {
                                 <View style={styles.stopIconCircle}>
                                     <View style={styles.stopSquare} />
                                 </View>
-                                <Text style={styles.stopText}>STOP CHARGING</Text>
+                                {actionLoading ? (
+                                    <ActivityIndicator color={COLORS.alertRed} />
+                                ) : (
+                                    <Text style={styles.stopText}>STOP CHARGING</Text>
+                                )}
                             </View>
                         </GHTouchableOpacity>
                     ) : null}

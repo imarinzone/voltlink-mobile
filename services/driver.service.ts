@@ -8,35 +8,41 @@ export const getDriverProfile = async (driverId: string = DEFAULT_DRIVER_ID, for
 
 export const getVehiclesByDriver = async (driverId: string = DEFAULT_DRIVER_ID, forceRefresh?: boolean) =>
     fetchWithCache(`/users/${driverId}`, { forceRefresh }).then(data => {
-        return data?.vehicles || [];
+        // New API: vehicle is a single embedded object, not an array
+        const v = data?.vehicle;
+        return v ? [v] : [];
     });
 
 export const getVehicleDashboard = async (vehicleId: string, forceRefresh?: boolean) =>
-    fetchWithCache(`/vehicles/${vehicleId}/extended`, { forceRefresh }).then(data => {
+    fetchWithCache(`/vehicles/${vehicleId}`, { forceRefresh }).then(data => {
         const d = data.data || data;
+        const soc = d.current_soc ?? 0;
+        const capacity = d.battery_capacity_kwh ?? 0;
+        const efficiency = d.efficiency_km_per_kwh ?? 0;
+        const rangeKm = Math.round((soc / 100) * capacity * efficiency);
         return {
-            id: d.id,
-            name: d.name || '',
+            id: String(d.id),
+            name: `${d.make || ''} ${d.model || ''}`.trim(),
             make: d.make || '',
             model: d.model || '',
-            licensePlate: d.license_plate || d.vehicle_identifier || '',
-            batteryLevel: d.battery?.percentage || 0,
-            rangeKm: d.range?.estimated || 0,
+            licensePlate: d.license_plate || '',
+            batteryLevel: soc,
+            rangeKm,
             status: d.status as any,
-            lastChargedAt: d.battery?.lastCharged || d.lastUpdate || 'Unknown',
-            driverName: d.driver?.name || 'Driver',
-            driverEmail: d.driver?.email || 'driver@voltlink.com',
+            lastChargedAt: d.last_location_update || d.updated_at || 'Unknown',
+            driverName: '',   // driver name comes from getDriverProfile
+            driverEmail: '',
         };
     });
 
 export const getTodayStats = async (vehicleId: string, forceRefresh?: boolean) =>
-    fetchWithCache(`/vehicles/${vehicleId}/extended`, { forceRefresh }).then(data => {
+    fetchWithCache(`/vehicles/${vehicleId}`, { forceRefresh }).then(data => {
         const d = data.data || data;
+        const soc = d.current_soc ?? 0;
+        const capacity = d.battery_capacity_kwh ?? 0;
         return {
             distanceKm: 0,
-            kwhConsumed: Math.round(
-                (d.battery?.capacity_kwh || 0) * (d.battery?.percentage || 0) / 100 * 10
-            ) / 10,
+            kwhConsumed: Math.round((capacity * soc / 100) * 10) / 10,
             costPerKwh: 12.0,
         };
     });

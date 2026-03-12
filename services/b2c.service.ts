@@ -14,7 +14,7 @@ export const getB2CStats = async (userId: string = DEFAULT_USER_ID, forceRefresh
 
     return {
         user: user,
-        vehicles: user?.vehicles || [],
+        vehicle: user?.vehicle || null,
         availableCredits: balance?.current_balance || 0,
         carbonSavedKg: sustainability?.carbon_saved_kg || 0,
         totalSessions: Array.isArray(sessions) ? sessions.length : 0,
@@ -42,4 +42,9 @@ export const getSustainabilityStats = async (userId: string = DEFAULT_USER_ID, f
     }));
 
 export const getUserSessions = async (userId: string = DEFAULT_USER_ID, status?: string, forceRefresh?: boolean) =>
-    fetchWithCache(`/users/${userId}/sessions`, { params: { status }, forceRefresh });
+    fetchWithCache(`/users/${userId}/sessions`, { params: { status }, forceRefresh }).then(data => {
+        // Handle both bare array and wrapped { data: [...] } responses
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(data?.data)) return data.data;
+        return [];
+    });

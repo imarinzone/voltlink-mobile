@@ -8,7 +8,7 @@ import { MetricCard } from '../../components/ui/MetricCard';
 import { VehicleCard } from '../../components/vehicle/VehicleCard';
 import { GlassButton } from '../../components/ui/GlassButton';
 import { getB2CStats } from '../../services/b2c.service';
-import { getStations } from '../../services/stations.service';
+import { getAIRecommendations } from '../../services/stations.service';
 import { Station } from '../../types/station.types';
 import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore } from '../../store/vehicleStore';
@@ -65,7 +65,7 @@ const translations = {
 const B2CDashboard = () => {
     const { theme } = useThemeStore();
     const { language, setLanguage } = useLanguageStore();
-    const { myVehicle, familyVehicles, addFamilyVehicle, fetchMyVehicle, setCurrentVehicleId } = useVehicleStore();
+    const { myVehicle, setMyVehicleFromUserData } = useVehicleStore();
     const isDark = theme === 'dark';
     const router = useRouter();
     const t = translations[language];
@@ -76,28 +76,17 @@ const B2CDashboard = () => {
 
     const fetchData = async (forceRefresh: boolean = false) => {
         try {
-            const [sData, stationsData] = await Promise.all([
-                getB2CStats(DEFAULT_USER_ID, forceRefresh),
-                getStations(undefined, forceRefresh),
-            ]);
+            const sData = await getB2CStats(DEFAULT_USER_ID, forceRefresh);
             setStats(sData);
 
-            // Sort: stations with aiReason first, then by distance
-            const sorted = [...stationsData].sort((a, b) => {
-                if (a.aiReason && !b.aiReason) return -1;
-                if (!a.aiReason && b.aiReason) return 1;
-                return (a.distanceKm ?? 99) - (b.distanceKm ?? 99);
-            });
-            setAiStations(sorted.slice(0, 3));
+            // Map vehicle directly from the embedded user API response
+            const vehicle = sData?.vehicle ?? null;
+            setMyVehicleFromUserData(vehicle);
 
-            // Set current vehicle ID from profile if available
-            const vehicleId = sData?.user?.primary_vehicle_id || sData?.vehicles?.[0]?.id;
-            if (vehicleId) {
-                setCurrentVehicleId(vehicleId);
-                await fetchMyVehicle(vehicleId);
-            } else {
-                setCurrentVehicleId(null);
-                await fetchMyVehicle(null);
+            // Fetch AI recommendations if vehicle is available
+            if (vehicle?.id) {
+                const aiData = await getAIRecommendations(vehicle.id.toString(), forceRefresh);
+                setAiStations(aiData.slice(0, 3));
             }
         } catch (error) {
             console.error('Error fetching B2C dashboard data:', error);

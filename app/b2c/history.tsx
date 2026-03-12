@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {
-    StyleSheet, View, FlatList, Text, TouchableOpacity, Alert, Pressable, ActivityIndicator, Platform, Linking, Modal
-} from 'react-native';
+import { StyleSheet, View, FlatList, Text, TouchableOpacity, Alert, Pressable, ActivityIndicator, Platform, Linking, Modal } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Zap, Clock, ThumbsUp, ThumbsDown, Calendar, XCircle, MapPin, CheckCircle, Info } from 'lucide-react-native';
+import { Zap, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
 import { getUserSessions } from '../../services/b2c.service';
-import { getBookings, cancelBooking } from '../../services/booking.service';
 import { format } from 'date-fns';
 
 const TABS = ['Active', 'Past'];
@@ -27,6 +24,10 @@ type HistoryItem = {
     duration?: string;
     rating?: number;
     status?: string;
+    connectorId?: string;
+    currentSoc?: number;
+    isLive?: boolean;
+    estimatedCompletion?: string;
 };
 
 export default function HistoryScreen() {
@@ -37,8 +38,6 @@ export default function HistoryScreen() {
     const [expandedSession, setExpandedSession] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState<HistoryItem[]>([]);
-    const [verifyingStation, setVerifyingStation] = useState<string | null>(null);
-    const [showWorkingModal, setShowWorkingModal] = useState(false);
 
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
@@ -49,44 +48,55 @@ export default function HistoryScreen() {
         setLoading(true);
         try {
             if (activeTab === 'Active') {
-                // Fetch both pending bookings and active sessions
-                const [bookingsResponse, sessions] = await Promise.all([
-                    getBookings({ status: 'pending' }, forceRefresh),
-                    getUserSessions(undefined, 'active', forceRefresh)
-                ]);
-
-                const bookings = bookingsResponse.data || [];
-
-                const mappedItems: HistoryItem[] = [
-                    ...sessions.map((s: any) => ({
-                        id: s.id,
-                        status: 'active',
-                        time: 'Charging Now',
-                        station: s.station_name || 'Charging Station',
-                        type: s.session_type || 'Charging',
-                        cost: s.total_cost,
-                        kWh: s.kwh
-                    })),
-                    ...bookings.map((b: any) => ({
-                        id: b.id,
-                        status: 'pending',
-                        time: format(new Date(b.booking_time), 'hh:mm a') + ' Today',
-                        station: b.connector?.station_name || 'Booked Station',
-                        type: b.connector?.connector_type || 'Reserved'
-                    }))
-                ];
+                const sessions = await getUserSessions(undefined, 'active', forceRefresh);
+                const mappedItems: HistoryItem[] = sessions.map((s: any) => ({
+                    id: s.id,
+                    status: 'active',
+                    time: 'Charging Now',
+                    station: s.station_name || 'Charging Station',
+                    type: s.session_type || 'Charging',
+                    cost: s.total_cost,
+                    kWh: s.kwh,
+                    connectorId: s.connector_id,
+                    currentSoc: s.current_soc,
+                }));
                 setItems(mappedItems);
             } else {
                 const sessions = await getUserSessions(undefined, 'completed', forceRefresh);
-                const mappedItems: HistoryItem[] = sessions.map((s: any) => ({
-                    id: s.id,
-                    date: format(new Date(s.start_time), 'dd MMM yyyy'),
-                    station: s.station_name || 'Charging Station',
-                    kWh: s.kwh,
-                    cost: s.total_cost,
-                    duration: s.end_time ? `${Math.round((new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / 60000)} min` : 'N/A',
-                    rating: 5 // Default for now
-                }));
+                const mappedItems: HistoryItem[] = sessions.map((s: any) => {
+                    // Duration from elapsed_seconds (new API) or start/end times (legacy)
+                    let duration = 'N/A';
+                    if (s.elapsed_seconds) {
+                        const totalMins = Math.round(s.elapsed_seconds / 60);
+                        const hrs = Math.floor(totalMins / 60);
+                        const mins = totalMins % 60;
+                        duration = hrs > 0 ? `${hrs}h ${mins}m` : `${totalMins}m`;
+                    } else if (s.start_time && s.end_time) {
+                        const mins = Math.round((new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / 60000);
+                        duration = `${mins} min`;
+                    }
+
+                    // Date from start_time or fallback label
+                    let date = 'Past session';
+                    if (s.start_time) {
+                        try { date = format(new Date(s.start_time), 'dd MMM yyyy'); } catch { }
+                    }
+
+                    return {
+                        id: s.id,
+                        date,
+                        station: s.station_name || 'Charging Station',
+                        kWh: s.kwh,
+                        cost: s.total_cost,
+                        duration,
+                        connectorId: s.connector_id || s.connector?.connector_type,
+                        currentSoc: s.current_soc,
+                        isLive: s.is_live,
+                        estimatedCompletion: s.estimated_completion,
+                        status: s.status,
+                        rating: undefined
+                    };
+                });
                 setItems(mappedItems);
             }
         } catch (error) {
@@ -107,93 +117,18 @@ export default function HistoryScreen() {
         }, [activeTab])
     );
 
-    const handleCancelBooking = (id: string) => {
-        if (Platform.OS === 'web') {
-            const confirmed = window.confirm('Cancelling within 15 minutes of the slot incurs a ₹20 penalty. Do you want to proceed?');
-            if (confirmed) {
-                (async () => {
-                    try {
-                        setLoading(true);
-                        await cancelBooking(id, { reason: 'Cancelled by user' });
-                        window.alert('Your booking has been cancelled and a ₹20 penalty has been applied.');
-                        fetchData(true);
-                    } catch (error) {
-                        console.error('Cancel booking error:', error);
-                        window.alert('Failed to cancel the booking.');
-                        setLoading(false);
-                    }
-                })();
-            }
-            return;
-        }
 
-        Alert.alert(
-            'Cancel Booking?',
-            'Cancelling within 15 minutes of the slot incurs a ₹20 penalty. Do you want to proceed?',
-            [
-                { text: 'Keep Booking', style: 'cancel' },
-                {
-                    text: 'Cancel (₹20 Penalty)',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            setLoading(true);
-                            await cancelBooking(id, { reason: 'Cancelled by user' });
-                            Alert.alert('Cancelled', 'Your booking has been cancelled and a ₹20 penalty has been applied.');
-                            fetchData(true);
-                        } catch (error) {
-                            console.error('Cancel booking error:', error);
-                            Alert.alert('Error', 'Failed to cancel the booking.');
-                            setLoading(false);
-                        }
-                    }
-                },
-            ]
-        );
-    };
 
     const openDirections = () => {
         const url = `https://www.google.com/maps/dir/?api=1&destination=12.9716,77.5946`;
         Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
     };
 
-    const handleOpenSession = (sessionId: string) => {
-        setVerifyingStation(sessionId);
-        setShowWorkingModal(true);
-    };
-
-    const confirmStationWorking = (isWorking: boolean) => {
-        setShowWorkingModal(false);
-        if (isWorking) {
-            router.push({
-                pathname: '/b2c/session',
-                params: { sessionId: verifyingStation! }
-            });
-        } else {
-            Alert.alert(
-                "Station Issue",
-                "We're sorry the station is not working. Redirecting you to Home to find another recommendation.",
-                [{ text: "OK", onPress: () => router.replace('/b2c/dashboard') }]
-            );
-        }
-    };
-
     const renderItem = ({ item }: { item: HistoryItem }) => {
         if (activeTab === 'Active') {
-            const isActive = item.status === 'active';
             return (
                 <View style={{ marginBottom: SPACING.md }}>
                     <GlassCard style={{ ...(styles.bookingCard as any), padding: 0 }} intensity={25}>
-
-                        {!isActive && (
-                            <TouchableOpacity
-                                onPress={() => handleCancelBooking(item.id)}
-                                style={{ position: 'absolute', right: SPACING.lg, top: SPACING.lg, zIndex: 10 }}
-                            >
-                                <XCircle size={22} color={COLORS.alertRed} />
-                            </TouchableOpacity>
-                        )}
-
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => router.push({
@@ -203,8 +138,8 @@ export default function HistoryScreen() {
                             style={{ padding: SPACING.lg }}
                         >
                             <View style={styles.cardHeader}>
-                                <View style={[styles.iconBox, { backgroundColor: isActive ? COLORS.successGreen + '20' : COLORS.brandBlue + '20' }]}>
-                                    {isActive ? <Zap size={18} color={COLORS.successGreen} /> : <Calendar size={18} color={COLORS.brandBlue} />}
+                                <View style={[styles.iconBox, { backgroundColor: COLORS.successGreen + '20' }]}>
+                                    <Zap size={18} color={COLORS.successGreen} />
                                 </View>
                                 <View style={styles.headerInfo}>
                                     <Text style={[styles.bookingTime, { color: textPrimary }]}>{item.time}</Text>
@@ -214,32 +149,22 @@ export default function HistoryScreen() {
 
                             <View style={styles.bookingDetails}>
                                 <View style={styles.detailRow}>
-                                    <Zap size={14} color={isActive ? COLORS.successGreen : COLORS.brandBlue} />
+                                    <Zap size={14} color={COLORS.successGreen} />
                                     <Text style={[styles.detailText, { color: textSecondary }]}>
-                                        {item.type} {item.cost ? `· ₹${item.cost}` : ''} {item.kWh ? `· ${item.kWh} kWh` : ''}
+                                        {item.type}{item.cost ? ` · ₹${item.cost}` : ''}{item.kWh ? ` · ${item.kWh} kWh` : ''}{item.currentSoc ? ` · 🔋${item.currentSoc}%` : ''}
                                     </Text>
                                 </View>
                             </View>
 
-                            {!isActive && (
-                                <View style={styles.actionRow}>
-                                    <TouchableOpacity
-                                        style={[styles.actionBtn, { borderColor: COLORS.brandBlue }]}
-                                        onPress={openDirections}
-                                    >
-                                        <MapPin size={14} color={COLORS.brandBlue} />
-                                        <Text style={[styles.actionBtnText, { color: COLORS.brandBlue }]}>View Directions</Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        style={[styles.actionBtn, { backgroundColor: COLORS.brandBlue, borderColor: COLORS.brandBlue }]}
-                                        onPress={() => handleOpenSession(item.id)}
-                                    >
-                                        <Zap size={14} color="#000" />
-                                        <Text style={[styles.actionBtnText, { color: '#000' }]}>Open Session</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
+                            <View style={styles.actionRow}>
+                                <TouchableOpacity
+                                    style={[styles.actionBtn, { borderColor: COLORS.brandBlue }]}
+                                    onPress={openDirections}
+                                >
+                                    <MapPin size={14} color={COLORS.brandBlue} />
+                                    <Text style={[styles.actionBtnText, { color: COLORS.brandBlue }]}>View Directions</Text>
+                                </TouchableOpacity>
+                            </View>
                         </TouchableOpacity>
                     </GlassCard>
                 </View>
@@ -250,6 +175,7 @@ export default function HistoryScreen() {
         return (
             <GlassCard style={styles.sessionCard as any} intensity={15}>
                 <Pressable onPress={() => setExpandedSession(isExpanded ? null : item.id)}>
+                    {/* Collapsed row */}
                     <View style={styles.sessionMain}>
                         <View style={[styles.iconBox, { backgroundColor: COLORS.successGreen + '15' }]}>
                             <Zap size={18} color={COLORS.successGreen} />
@@ -272,17 +198,26 @@ export default function HistoryScreen() {
                                     <Text style={[styles.gridLabel, { color: textSecondary }]}>Duration</Text>
                                     <Text style={[styles.gridValue, { color: textPrimary }]}>{item.duration}</Text>
                                 </View>
-                                <View style={styles.gridItem}>
-                                    <Text style={[styles.gridLabel, { color: textSecondary }]}>Rating</Text>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                        {item.rating && item.rating >= 4 ? (
-                                            <ThumbsUp size={14} color={COLORS.successGreen} fill={COLORS.successGreen} />
-                                        ) : (
-                                            <ThumbsDown size={14} color={COLORS.alertRed} fill={COLORS.alertRed} />
-                                        )}
-                                        <Text style={[styles.gridValue, { color: textPrimary }]}>{item.rating && item.rating >= 4 ? 'Good' : 'Bad'}</Text>
+                                {item.currentSoc !== undefined && (
+                                    <View style={styles.gridItem}>
+                                        <Zap size={12} color={textSecondary} />
+                                        <Text style={[styles.gridLabel, { color: textSecondary }]}>Final SOC</Text>
+                                        <Text style={[styles.gridValue, { color: COLORS.successGreen }]}>{item.currentSoc}%</Text>
                                     </View>
-                                </View>
+                                )}
+                                {item.connectorId && (
+                                    <View style={styles.gridItem}>
+                                        <Text style={[styles.gridLabel, { color: textSecondary }]}>Connector</Text>
+                                        <Text style={[styles.gridValue, { color: textPrimary }]}>{item.connectorId}</Text>
+                                    </View>
+                                )}
+                                {item.estimatedCompletion ? (
+                                    <View style={styles.gridItem}>
+                                        <CheckCircle size={12} color={COLORS.successGreen} />
+                                        <Text style={[styles.gridLabel, { color: textSecondary }]}>Status</Text>
+                                        <Text style={[styles.gridValue, { color: COLORS.successGreen }]}>{item.estimatedCompletion}</Text>
+                                    </View>
+                                ) : null}
                             </View>
                             <TouchableOpacity style={styles.invoiceBtn}>
                                 <Text style={styles.invoiceText}>Download Invoice</Text>
@@ -335,49 +270,7 @@ export default function HistoryScreen() {
                 />
             )}
 
-            {/* Station Working Confirmation Modal */}
-            <Modal
-                transparent
-                visible={showWorkingModal}
-                animationType="fade"
-            >
-                <View style={styles.modalOverlay}>
-                    <GlassCard style={styles.modalContent as any} intensity={30}>
-                        <View style={styles.modalIcon}>
-                            <Info size={32} color={COLORS.brandBlue} />
-                        </View>
-                        <Text style={[styles.modalTitle, { color: textPrimary }]}>Start Charging?</Text>
-                        <Text style={[styles.modalSub, { color: textSecondary }]}>
-                            Is the charging station working?
-                        </Text>
 
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalBtn, { backgroundColor: COLORS.successGreen + '20', borderColor: COLORS.successGreen }]}
-                                onPress={() => confirmStationWorking(true)}
-                            >
-                                <CheckCircle size={18} color={COLORS.successGreen} />
-                                <Text style={[styles.modalBtnText, { color: COLORS.successGreen }]}>Yes, Station is Working</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.modalBtn, { backgroundColor: COLORS.alertRed + '20', borderColor: COLORS.alertRed }]}
-                                onPress={() => confirmStationWorking(false)}
-                            >
-                                <XCircle size={18} color={COLORS.alertRed} />
-                                <Text style={[styles.modalBtnText, { color: COLORS.alertRed }]}>No, Station is Not Working</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity
-                            style={styles.modalCancel}
-                            onPress={() => setShowWorkingModal(false)}
-                        >
-                            <Text style={[styles.modalCancelText, { color: textSecondary }]}>Cancel</Text>
-                        </TouchableOpacity>
-                    </GlassCard>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }

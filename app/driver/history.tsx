@@ -11,7 +11,6 @@ import { SectionHeader } from '../../components/ui/SectionHeader';
 import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { getDriverSessions } from '../../services/driver.service';
-import { getBookings, cancelBooking } from '../../services/booking.service';
 import { format } from 'date-fns';
 
 type SessionItem = {
@@ -25,6 +24,9 @@ type SessionItem = {
     carbonSaved: number;
     connectorType: string;
     status?: string;
+    currentSoc?: number;
+    isLive?: boolean;
+    estimatedCompletion?: string;
 };
 
 type FilterKey = 'all' | 'completed' | 'active';
@@ -54,52 +56,50 @@ export default function DriverHistory() {
         setLoading(true);
         try {
             const status = filter === 'all' ? undefined : filter;
-
-            const [data, bookingsResponse] = await Promise.all([
-                getDriverSessions(undefined, currentVehicleId || '', status as any, forceRefresh),
-                (filter === 'all' || filter === 'active') ? getBookings({ status: 'pending' }, forceRefresh) : Promise.resolve({ data: [] })
-            ]);
-
-            const bookings = bookingsResponse.data || [];
+            const data = await getDriverSessions(undefined, currentVehicleId || '', status as any, forceRefresh);
 
             const sessionMapped: SessionItem[] = (data || []).map((s: any) => {
-                const startTime = s.start_time ? new Date(s.start_time) : new Date();
-                const endTime = s.end_time ? new Date(s.end_time) : null;
-                const durationMs = endTime ? endTime.getTime() - startTime.getTime() : 0;
-                const mins = Math.round(durationMs / 60000);
-                const hrs = Math.floor(mins / 60);
-                const duration = hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins}m`;
+                // Duration from elapsed_seconds (new API) or start/end times (legacy)
+                let duration = 'N/A';
+                if (s.elapsed_seconds) {
+                    const totalMins = Math.round(s.elapsed_seconds / 60);
+                    const hrs = Math.floor(totalMins / 60);
+                    const mins = totalMins % 60;
+                    duration = hrs > 0 ? `${hrs}h ${mins}m` : `${totalMins}m`;
+                } else if (s.start_time && s.end_time) {
+                    const mins = Math.round((new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / 60000);
+                    const hrs = Math.floor(mins / 60);
+                    duration = hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins}m`;
+                }
+
+                // Date with safe fallback
+                let date = 'Past session';
+                if (s.start_time) {
+                    try {
+                        date = new Date(s.start_time).toLocaleDateString('en-IN', {
+                            day: 'numeric', month: 'short', year: 'numeric',
+                        });
+                    } catch { }
+                }
 
                 return {
                     id: s.id,
                     stationName: s.station_name || 'Charging Station',
-                    date: startTime.toLocaleDateString('en-IN', {
-                        day: 'numeric', month: 'short', year: 'numeric',
-                    }),
+                    date,
                     duration,
                     kwh: s.kwh || 0,
                     cost: s.total_cost || 0,
                     rating: 0,
                     carbonSaved: s.carbon_saved_kg || 0,
-                    connectorType: s.connector?.connector_type || 'CCS2',
-                    status: s.status || 'completed'
+                    connectorType: s.connector_id || s.connector?.connector_type || '',
+                    status: s.status || 'completed',
+                    currentSoc: s.current_soc,
+                    isLive: s.is_live,
+                    estimatedCompletion: s.estimated_completion,
                 };
             });
 
-            const bookingMapped: SessionItem[] = bookings.map((b: any) => ({
-                id: b.id,
-                stationName: b.connector?.station_name || 'Booked Station',
-                date: format(new Date(b.booking_time), 'dd MMM yyyy, hh:mm a'),
-                duration: 'Not Started',
-                kwh: 0,
-                cost: 0,
-                rating: 0,
-                carbonSaved: 0,
-                connectorType: b.connector?.connector_type || 'Reserved',
-                status: 'pending'
-            }));
-
-            setSessions([...bookingMapped, ...sessionMapped]);
+            setSessions([...sessionMapped]);
         } catch (error) {
             console.error('Error loading history:', error);
         } finally {
@@ -122,71 +122,6 @@ export default function DriverHistory() {
         Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
     };
 
-    const handleOpenSession = (sessionId: string) => {
-        setVerifyingStation(sessionId);
-        setShowWorkingModal(true);
-    };
-
-    const confirmStationWorking = (isWorking: boolean) => {
-        setShowWorkingModal(false);
-        if (isWorking) {
-            router.push({
-                pathname: '/driver/session',
-                params: { sessionId: verifyingStation! }
-            });
-        } else {
-            Alert.alert(
-                "Station Issue",
-                "We're sorry the station is not working. Redirecting you to Home to find another recommendation.",
-                [{ text: "OK", onPress: () => router.replace('/driver/dashboard') }]
-            );
-        }
-    };
-
-    const handleCancelBooking = (id: string) => {
-        if (Platform.OS === 'web') {
-            const confirmed = window.confirm('Cancelling within 15 minutes of the slot incurs a ₹20 penalty. Do you want to proceed?');
-            if (confirmed) {
-                (async () => {
-                    try {
-                        setLoading(true);
-                        await cancelBooking(id, { reason: 'Cancelled by user' });
-                        window.alert('Your booking has been cancelled and a ₹20 penalty has been applied.');
-                        fetchSessions(true);
-                    } catch (error) {
-                        console.error('Cancel booking error:', error);
-                        window.alert('Failed to cancel the booking.');
-                        setLoading(false);
-                    }
-                })();
-            }
-            return;
-        }
-
-        Alert.alert(
-            'Cancel Booking?',
-            'Cancelling within 15 minutes of the slot incurs a ₹20 penalty. Do you want to proceed?',
-            [
-                { text: 'Keep Booking', style: 'cancel' },
-                {
-                    text: 'Cancel (₹20 Penalty)',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            setLoading(true);
-                            await cancelBooking(id, { reason: 'Cancelled by user' });
-                            Alert.alert('Cancelled', 'Your booking has been cancelled and a ₹20 penalty has been applied.');
-                            fetchSessions(true);
-                        } catch (error) {
-                            console.error('Cancel booking error:', error);
-                            Alert.alert('Error', 'Failed to cancel the booking.');
-                            setLoading(false);
-                        }
-                    }
-                },
-            ]
-        );
-    };
 
     const totalKwh = sessions.reduce((s, i) => s + (i.kwh || 0), 0);
     const totalCost = sessions.reduce((s, i) => s + (i.cost || 0), 0);
@@ -199,7 +134,7 @@ export default function DriverHistory() {
                 {/* Cancel Button Absolute */}
                 {item.status === 'pending' && (
                     <TouchableOpacity
-                        onPress={() => handleCancelBooking(item.id)}
+                        onPress={() => router.push({ pathname: '/driver/session', params: { sessionId: item.id } })}
                         style={{ position: 'absolute', right: SPACING.lg, top: SPACING.md, zIndex: 10, padding: 4 }}
                     >
                         <XCircle size={20} color={COLORS.alertRed} />
@@ -239,6 +174,11 @@ export default function DriverHistory() {
                         <View style={styles.sessionStat}>
                             <Text style={[styles.sessionStatValue, { color: COLORS.successGreen }]}>₹{item.cost.toFixed(0)}</Text>
                         </View>
+                        {item.currentSoc !== undefined && (
+                            <View style={styles.sessionStat}>
+                                <Text style={[styles.sessionStatValue, { color: COLORS.brandBlue }]}>🔋 {item.currentSoc}%</Text>
+                            </View>
+                        )}
                         {item.carbonSaved > 0 && (
                             <View style={styles.sessionStat}>
                                 <Text style={[styles.sessionStatValue, { color: textSecondary }]}>🌱 {item.carbonSaved.toFixed(1)} kg</Text>
@@ -259,7 +199,7 @@ export default function DriverHistory() {
                         </View>
                     )}
 
-                    {item.status === 'pending' && (
+                    {item.status === 'active' && (
                         <View style={styles.actionRow}>
                             <TouchableOpacity
                                 style={[styles.actionBtn, { borderColor: COLORS.brandBlue }]}
@@ -267,14 +207,6 @@ export default function DriverHistory() {
                             >
                                 <MapPin size={14} color={COLORS.brandBlue} />
                                 <Text style={[styles.actionBtnText, { color: COLORS.brandBlue }]}>View Directions</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.actionBtn, { backgroundColor: COLORS.brandBlue, borderColor: COLORS.brandBlue }]}
-                                onPress={() => handleOpenSession(item.id)}
-                            >
-                                <Zap size={14} color="#000" />
-                                <Text style={[styles.actionBtnText, { color: '#000' }]}>Open Session</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -347,49 +279,6 @@ export default function DriverHistory() {
                 />
             )}
 
-            {/* Station Working Confirmation Modal */}
-            <Modal
-                transparent
-                visible={showWorkingModal}
-                animationType="fade"
-            >
-                <View style={styles.modalOverlay}>
-                    <GlassCard style={styles.modalContent as any} intensity={30}>
-                        <View style={styles.modalIcon}>
-                            <Info size={32} color={COLORS.brandBlue} />
-                        </View>
-                        <Text style={[styles.modalTitle, { color: textPrimary }]}>Start Charging?</Text>
-                        <Text style={[styles.modalSub, { color: textSecondary }]}>
-                            Is the charging station working?
-                        </Text>
-
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalBtn, { backgroundColor: COLORS.successGreen + '20', borderColor: COLORS.successGreen }]}
-                                onPress={() => confirmStationWorking(true)}
-                            >
-                                <CheckCircle size={18} color={COLORS.successGreen} />
-                                <Text style={[styles.modalBtnText, { color: COLORS.successGreen }]}>Yes, Station is Working</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.modalBtn, { backgroundColor: COLORS.alertRed + '20', borderColor: COLORS.alertRed }]}
-                                onPress={() => confirmStationWorking(false)}
-                            >
-                                <XCircle size={18} color={COLORS.alertRed} />
-                                <Text style={[styles.modalBtnText, { color: COLORS.alertRed }]}>No, Station is Not Working</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity
-                            style={styles.modalCancel}
-                            onPress={() => setShowWorkingModal(false)}
-                        >
-                            <Text style={[styles.modalCancelText, { color: textSecondary }]}>Cancel</Text>
-                        </TouchableOpacity>
-                    </GlassCard>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }

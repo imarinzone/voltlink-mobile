@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    StyleSheet, View, FlatList, Text, TouchableOpacity, Pressable, ActivityIndicator, Alert, Platform, Linking, Modal, TextInput
+    StyleSheet, View, FlatList, Text, TouchableOpacity, Pressable, ActivityIndicator, Alert, Platform, Linking, Modal
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +11,7 @@ import { SectionHeader } from '../../components/ui/SectionHeader';
 import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { getDriverSessions } from '../../services/driver.service';
-import { cancelBooking, getPendingBookings } from '../../services/booking.service';
+import { deleteBooking, getPendingBookings } from '../../services/booking.service';
 import { stopSession } from '../../services/session.service';
 import { format } from 'date-fns';
 
@@ -55,7 +55,6 @@ export default function DriverHistory() {
     const [allSessions, setAllSessions] = useState<SessionItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [cancelTarget, setCancelTarget] = useState<SessionItem | null>(null);
-    const [cancelReason, setCancelReason] = useState('');
     const [cancelling, setCancelling] = useState(false);
 
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
@@ -189,39 +188,32 @@ export default function DriverHistory() {
 
     const handleCancelPress = (item: SessionItem) => {
         setCancelTarget(item);
-        setCancelReason('');
     };
 
     const submitCancel = async () => {
         if (!cancelTarget) return;
-        if (cancelTarget.source === 'booking' && !cancelReason.trim()) {
-            Alert.alert('Reason Required', 'Please provide a reason for cancellation.');
-            return;
-        }
         setCancelling(true);
         let apiFailed = false;
         try {
             if (cancelTarget.source === 'session') {
                 await stopSession(String(cancelTarget.id));
             } else {
-                await cancelBooking(String(cancelTarget.id), { reason: cancelReason.trim() });
+                await deleteBooking(String(cancelTarget.id));
             }
         } catch (error: any) {
             apiFailed = true;
-            const label = cancelTarget.source === 'session' ? 'stopSession' : 'cancelBooking';
+            const label = cancelTarget.source === 'session' ? 'stopSession' : 'deleteBooking';
             const endpoint = cancelTarget.source === 'session'
                 ? `PATCH /sessions/${cancelTarget.id}/stop`
-                : `POST /bookings/${cancelTarget.id}/cancel`;
+                : `DELETE /bookings/${cancelTarget.id}`;
             console.error(`[Driver] ${label} API failed. Removing from active list locally.`, {
                 endpoint,
-                payload: cancelTarget.source === 'booking' ? { reason: cancelReason.trim() } : undefined,
                 error: error?.response?.data || error?.message,
             });
         } finally {
             setCancelling(false);
         }
         setCancelTarget(null);
-        setCancelReason('');
         if (apiFailed) {
             setSessions(prev => prev.filter(i => i.id !== cancelTarget.id));
         } else {
@@ -428,29 +420,13 @@ export default function DriverHistory() {
                         <Text style={[styles.modalSub, { color: textSecondary }]}>
                             {cancelTarget?.source === 'session'
                                 ? 'Are you sure you want to stop this charging session?'
-                                : 'Cancelling within 15 mins incurs a ₹20 penalty.'}
+                                : 'Are you sure you want to cancel this booking?'}
                         </Text>
-
-                        {cancelTarget?.source === 'booking' && (
-                            <>
-                                <Text style={[styles.reasonLabel, { color: textSecondary }]}>Reason for cancellation *</Text>
-                                <TextInput
-                                    style={[styles.reasonInput, { color: textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor }]}
-                                    placeholder="Enter your reason here..."
-                                    placeholderTextColor={textSecondary}
-                                    multiline
-                                    numberOfLines={4}
-                                    value={cancelReason}
-                                    onChangeText={setCancelReason}
-                                />
-                            </>
-                        )}
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
                                 style={[styles.modalBtn, {
-                                    backgroundColor: cancelTarget?.source === 'session' || cancelReason.trim()
-                                        ? COLORS.alertRed : 'rgba(255,255,255,0.1)',
+                                    backgroundColor: COLORS.alertRed,
                                     borderColor: COLORS.alertRed,
                                 }]}
                                 onPress={submitCancel}
@@ -459,11 +435,8 @@ export default function DriverHistory() {
                                 {cancelling ? (
                                     <ActivityIndicator color="#fff" size="small" />
                                 ) : (
-                                    <Text style={[styles.modalBtnText, {
-                                        color: cancelTarget?.source === 'session' || cancelReason.trim()
-                                            ? '#fff' : textSecondary,
-                                    }]}>
-                                        {cancelTarget?.source === 'session' ? 'Yes, Stop' : 'Confirm Cancellation'}
+                                    <Text style={[styles.modalBtnText, { color: '#fff' }]}>
+                                        {cancelTarget?.source === 'session' ? 'Yes, Stop' : 'Yes, Cancel'}
                                     </Text>
                                 )}
                             </TouchableOpacity>
@@ -541,8 +514,6 @@ const styles = StyleSheet.create({
     modalIcon: { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', marginBottom: SPACING.md },
     modalTitle: { ...TYPOGRAPHY.sectionHeader, fontSize: 22, marginBottom: 8 },
     modalSub: { ...TYPOGRAPHY.body, textAlign: 'center', marginBottom: SPACING.lg, opacity: 0.8 },
-    reasonLabel: { ...TYPOGRAPHY.label, fontWeight: '700', alignSelf: 'flex-start', marginBottom: SPACING.sm },
-    reasonInput: { width: '100%', height: 100, borderRadius: BORDER_RADIUS.md, borderWidth: 1, padding: SPACING.md, textAlignVertical: 'top', ...TYPOGRAPHY.body, fontSize: 14, marginBottom: SPACING.lg },
     modalButtons: { width: '100%', gap: SPACING.md, alignItems: 'center' },
     modalBtn: { width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 14, borderRadius: BORDER_RADIUS.lg, borderWidth: 1 },
     modalBtnText: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 15 },

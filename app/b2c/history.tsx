@@ -8,7 +8,7 @@ import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { getUserSessions } from '../../services/b2c.service';
-import { cancelBooking, getPendingBookings } from '../../services/booking.service';
+import { deleteBooking, getPendingBookings } from '../../services/booking.service';
 import { stopSession } from '../../services/session.service';
 import { format } from 'date-fns';
 
@@ -188,14 +188,14 @@ export default function HistoryScreen() {
             if (cancelTarget.source === 'session') {
                 await stopSession(String(cancelTarget.id));
             } else {
-                await cancelBooking(String(cancelTarget.id));
+                await deleteBooking(String(cancelTarget.id));
             }
         } catch (error: any) {
             apiFailed = true;
-            const label = cancelTarget.source === 'session' ? 'stopSession' : 'cancelBooking';
+            const label = cancelTarget.source === 'session' ? 'stopSession' : 'deleteBooking';
             const endpoint = cancelTarget.source === 'session'
                 ? `PATCH /sessions/${cancelTarget.id}/stop`
-                : `POST /bookings/${cancelTarget.id}/cancel`;
+                : `DELETE /bookings/${cancelTarget.id}`;
             console.error(`[B2C] ${label} API failed. Removing from active list locally.`, {
                 endpoint,
                 error: error?.response?.data || error?.message,

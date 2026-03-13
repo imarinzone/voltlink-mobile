@@ -145,7 +145,8 @@ export default function SessionScreen() {
                             connector_id: paramConnectorId,
                             vehicle_id: vId,
                             user_id: parseInt(DEFAULT_USER_ID, 10),
-                            booking_id: parseInt(bookingId, 10),
+                            booking_id: bookingId,
+                            session_type: 'charging',
                         });
                         activeSessionId = String(created.id);
                         setSessionId(activeSessionId);

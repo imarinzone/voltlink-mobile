@@ -43,7 +43,8 @@ export const createSession = async (data: {
     connector_id: string;
     vehicle_id: number;
     user_id: number;
-    booking_id?: number;
+    booking_id?: string | number;
+    session_type?: string;
 }) => apiClient.post('/sessions', data).then(res => res.data);
 
 

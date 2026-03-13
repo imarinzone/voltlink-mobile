@@ -169,7 +169,7 @@ export default function CreditsScreen() {
 
                 {/* ── Header ── */}
                 <View style={styles.header}>
-                    <Text style={[styles.title, { color: textPrimary }]}>Credit Balance</Text>
+                    <Text style={[styles.title, { color: textPrimary }]}>Energy Credits</Text>
                     <Text style={[styles.subtitle, { color: textSecondary }]}>
                         Track energy credits by source, view transaction history, and transfer credits.
                     </Text>
@@ -181,7 +181,7 @@ export default function CreditsScreen() {
                     <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
                         <View style={styles.statTileHeader}>
                             <Wallet size={14} color={COLORS.brandBlue} />
-                            <Text style={[styles.statTileLabel, { color: textSecondary }]}>Credits</Text>
+                            <Text style={[styles.statTileLabel, { color: textSecondary }]}>Credit Balance</Text>
                         </View>
                         <Text style={[styles.statTileValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
                             {(balance?.current_balance ?? 0).toFixed(2)}

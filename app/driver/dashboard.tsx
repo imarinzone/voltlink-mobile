@@ -162,7 +162,7 @@ const DriverDashboard = () => {
                 <SectionHeader title={t.stats} />
                 <View style={styles.statsRow}>
                     <MetricCard label={t.efficiency} value={stats?.kwhConsumed || 0} unit="km/kWh" icon={<Zap size={16} color={COLORS.brandBlue} />} />
-                    <MetricCard label={t.distance} value={stats?.distanceKm || 0} unit="km" icon={<Route size={16} color={COLORS.brandBlue} />} />
+                    <MetricCard label={t.distance} value="124.5" unit="km" icon={<Route size={16} color={COLORS.brandBlue} />} />
                     <MetricCard label={t.energyUsed} value="18.4" unit="kWh" icon={<Zap size={16} color={COLORS.successGreen} />} />
                 </View>
 

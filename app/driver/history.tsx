@@ -112,7 +112,7 @@ export default function DriverHistory() {
     const fetchSessions = async (forceRefresh: boolean = false) => {
         setLoading(true);
         try {
-            if (filter === 'active') {
+            if (filter === 'active' || filter === 'all') {
                 const [pendingBookings, activeSessions, allData] = await Promise.all([
                     getPendingBookings(DEFAULT_USER_ID, forceRefresh).catch(err => {
                         console.error('[Driver] Failed to fetch pending bookings:', err?.response?.data || err?.message);
@@ -129,33 +129,41 @@ export default function DriverHistory() {
                 ]);
 
                 const bookingItems = mapSessions(pendingBookings, 'booking');
-                const sessionItems = mapSessions(activeSessions, 'session');
-                const merged = [...bookingItems, ...sessionItems];
-                merged.sort((a, b) => {
-                    const tA = a.bookingTime ? new Date(a.bookingTime).getTime() : 0;
-                    const tB = b.bookingTime ? new Date(b.bookingTime).getTime() : 0;
-                    return tB - tA;
-                });
-                setSessions(merged);
-                setAllSessions(mapSessions(allData));
+                const activeItems = mapSessions(activeSessions, 'session');
+                const allItems = mapSessions(allData);
+
+                if (filter === 'active') {
+                    const merged = [...bookingItems, ...activeItems];
+                    merged.sort((a, b) => {
+                        const tA = a.bookingTime ? new Date(a.bookingTime).getTime() : 0;
+                        const tB = b.bookingTime ? new Date(b.bookingTime).getTime() : 0;
+                        return tB - tA;
+                    });
+                    setSessions(merged);
+                } else {
+                    const activeIds = new Set([...bookingItems, ...activeItems].map(i => i.id));
+                    const completedItems = allItems.filter(i => !activeIds.has(i.id));
+                    const sortedActive = [...bookingItems, ...activeItems].sort((a, b) => {
+                        const tA = a.bookingTime ? new Date(a.bookingTime).getTime() : 0;
+                        const tB = b.bookingTime ? new Date(b.bookingTime).getTime() : 0;
+                        return tB - tA;
+                    });
+                    setSessions([...sortedActive, ...completedItems]);
+                }
+                setAllSessions(allItems);
             } else {
-                const status = filter === 'all' ? undefined : filter;
                 const [filtered, all] = await Promise.all([
-                    getDriverSessions(undefined, currentVehicleId || '', status as any, forceRefresh).catch(err => {
+                    getDriverSessions(undefined, currentVehicleId || '', filter, forceRefresh).catch(err => {
                         console.error('[Driver] Failed to fetch sessions:', err?.response?.data || err?.message);
                         return [];
                     }),
-                    filter === 'all'
-                        ? Promise.resolve(null)
-                        : getDriverSessions(undefined, currentVehicleId || '', undefined, forceRefresh).catch(err => {
-                            console.error('[Driver] Failed to fetch all sessions:', err?.response?.data || err?.message);
-                            return [];
-                        }),
+                    getDriverSessions(undefined, currentVehicleId || '', undefined, forceRefresh).catch(err => {
+                        console.error('[Driver] Failed to fetch all sessions:', err?.response?.data || err?.message);
+                        return [];
+                    }),
                 ]);
-                const mappedFiltered = mapSessions(filtered);
-                const mappedAll = all ? mapSessions(all) : mappedFiltered;
-                setSessions(mappedFiltered);
-                setAllSessions(mappedAll);
+                setSessions(mapSessions(filtered));
+                setAllSessions(mapSessions(all));
             }
         } catch (error: any) {
             console.error('[Driver] Error loading history:', error?.response?.data || error?.message);

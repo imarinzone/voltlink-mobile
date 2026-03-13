@@ -4,13 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // ---------------------------------------------------------------------------
 // Validate required environment variables at startup
 // ---------------------------------------------------------------------------
-const API_URL = process.env.EXPO_PUBLIC_API_URL as string;
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://voltlink-be.coffeebeans.io/api/v1';
 const API_TIMEOUT = parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT ?? '10000', 10);
 
-if (!API_URL) {
-    throw new Error(
-        '[api.service] EXPO_PUBLIC_API_URL is not set.\n' +
-        'Copy .env.example to .env and set the backend URL before starting the app.'
+if (!process.env.EXPO_PUBLIC_API_URL) {
+    console.warn(
+        '[api.service] EXPO_PUBLIC_API_URL is not set. Using fallback:',
+        API_URL
     );
 }
 

@@ -48,7 +48,7 @@ const DEFAULT_USER_ID = process.env.EXPO_PUBLIC_DEFAULT_USER_ID ?? '11';
 export default function DriverHistory() {
     const router = useRouter();
     const { theme } = useThemeStore();
-    const { currentVehicleId } = useVehicleStore();
+    const { currentVehicleId, myVehicle } = useVehicleStore();
     const isDark = theme === 'dark';
     const [filter, setFilter] = useState<FilterKey>('active');
     const [sessions, setSessions] = useState<SessionItem[]>([]);
@@ -242,12 +242,14 @@ export default function DriverHistory() {
                     activeOpacity={0.8}
                     onPress={() => {
                         if (item.status === 'active' || item.status === 'pending') {
+                            const bl = myVehicle?.batteryLevel != null ? String(myVehicle.batteryLevel) : undefined;
                             const params = item.source === 'session'
-                                ? { sessionId: item.id }
+                                ? { sessionId: item.id, ...(bl != null ? { batteryLevel: bl } : {}) }
                                 : {
                                     bookingId: item.id,
                                     ...(item.connectorId ? { connectorId: item.connectorId } : {}),
                                     ...(item.vehicleId ? { vehicleId: item.vehicleId } : {}),
+                                    ...(bl != null ? { batteryLevel: bl } : {}),
                                 };
                             router.push({ pathname: '/driver/session', params });
                         }
@@ -316,12 +318,14 @@ export default function DriverHistory() {
                             <TouchableOpacity
                                 style={[styles.actionBtn, { borderColor: COLORS.successGreen }]}
                                 onPress={() => {
+                                    const bl = myVehicle?.batteryLevel != null ? String(myVehicle.batteryLevel) : undefined;
                                     const params = item.source === 'session'
-                                        ? { sessionId: item.id }
+                                        ? { sessionId: item.id, ...(bl != null ? { batteryLevel: bl } : {}) }
                                         : {
                                             bookingId: item.id,
                                             ...(item.connectorId ? { connectorId: item.connectorId } : {}),
                                             ...(item.vehicleId ? { vehicleId: item.vehicleId } : {}),
+                                            ...(bl != null ? { batteryLevel: bl } : {}),
                                         };
                                     router.push({ pathname: '/driver/session', params });
                                 }}

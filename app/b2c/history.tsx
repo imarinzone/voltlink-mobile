@@ -6,6 +6,7 @@ import { Zap, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info, XCircle, P
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
+import { useVehicleStore } from '../../store/vehicleStore';
 import { getUserSessions } from '../../services/b2c.service';
 import { cancelBooking, getPendingBookings } from '../../services/booking.service';
 import { stopSession } from '../../services/session.service';
@@ -210,14 +211,18 @@ export default function HistoryScreen() {
         }
     };
 
+    const { myVehicle } = useVehicleStore();
+
     const getSessionParams = (item: HistoryItem) => {
+        const bl = myVehicle?.batteryLevel != null ? String(myVehicle.batteryLevel) : undefined;
         if (item.source === 'session') {
-            return { sessionId: item.id };
+            return { sessionId: item.id, ...(bl != null ? { batteryLevel: bl } : {}) };
         }
         return {
             bookingId: item.id,
             ...(item.connectorId ? { connectorId: item.connectorId } : {}),
             ...(item.vehicleId ? { vehicleId: item.vehicleId } : {}),
+            ...(bl != null ? { batteryLevel: bl } : {}),
         };
     };
 

@@ -12,8 +12,13 @@
             "env": {
                 "EXPO_PUBLIC_API_URL": "https://voltlink-be.coffeebeans.io/api/v1",
                 "EXPO_PUBLIC_API_TIMEOUT": "10000",
-                "EXPO_PUBLIC_DEFAULT_FLEET_ID": "FLEET001",
-                "EXPO_PUBLIC_DEFAULT_USER_ID": "11"
+                "EXPO_PUBLIC_DEFAULT_FLEET_ID": "1",
+                "EXPO_PUBLIC_DEFAULT_USER_ID": "5",
+                "EXPO_PUBLIC_DEFAULT_DRIVER_ID": "5",
+                "EXPO_PUBLIC_DEFAULT_LAT": "12.9716",
+                "EXPO_PUBLIC_DEFAULT_LNG": "77.5946",
+                "EXPO_PUBLIC_ENV": "development",
+                "EXPO_PUBLIC_SESSION_POLL_INTERVAL": "30000"
             }
         },
         "preview": {
@@ -25,12 +30,28 @@
                 "EXPO_PUBLIC_API_URL": "https://voltlink-be.coffeebeans.io/api/v1",
                 "EXPO_PUBLIC_API_TIMEOUT": "10000",
                 "EXPO_PUBLIC_DEFAULT_FLEET_ID": "FLEET001",
-                "EXPO_PUBLIC_DEFAULT_USER_ID": "11"
+                "EXPO_PUBLIC_DEFAULT_USER_ID": "11",
+                "EXPO_PUBLIC_DEFAULT_DRIVER_ID": "4",
+                "EXPO_PUBLIC_DEFAULT_LAT": "12.9716",
+                "EXPO_PUBLIC_DEFAULT_LNG": "77.5946",
+                "EXPO_PUBLIC_ENV": "preview",
+                "EXPO_PUBLIC_SESSION_POLL_INTERVAL": "30000"
             }
         },
         "production": {
             "android": {
                 "buildType": "app-bundle"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_URL": "https://voltlink-be.coffeebeans.io/api/v1",
+                "EXPO_PUBLIC_API_TIMEOUT": "10000",
+                "EXPO_PUBLIC_DEFAULT_FLEET_ID": "FLEET001",
+                "EXPO_PUBLIC_DEFAULT_USER_ID": "11",
+                "EXPO_PUBLIC_DEFAULT_DRIVER_ID": "4",
+                "EXPO_PUBLIC_DEFAULT_LAT": "12.9716",
+                "EXPO_PUBLIC_DEFAULT_LNG": "77.5946",
+                "EXPO_PUBLIC_ENV": "production",
+                "EXPO_PUBLIC_SESSION_POLL_INTERVAL": "30000"
             }
         }
     },

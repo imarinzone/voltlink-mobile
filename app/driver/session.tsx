@@ -30,16 +30,20 @@ export default function SessionScreen() {
     const { currentVehicleId } = useVehicleStore();
     const isDark = theme === 'dark';
     const router = useRouter();
-    const { sessionId: initialSessionId, bookingId, connectorId: paramConnectorId, vehicleId: paramVehicleId } = useLocalSearchParams<{
+    const { sessionId: initialSessionId, bookingId, connectorId: paramConnectorId, vehicleId: paramVehicleId, batteryLevel: paramBatteryLevel } = useLocalSearchParams<{
         sessionId?: string;
         bookingId?: string;
         connectorId?: string;
         vehicleId?: string;
+        batteryLevel?: string;
     }>();
 
     const [sessionId, setSessionId] = useState<string | undefined>(initialSessionId);
     const { myVehicle } = useVehicleStore();
-    const [chargePercent, setChargePercent] = useState(myVehicle?.batteryLevel ?? 20);
+
+    const parsedBattery = paramBatteryLevel != null ? Number(paramBatteryLevel) : NaN;
+    const initialBattery = Number.isFinite(parsedBattery) ? Math.min(100, Math.max(0, parsedBattery)) : (myVehicle?.batteryLevel ?? 20);
+    const [chargePercent, setChargePercent] = useState(initialBattery);
     const [isCharging, setIsCharging] = useState(false);
     const [sessionEnded, setSessionEnded] = useState(false);
     const [stationRating, setStationRating] = useState(0);
@@ -50,11 +54,20 @@ export default function SessionScreen() {
     const [sessionData, setSessionData] = useState<any>(null);
     const [sessionLoading, setSessionLoading] = useState(true);
 
+    const [batteryInitialized, setBatteryInitialized] = useState(paramBatteryLevel != null || myVehicle?.batteryLevel != null);
     const progress = useSharedValue(chargePercent / 100);
     const sliderPos = useSharedValue(0);
     const SLIDER_WIDTH = 320;
     const SLIDER_BTN_SIZE = 56;
     const pulseOpacity = useSharedValue(1);
+
+    useEffect(() => {
+        if (!batteryInitialized && myVehicle?.batteryLevel != null) {
+            setChargePercent(myVehicle.batteryLevel);
+            progress.value = myVehicle.batteryLevel / 100;
+            setBatteryInitialized(true);
+        }
+    }, [myVehicle?.batteryLevel]);
 
     // Fetch session on mount — auto-start if already live
     useEffect(() => {
@@ -156,11 +169,9 @@ export default function SessionScreen() {
                     }
                 }
                 setIsCharging(true);
-                setChargePercent(myVehicle?.batteryLevel ?? 20);
             } catch (err) {
                 console.error('[Driver] Unexpected session error:', err);
                 setIsCharging(true);
-                setChargePercent(myVehicle?.batteryLevel ?? 20);
             } finally {
                 setActionLoading(false);
             }
@@ -184,7 +195,7 @@ export default function SessionScreen() {
     const stationName = sessionData?.station_name || 'Charging Station';
     const connectorId = sessionData?.connector_id || '';
     const connectorType = sessionData?.connector_type || '';
-    const kwhDelivered = sessionData?.kwh ?? ((chargePercent - (myVehicle?.batteryLevel ?? 20)) * 0.4);
+    const kwhDelivered = sessionData?.kwh ?? (Math.max(0, chargePercent - initialBattery) * 0.4);
     const estimatedCost = sessionData?.total_cost ?? Math.round(kwhDelivered * 15);
     const estimatedCompletion = sessionData?.estimated_completion;
 

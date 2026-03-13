@@ -105,11 +105,21 @@ const B2CDashboard = () => {
             setMyVehicleFromUserData(vehicle);
 
             if (vehicle?.id) {
-                const aiData = await getAIRecommendations(vehicle.id.toString(), forceRefresh);
-                setAiStations(aiData.slice(0, 3));
+                try {
+                    const aiData = await getAIRecommendations(vehicle.id.toString(), forceRefresh);
+                    setAiStations(aiData.slice(0, 3));
+                } catch (aiErr: any) {
+                    console.error('[B2C] AI recommendations failed:', {
+                        endpoint: `GET /vehicles/${vehicle.id}/recommendations`,
+                        error: aiErr?.response?.data || aiErr?.message,
+                    });
+                }
             }
-        } catch (error) {
-            console.error('Error fetching B2C dashboard data:', error);
+        } catch (error: any) {
+            console.error('[B2C] Dashboard fetch failed:', {
+                endpoint: `GET /users/${DEFAULT_USER_ID}`,
+                error: error?.response?.data || error?.message,
+            });
         }
     };
 

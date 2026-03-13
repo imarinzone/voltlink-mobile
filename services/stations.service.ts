@@ -67,7 +67,7 @@ export const getAIRecommendations = async (
             const dist = calculateDistance(USER_LAT, USER_LNG, lat, lng);
             return {
                 ...s,
-                id: s.station_id || s.id?.toString(),
+                id: String(s.station_id || s.id || '').replace(/^STN/i, '') || s.id?.toString(),
                 name: s.station_name || s.name || 'AI Suggested Station',
                 cpoName: s.operator_id || 'VoltLink Optimized',
                 chargerTypes: s.charging_types || [],

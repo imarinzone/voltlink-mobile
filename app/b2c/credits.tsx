@@ -3,6 +3,7 @@ import {
     StyleSheet, View, Text, ScrollView, TouchableOpacity,
     TextInput, Alert, ActivityIndicator, Platform
 } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Wallet, ArrowDownLeft, ArrowUpRight, Leaf, Zap, ArrowLeftRight, ChevronDown } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
@@ -76,7 +77,11 @@ export default function CreditsScreen() {
         }
     };
 
-    useEffect(() => { fetchData(); }, []);
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchData();
+        }, [])
+    );
 
     // ─── derived values ──────────────────────────────────────────────────────
     const totalReceived = useMemo(

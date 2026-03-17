@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Zap, Route, AlertTriangle, User } from 'lucide-react-native';
@@ -17,6 +17,7 @@ import { Station } from '../../types/station.types';
 import { getDriverProfile, getVehiclesByDriver } from '../../services/driver.service';
 import { useRouter } from 'expo-router';
 import { useLanguageStore, Language } from '../../store/languageStore';
+import { useFocusEffect } from '@react-navigation/native';
 
 const translations = {
     English: {
@@ -87,6 +88,12 @@ const DriverDashboard = () => {
     };
 
     useEffect(() => { fetchData(); }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchData(true);
+        }, [])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);

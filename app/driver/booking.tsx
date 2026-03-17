@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, TextInput
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, MapPin, Zap, Clock, CheckCircle, Banknote } from 'lucide-react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
@@ -35,8 +35,11 @@ export default function DriverBooking() {
     const [reason, setReason] = useState('');
     const [showReasonScreen, setShowReasonScreen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [autoError, setAutoError] = useState(false);
     const [firstRecommendation, setFirstRecommendation] = useState<any>(null);
     const [thisRecommendation, setThisRecommendation] = useState<any>(null);
+    const fetchSeqRef = useRef(0);
+    const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const scale = useSharedValue(1);
     const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -46,70 +49,115 @@ export default function DriverBooking() {
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
     const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const stationId = params.stationId || '1';
-                const [stationData, slotsData] = await Promise.all([
-                    getStationById(stationId),
-                    getStationSlots(stationId),
-                ]);
-                setStation(stationData);
-                setConnectorSlots(slotsData);
-
-                // Flatten slots with unique IDs for the picker
-                const flat = slotsData.flatMap((cs: ConnectorSlots, ci: number) =>
-                    cs.slots.map((s: SlotInfo, si: number) => ({
-                        ...s,
-                        id: `${ci}-${si}`,
-                        _connectorId: cs.connector_id,
-                    }))
-                );
-                setAllSlots(flat as any);
-                if (slotsData.length > 0) {
-                    setSelectedConnectorId(slotsData[0].connector_id);
-
-                    // Auto-select first available slot for any rank in driver flow
-                    if (flat.length > 0) {
-                        setSelectedSlot(flat[0].id);
-                    }
-                }
-
-                if (currentVehicleId) {
-                    const recs = await getAIRecommendations(currentVehicleId);
-                    if (recs.length > 0) setFirstRecommendation(recs[0]);
-                    
-                    if (rank) {
-                        const rankIndex = parseInt(rank as string, 10) - 1;
-                        if (recs.length > rankIndex && rankIndex >= 0) {
-                            setThisRecommendation(recs[rankIndex]);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching booking data:', error);
-                Alert.alert('Error', 'Failed to load station info.');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [params.stationId, rank, currentVehicleId]);
-
-    useEffect(() => {
+    const resetBookingState = useCallback(() => {
         setConfirmed(false);
+        setLoading(true);
         setSubmitting(false);
+        setAutoError(false);
         setShowReasonScreen(false);
         setReason('');
-    }, [params.stationId, rank]);
+        setSelectedSlot(null);
+        setSelectedConnectorId('');
+        setStation(null);
+        setConnectorSlots([]);
+        setAllSlots([]);
+        setFirstRecommendation(null);
+        setThisRecommendation(null);
+        if (navTimeoutRef.current) {
+            clearTimeout(navTimeoutRef.current);
+            navTimeoutRef.current = null;
+        }
+    }, []);
+
+
+
+    const fetchData = useCallback(async () => {
+        const seq = ++fetchSeqRef.current;
+        setLoading(true);
+        try {
+            const stationId = params.stationId || '1';
+
+            // Clear previous station immediately to avoid showing stale name/slots.
+            setStation(null);
+            setConnectorSlots([]);
+            setAllSlots([]);
+            setSelectedConnectorId('');
+            setSelectedSlot(null);
+
+            const [stationData, slotsData] = await Promise.all([
+                getStationById(stationId),
+                getStationSlots(stationId),
+            ]);
+
+            if (seq !== fetchSeqRef.current) return;
+
+            setStation(stationData);
+            setConnectorSlots(slotsData);
+
+            // Flatten slots with unique IDs for the picker
+            const flat = slotsData.flatMap((cs: ConnectorSlots, ci: number) =>
+                cs.slots.map((s: SlotInfo, si: number) => ({
+                    ...s,
+                    id: `${ci}-${si}`,
+                    _connectorId: cs.connector_id,
+                }))
+            );
+            setAllSlots(flat as any);
+            if (slotsData.length > 0) {
+                setSelectedConnectorId(slotsData[0].connector_id);
+
+                // Auto-select first available slot for any rank in driver flow
+                if (flat.length > 0) {
+                    setSelectedSlot(flat[0].id);
+                }
+            }
+
+            if (currentVehicleId) {
+                const recs = await getAIRecommendations(currentVehicleId);
+                if (seq !== fetchSeqRef.current) return;
+
+                if (recs.length > 0) setFirstRecommendation(recs[0]);
+
+                if (rank) {
+                    const rankIndex = parseInt(rank as string, 10) - 1;
+                    if (recs.length > rankIndex && rankIndex >= 0) {
+                        setThisRecommendation(recs[rankIndex]);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching booking data:', error);
+            Alert.alert('Error', 'Failed to load station info.');
+        } finally {
+            if (seq === fetchSeqRef.current) setLoading(false);
+        }
+    }, [params.stationId, rank, currentVehicleId]);
+
+    useFocusEffect(
+        useCallback(() => {
+            // Always start booking from a clean slate (prevents skipping to success screen).
+            resetBookingState();
+            fetchData();
+            return () => {
+                if (navTimeoutRef.current) {
+                    clearTimeout(navTimeoutRef.current);
+                    navTimeoutRef.current = null;
+                }
+            };
+        }, [resetBookingState, fetchData])
+    );
 
     // Auto-confirm if rank=1 and slot is selected
     useEffect(() => {
-        if (rank === '1' && !loading && !confirmed && !submitting && selectedSlot && station) {
-            handleConfirm();
+        if (rank === '1' && !loading && !confirmed && !submitting && !autoError) {
+            if (selectedSlot && station) {
+                handleConfirm();
+            } else if (station && !selectedSlot) {
+                // API loaded but no available slots found! Show normal details so user can see it's full.
+                setAutoError(true);
+            }
         }
-    }, [rank, loading, confirmed, submitting, selectedSlot, station]);
+    }, [rank, loading, confirmed, submitting, selectedSlot, station, autoError]);
 
     // Get the first connector's data for display
     const connector = connectorSlots[0];
@@ -174,6 +222,16 @@ export default function DriverBooking() {
             });
             setConfirmed(true);
             setSubmitting(false); // Reset to allow future bookings
+
+            // Navigation watchdog: never leave user stuck on success screen.
+            if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+            navTimeoutRef.current = setTimeout(() => {
+                router.replace({
+                    pathname: '/driver/history',
+                    params: { refresh: Date.now().toString(), filter: 'active' }
+                });
+            }, 6000);
+
             setTimeout(() => {
                 router.replace({
                     pathname: '/driver/history',
@@ -184,10 +242,11 @@ export default function DriverBooking() {
             console.error('Error creating session:', error);
             Alert.alert('Error', 'Failed to start session. Please try again.');
             setSubmitting(false); // Reset submitting on error
+            setAutoError(true); // Escape the auto-booking loading screen
         }
     };
 
-    if (loading || (rank === '1' && !confirmed)) {
+    if (loading || (rank === '1' && !confirmed && !autoError)) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: bg, justifyContent: 'center', alignItems: 'center' }]}>
                 <ActivityIndicator size="large" color={COLORS.brandBlue} />

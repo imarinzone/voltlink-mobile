@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator
 } from 'react-native';
@@ -7,7 +7,7 @@ import {
     ArrowLeft, MapPin, Zap, Clock, CheckCircle,
     Car, BatteryCharging, Plug, IndianRupee, CalendarCheck, Bot
 } from 'lucide-react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
@@ -39,6 +39,8 @@ export default function B2CBooking() {
     const [submitting, setSubmitting] = useState(false);
     const scrollRef = useRef<ScrollView>(null);
     const taskIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const fetchSeqRef = useRef(0);
+    const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const selectedSlotObj = connectorSlots?.[0]?.slots?.find((s, i) => `0-${i}` === selectedSlot);
     const selectedSlotLabel = selectedSlotObj?.time
@@ -54,22 +56,36 @@ export default function B2CBooking() {
         }
     }, [confirmed]);
 
-    useEffect(() => {
+    const resetBookingState = useCallback(() => {
         setConfirmed(false);
+        setLoading(true);
         setSubmitting(false);
         setTaskStep(0);
         setSelectedSlot(null);
+        setSelectedConnectorId('');
+        setStation(null);
+        setConnectorSlots([]);
         if (taskIntervalRef.current) {
             clearInterval(taskIntervalRef.current);
             taskIntervalRef.current = null;
         }
-    }, [params.stationId]);
+        if (navTimeoutRef.current) {
+            clearTimeout(navTimeoutRef.current);
+            navTimeoutRef.current = null;
+        }
+    }, []);
+
+
 
     useEffect(() => {
         return () => {
             if (taskIntervalRef.current) {
                 clearInterval(taskIntervalRef.current);
                 taskIntervalRef.current = null;
+            }
+            if (navTimeoutRef.current) {
+                clearTimeout(navTimeoutRef.current);
+                navTimeoutRef.current = null;
             }
         };
     }, []);
@@ -96,36 +112,54 @@ export default function B2CBooking() {
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const stationId = params.stationId || '1';
-                const [stationData, slotsData] = await Promise.all([
-                    getStationById(stationId),
-                    getStationSlots(stationId),
-                ]);
-                setStation(stationData);
-                setConnectorSlots(slotsData);
+    const fetchData = useCallback(async () => {
+        const seq = ++fetchSeqRef.current;
+        setLoading(true);
+        try {
+            const stationId = params.stationId || '1';
 
-                if (slotsData.length > 0) {
-                    const firstConnector = slotsData[0];
-                    setSelectedConnectorId(firstConnector.connector_id);
+            // Clear previous station immediately to avoid showing stale name/slots.
+            setStation(null);
+            setConnectorSlots([]);
+            setSelectedConnectorId('');
+            setSelectedSlot(null);
 
-                    // If AI mode, auto-select first slot and proceed
-                    if (isAI && firstConnector.slots.length > 0) {
-                        setSelectedSlot('0-0'); // Use same ID pattern as displaySlots
-                    }
+            const [stationData, slotsData] = await Promise.all([
+                getStationById(stationId),
+                getStationSlots(stationId),
+            ]);
+
+            // Ignore out-of-order responses (rapid navigation).
+            if (seq !== fetchSeqRef.current) return;
+
+            setStation(stationData);
+            setConnectorSlots(slotsData);
+
+            if (slotsData.length > 0) {
+                const firstConnector = slotsData[0];
+                setSelectedConnectorId(firstConnector.connector_id);
+
+                // If AI mode, auto-select first slot and proceed
+                if (isAI && firstConnector.slots.length > 0) {
+                    setSelectedSlot('0-0'); // Use same ID pattern as displaySlots
                 }
-            } catch (error) {
-                console.error('Error fetching booking data:', error);
-                Alert.alert('Error', 'Failed to load station info.');
-            } finally {
-                setLoading(false);
             }
-        };
-        fetchData();
+        } catch (error) {
+            console.error('Error fetching booking data:', error);
+            Alert.alert('Error', 'Failed to load station info.');
+        } finally {
+            if (seq === fetchSeqRef.current) setLoading(false);
+        }
     }, [params.stationId, isAI]);
+
+    useFocusEffect(
+        useCallback(() => {
+            // Reset on every entry so repeated bookings never reuse stale success/loading state.
+            resetBookingState();
+            fetchData();
+            return () => { };
+        }, [resetBookingState, fetchData])
+    );
 
     // Auto-confirm if isAI and data is ready
     useEffect(() => {
@@ -179,6 +213,15 @@ export default function B2CBooking() {
 
             setConfirmed(true);
             setTaskStep(1); // Set first step immediately
+
+            // Navigation watchdog: never leave user stuck on success screen.
+            if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+            navTimeoutRef.current = setTimeout(() => {
+                router.replace({
+                    pathname: '/b2c/history',
+                    params: { refresh: Date.now().toString(), tab: 'Active' },
+                });
+            }, 8000);
 
             // Start the task loop animation for remaining steps
             if (taskIntervalRef.current) {

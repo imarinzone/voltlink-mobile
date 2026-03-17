@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity, Modal, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -20,6 +20,7 @@ import { useVehicleStore } from '../../store/vehicleStore';
 import { useRouter } from 'expo-router';
 import { useLanguageStore, Language } from '../../store/languageStore';
 import { formatSlotRange } from '../../utils/time';
+import { useFocusEffect } from '@react-navigation/native';
 
 const DEFAULT_USER_ID = process.env.EXPO_PUBLIC_DEFAULT_USER_ID ?? '11';
 
@@ -125,6 +126,12 @@ const B2CDashboard = () => {
     };
 
     useEffect(() => { fetchData(); }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchData(true);
+        }, [])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProfileView } from '../../components/profile/ProfileView';
 import { COLORS } from '../../utils/theme';
@@ -12,11 +13,14 @@ export default function B2CProfile() {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        getB2CStats(undefined, true)
-            .then(setStats)
-            .finally(() => setLoading(false));
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            getB2CStats(undefined, true)
+                .then(setStats)
+                .finally(() => setLoading(false));
+            return () => {};
+        }, [])
+    );
 
     if (loading) {
         return (

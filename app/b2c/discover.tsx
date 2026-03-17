@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Search, MapPin, Zap, Clock, ChevronRight, Star, AlertCircle, Car, Menu, SlidersHorizontal, User } from 'lucide-react-native';
 import MapComponent from '../../components/map/MapComponent';
 import { FilterContent, FilterState } from '../../components/filters/FilterContent';
@@ -87,9 +87,11 @@ export default function DiscoverScreen() {
             .catch(console.error);
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchData(true);
+        }, [])
+    );
 
     const onRefresh = () => {
         fetchData(true);

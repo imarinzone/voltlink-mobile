@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProfileView } from '../../components/profile/ProfileView';
 import { COLORS } from '../../utils/theme';
@@ -17,21 +18,24 @@ export default function DriverProfile() {
     const [loading, setLoading] = useState(true);
     const { currentVehicleId } = useVehicleStore();
 
-    useEffect(() => {
-        getDriverProfile().then(setProfile).catch(console.error);
+    useFocusEffect(
+        useCallback(() => {
+            getDriverProfile().then(setProfile).catch(console.error);
 
-        getVehiclesByDriver().then((vehicles: any[]) => {
-            const vehicleId = vehicles?.[0]?.id || currentVehicleId;
-            if (vehicleId) {
-                getVehicleDashboard(vehicleId).then(setVehicle).finally(() => setLoading(false));
-            } else {
+            getVehiclesByDriver().then((vehicles: any[]) => {
+                const vehicleId = vehicles?.[0]?.id || currentVehicleId;
+                if (vehicleId) {
+                    getVehicleDashboard(vehicleId).then(setVehicle).finally(() => setLoading(false));
+                } else {
+                    setLoading(false);
+                }
+            }).catch((err: any) => {
+                console.error(err);
                 setLoading(false);
-            }
-        }).catch((err: any) => {
-            console.error(err);
-            setLoading(false);
-        });
-    }, [currentVehicleId]);
+            });
+            return () => {};
+        }, [currentVehicleId])
+    );
 
     if (loading) {
         return (

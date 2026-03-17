@@ -1,0 +1,670 @@
+[
+  {
+    "connector_id": "CON009",
+    "connector_type": "CCS2",
+    "power_kw": 50,
+    "slots": [
+      {
+        "time": "06:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "06:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:30",
+        "available": false,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:30",
+        "available": true,
+        "price_per_kwh": 14
+      }
+    ]
+  },
+  {
+    "connector_id": "CON010",
+    "connector_type": "Type2",
+    "power_kw": 22,
+    "slots": [
+      {
+        "time": "06:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "06:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:30",
+        "available": true,
+        "price_per_kwh": 14
+      }
+    ]
+  },
+  {
+    "connector_id": "CON011",
+    "connector_type": "CCS2",
+    "power_kw": 50,
+    "slots": [
+      {
+        "time": "06:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "06:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:30",
+        "available": true,
+        "price_per_kwh": 14
+      }
+    ]
+  },
+  {
+    "connector_id": "CON012",
+    "connector_type": "CHAdeMO",
+    "power_kw": 50,
+    "slots": [
+      {
+        "time": "06:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "06:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "07:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "08:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "09:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "10:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "11:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "12:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "13:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "14:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "15:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "16:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "17:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "18:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "19:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "20:30",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:00",
+        "available": true,
+        "price_per_kwh": 14
+      },
+      {
+        "time": "21:30",
+        "available": true,
+        "price_per_kwh": 14
+      }
+    ]
+  }
+]

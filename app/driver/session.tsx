@@ -58,10 +58,16 @@ export default function SessionScreen() {
     const [stationRating, setStationRating] = useState(0);
     const [appRating, setAppRating] = useState(0);
     const [ratingSubmitted, setRatingSubmitted] = useState(false);
+    // Frontend-only charging simulation state (must not use backend values)
     const [elapsed, setElapsed] = useState(0);
+    const [simKwh, setSimKwh] = useState(0);
+    const [simCost, setSimCost] = useState(0);
     const [actionLoading, setActionLoading] = useState(false);
     const [sessionData, setSessionData] = useState<any>(null);
     const [sessionLoading, setSessionLoading] = useState(true);
+    const simIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const PRICE_PER_KWH = 12;
 
     const progress = useSharedValue(chargePercent / 100);
     const sliderPos = useSharedValue(0);
@@ -77,6 +83,8 @@ export default function SessionScreen() {
         setRatingSubmitted(false);
         setIsCharging(false);
         setElapsed(0);
+        setSimKwh(0);
+        setSimCost(0);
         setStationRating(0);
         setAppRating(0);
         setSessionData(null);
@@ -104,7 +112,6 @@ export default function SessionScreen() {
                     setChargePercent(data.current_soc);
                     progress.value = data.current_soc / 100;
                 }
-                if (data?.elapsed_seconds) setElapsed(data.elapsed_seconds);
                 if (data?.is_live) {
                     setIsCharging(true);
                 }
@@ -128,25 +135,57 @@ export default function SessionScreen() {
         );
     }, []);
 
-    // Simulation Timer
+    // Realistic charging simulation (frontend only, 1-second ticks, tapering rate)
     useEffect(() => {
-        let interval: any;
-        if (isCharging && chargePercent < 100) {
-            interval = setInterval(() => {
-                setChargePercent(prev => {
-                    const next = Math.min(prev + 1, 100);
-                    progress.value = withTiming(next / 100, { duration: 1000 });
-                    if (next === 100) {
-                        setIsCharging(false);
-                        setSessionEnded(true);
-                    }
-                    return next;
-                });
-                setElapsed(prev => prev + 2);
-            }, 2000);
+        if (!isCharging) {
+            if (simIntervalRef.current) {
+                clearInterval(simIntervalRef.current);
+                simIntervalRef.current = null;
+            }
+            return;
         }
-        return () => clearInterval(interval);
-    }, [isCharging, chargePercent]);
+
+        if (simIntervalRef.current) return; // prevent duplicate timers
+
+        simIntervalRef.current = setInterval(() => {
+            setElapsed((prevElapsed) => {
+                const nextElapsed = prevElapsed + 1;
+
+                let delta = 0.02;
+                if (prevElapsed < 120) delta = 0.05;
+                else if (prevElapsed < 300) delta = 0.035;
+
+                // Battery % simulation (keep prior behavior: +1% every 2 seconds)
+                // This drives the ring + color thresholds.
+                if (nextElapsed % 2 === 0) {
+                    setChargePercent((prevPct) => {
+                        const nextPct = Math.min(prevPct + 1, 100);
+                        progress.value = withTiming(nextPct / 100, { duration: 1000 });
+                        if (nextPct === 100) {
+                            setIsCharging(false);
+                            setSessionEnded(true);
+                        }
+                        return nextPct;
+                    });
+                }
+
+                setSimKwh((prevKwh) => {
+                    const nextKwh = Math.round((prevKwh + delta) * 100) / 100;
+                    setSimCost(Math.round(nextKwh * PRICE_PER_KWH * 100) / 100);
+                    return nextKwh;
+                });
+
+                return nextElapsed;
+            });
+        }, 1000);
+
+        return () => {
+            if (simIntervalRef.current) {
+                clearInterval(simIntervalRef.current);
+                simIntervalRef.current = null;
+            }
+        };
+    }, [isCharging]);
 
     const sliderBtnStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: sliderPos.value }],
@@ -207,18 +246,18 @@ export default function SessionScreen() {
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
 
-    // Use real session data when available, fall back to simulated values
+    // Display-only fields (must not use backend for kWh/cost/elapsed)
     const stationName = sessionData?.station_name || 'Charging Station';
     const connectorId = sessionData?.connector_id || '';
     const connectorType = sessionData?.connector_type || '';
-    const kwhDelivered = sessionData?.kwh ?? (Math.max(0, chargePercent - initialBattery) * 0.4);
-    const estimatedCost = sessionData?.total_cost ?? Math.round(kwhDelivered * 15);
+    const kwhDelivered = simKwh;
+    const estimatedCost = simCost;
     const estimatedCompletion = sessionData?.estimated_completion;
 
     const formatTime = (secs: number) => {
         const m = Math.floor(secs / 60);
         const s = secs % 60;
-        return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     };
 
     const timeRemainingMin = estimatedCompletion ?? Math.max(0, 100 - chargePercent) * 2;
@@ -228,15 +267,8 @@ export default function SessionScreen() {
         setActionLoading(true);
         try {
             if (sessionId) {
-                const result = await stopSession(sessionId);
-                // Use the real metrics from the Stop API response
-                if (result) {
-                    setSessionData(result);
-                    if (result.current_soc) {
-                        setChargePercent(result.current_soc);
-                        progress.value = result.current_soc / 100;
-                    }
-                }
+                // MUST call backend stop API, but do not use response metrics for UI.
+                await stopSession(sessionId);
             }
         } catch (err: any) {
             console.error('[Driver] stopSession API failed. Stopping locally.', {

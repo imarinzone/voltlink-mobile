@@ -6,14 +6,14 @@ import { format, addMinutes, parse } from 'date-fns';
 export const formatSlotRange = (slot: string): string => {
     if (!slot || !slot.includes('-')) return slot;
     const [start, end] = slot.split('-');
-    
+
     try {
         const startDate = parse(start.trim(), 'HH:mm', new Date());
         const endDate = parse(end.trim(), 'HH:mm', new Date());
-        
+
         const startAMPM = format(startDate, 'a');
         const endAMPM = format(endDate, 'a');
-        
+
         if (startAMPM === endAMPM) {
             return `${format(startDate, 'hh:mm')} - ${format(endDate, 'hh:mm a')}`;
         }

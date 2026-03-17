@@ -100,7 +100,25 @@ export default function RecommendationsScreen() {
                         recommendation={item}
                         rank={index + 1}
                         isPrimary={index === 0}
-                        onBook={() => router.push(`/driver/booking?rank=${index + 1}` as any)}
+                        onBook={() => {
+                            const stationId =
+                                (item as any).station_id != null
+                                    ? String((item as any).station_id)
+                                    : (item as any).id != null
+                                        ? String((item as any).id)
+                                        : undefined;
+
+                            const slot = (item as any).slot ? String((item as any).slot) : undefined;
+
+                            router.push({
+                                pathname: '/driver/booking',
+                                params: {
+                                    rank: String(index + 1),
+                                    ...(stationId ? { stationId } : {}),
+                                    ...(slot ? { slot } : {}),
+                                },
+                            } as any);
+                        }}
                         onRate={() => {
                             setSelectedStation(item);
                             setShowRating(true);

@@ -38,6 +38,12 @@ export default function B2CBooking() {
     const [taskStep, setTaskStep] = useState(0); // 0 to 7 (0 means not started)
     const [submitting, setSubmitting] = useState(false);
     const scrollRef = useRef<ScrollView>(null);
+    const taskIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const selectedSlotObj = connectorSlots?.[0]?.slots?.find((s, i) => `0-${i}` === selectedSlot);
+    const selectedSlotLabel = selectedSlotObj?.time
+        ? generate30MinSlot(selectedSlotObj.time)
+        : 'Auto';
 
     useEffect(() => {
         if (confirmed) {
@@ -53,7 +59,20 @@ export default function B2CBooking() {
         setSubmitting(false);
         setTaskStep(0);
         setSelectedSlot(null);
+        if (taskIntervalRef.current) {
+            clearInterval(taskIntervalRef.current);
+            taskIntervalRef.current = null;
+        }
     }, [params.stationId]);
+
+    useEffect(() => {
+        return () => {
+            if (taskIntervalRef.current) {
+                clearInterval(taskIntervalRef.current);
+                taskIntervalRef.current = null;
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (confirmed && taskStep > 0 && scrollRef.current) {
@@ -162,11 +181,16 @@ export default function B2CBooking() {
             setTaskStep(1); // Set first step immediately
 
             // Start the task loop animation for remaining steps
+            if (taskIntervalRef.current) {
+                clearInterval(taskIntervalRef.current);
+                taskIntervalRef.current = null;
+            }
             let step = 2;
             const interval = setInterval(() => {
                 setTaskStep(step);
                 if (step === 7) {
                     clearInterval(interval);
+                    taskIntervalRef.current = null;
                     // Auto-navigate to history after a short delay
                     setTimeout(() => {
                         router.replace({
@@ -177,6 +201,7 @@ export default function B2CBooking() {
                 }
                 step++;
             }, 1000); // 1s per step for better visibility
+            taskIntervalRef.current = interval;
             setSubmitting(false); // Reset to allow future bookings
         } catch (error: any) {
             setSubmitting(false);
@@ -225,13 +250,18 @@ export default function B2CBooking() {
     }
 
     if (confirmed) {
+        const stationName = station?.name || station?.station_name || 'Charging Station';
+        const chargerSummary = `${connector?.connector_type || 'CCS2'}${connector?.power_kw ? ` ${connector.power_kw}kW` : ''}`;
+        const waitMins = station?.etaMinutes ?? 30;
+        const pricePerKwh = selectedPrice || station?.pricePerKwh || 15;
+
         const steps = [
             { title: 'Vehicle Detected', sub: 'Reading vehicle telemetry', detail: 'Battery: 35% · Capacity: 72 kWh · Location acquired', Icon: Car },
             { title: 'Battery Analyzed', sub: 'Determining charge type', detail: 'Battery < 50% → AC Fast charging recommended', Icon: BatteryCharging },
             { title: 'Route Scanned', sub: 'Finding CPOs within 5 km', detail: '3 CPOs found on Bangalore → Chennai route', Icon: MapPin },
-            { title: 'Charger Matched', sub: 'Checking slot availability', detail: 'AC Fast @ ChargeZone Hub — slot in 30 min', Icon: Plug },
-            { title: 'Price Calculated', sub: 'Applying dynamic pricing', detail: '₹8.00/kWh · Off-peak discount applied (−20%)', Icon: IndianRupee },
-            { title: 'Slot Booked', sub: 'Reservation confirmed', detail: 'Booked 14:30–15:30 · Est. cost ₹259.20', Icon: CalendarCheck },
+            { title: 'Charger Matched', sub: 'Checking slot availability', detail: `${chargerSummary} @ ${stationName} — slot in ~${waitMins} min`, Icon: Plug },
+            { title: 'Price Calculated', sub: 'Applying dynamic pricing', detail: `₹${Number(pricePerKwh).toFixed(2)}/kWh · Credits earnable: ~${creditsEarned}`, Icon: IndianRupee },
+            { title: 'Slot Booked', sub: 'Reservation confirmed', detail: `Booked ${selectedSlotLabel} · Est. cost ₹${Number(estimatedCost).toFixed(2)}`, Icon: CalendarCheck },
             { title: 'Charging Active', sub: 'Session in progress', detail: 'Charging to 80% · ETA 47 min remaining', Icon: Zap },
         ];
 

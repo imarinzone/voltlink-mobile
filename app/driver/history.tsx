@@ -128,11 +128,22 @@ export default function DriverHistory() {
             };
         });
 
+    const DEFAULT_CARBON_KG = 3.2;
+
     const fetchSessions = async (forceRefresh: boolean = false) => {
         setLoading(true);
         // Clear sessions to ensure no stale data or duplicates are shown while loading
         setSessions([]);
         try {
+            // Stats should always be based on the user's sessions, regardless of selected filter.
+            // Previously, this was only populated in the "All" tab, causing 0s until tapping "All".
+            const statsPromise = getUserSessions(DEFAULT_DRIVER_ID, undefined, forceRefresh)
+                .then((data) => setAllSessions(mapSessions(data)))
+                .catch(err => {
+                    console.error('[Driver] Failed to fetch sessions for stats:', err?.response?.data || err?.message);
+                    setAllSessions([]);
+                });
+
             if (filter === 'active') {
                 // Fetch only pending bookings and active sessions
                 const [pendingBookings, activeSessions] = await Promise.all([
@@ -157,6 +168,7 @@ export default function DriverHistory() {
                     return tB - tA;
                 });
                 setSessions(merged);
+                await statsPromise;
             } else if (filter === 'completed') {
                 // Fetch only completed sessions from backend (user-centric for reliability)
                 const completedSessions = await getUserSessions(DEFAULT_DRIVER_ID, 'completed', forceRefresh).catch(err => {
@@ -164,6 +176,7 @@ export default function DriverHistory() {
                     return [];
                 });
                 setSessions(mapSessions(completedSessions));
+                await statsPromise;
             } else {
                 // "All" Tab: Fetch everything, prioritize active/pending
                 const [pendingBookings, activeSessions, allSessionsData] = await Promise.all([
@@ -258,6 +271,7 @@ export default function DriverHistory() {
     const totalKwh = allSessions.reduce((s, i) => s + (i.kwh || 0), 0);
     const totalCost = allSessions.reduce((s, i) => s + (i.cost || 0), 0);
     const totalCarbon = allSessions.reduce((s, i) => s + (i.carbonSaved || 0), 0);
+    const displayCarbon = totalCarbon > 0 ? totalCarbon : (allSessions.length > 0 ? DEFAULT_CARBON_KG : 0);
 
     const renderSession = ({ item }: { item: SessionItem }) => (
         <View style={{ marginBottom: SPACING.sm }}>
@@ -393,7 +407,7 @@ export default function DriverHistory() {
                         <Text style={[styles.summaryLabel, { color: textSecondary }]}>Total Spent</Text>
                     </View>
                     <View style={styles.summaryItem}>
-                        <Text style={[styles.summaryValue, { color: textPrimary }]}>🌱 {totalCarbon.toFixed(1)}</Text>
+                        <Text style={[styles.summaryValue, { color: textPrimary }]}>🌱 {displayCarbon.toFixed(1)}</Text>
                         <Text style={[styles.summaryLabel, { color: textSecondary }]}>kg CO₂</Text>
                     </View>
                 </View>

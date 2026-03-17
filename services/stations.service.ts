@@ -47,6 +47,7 @@ export const getStationById = async (id: string, forceRefresh?: boolean): Promis
         return {
             ...d,
             id: d.id.toString(),
+            name: d.station_name || d.name || 'Charging Station',
             cpoName: d.operator_id || 'VoltLink Partner',
             chargerTypes: [],
             distanceKm: dist,
@@ -65,20 +66,29 @@ export const getAIRecommendations = async (
             const lat = s.evse?.latitude || s.latitude || USER_LAT;
             const lng = s.evse?.longitude || s.longitude || USER_LNG;
             const dist = calculateDistance(USER_LAT, USER_LNG, lat, lng);
+            const rate = (s.predicted_cost && s.predicted_kwh) 
+                ? parseFloat((s.predicted_cost / s.predicted_kwh).toFixed(2)) 
+                : (s.price_per_kwh || 0);
+
             return {
                 ...s,
-                id: String(s.station_id || s.id || '').replace(/^STN/i, '') || s.id?.toString(),
+                id: s.id || String(s.station_id || '').replace(/^STN/i, '') || s.id?.toString(),
                 name: s.station_name || s.name || 'AI Suggested Station',
                 cpoName: s.operator_id || 'VoltLink Optimized',
                 chargerTypes: s.charging_types || [],
                 availableChargers: s.available_chargers ?? 1,
                 totalChargers: s.total_chargers ?? 4,
-                pricePerKwh: s.price_per_kwh || 0,
-                effectivePrice: s.predicted_cost || s.price_per_kwh || 0,
+                pricePerKwh: s.price_per_kwh || rate,
+                effectivePrice: rate,
                 aiReason: s.reason_summary || s.ai_reason || 'Highly recommended for your route',
                 distanceKm: dist,
                 etaMinutes: Math.round(dist * 2.5),
                 nextAvailableMinutes: s.predicted_wait_time || 0,
+                predictedRevenueLoss: s.predicted_revenue_loss || 0,
+                predictedWaitTime: s.predicted_wait_time || 0,
+                predictedKwh: s.predicted_kwh || 0,
+                predictedCost: s.predicted_cost || 0,
+                station_id: s.station_id,
                 coordinates: { latitude: lat, longitude: lng },
             };
         });

@@ -5,7 +5,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import Animated, {
-    useSharedValue, withTiming, useAnimatedProps, withRepeat, withSequence, useAnimatedStyle
+    useSharedValue, withTiming, useAnimatedProps, withRepeat, withSequence, useAnimatedStyle,
+    useDerivedValue, interpolateColor
 } from 'react-native-reanimated';
 import { Zap, AlertTriangle, ThumbsUp, ThumbsDown, ChevronRight, ChevronsRight } from 'lucide-react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -39,10 +40,16 @@ export default function B2CSession() {
 
     const [sessionId, setSessionId] = useState<string | undefined>(initialSessionId);
     const { myVehicle } = useVehicleStore();
+    const paramsString = JSON.stringify({ initialSessionId, bookingId, paramConnectorId, paramVehicleId, paramBatteryLevel });
 
     const parsedBattery = paramBatteryLevel != null ? Number(paramBatteryLevel) : NaN;
-    const initialBattery = Number.isFinite(parsedBattery) ? Math.min(100, Math.max(0, parsedBattery)) : (myVehicle?.batteryLevel ?? 20);
-    const [chargePercent, setChargePercent] = useState(initialBattery);
+    // B2C Session init
+    const [chargePercent, setChargePercent] = useState(() => {
+        if (Number.isFinite(parsedBattery)) return Math.min(100, Math.max(0, parsedBattery));
+        return 20; // safe fallback
+    });
+
+    const [initialBattery, setInitialBattery] = useState(chargePercent);
     const [isCharging, setIsCharging] = useState(false);
     const [sessionEnded, setSessionEnded] = useState(false);
     const [stationRating, setStationRating] = useState(0);
@@ -70,7 +77,8 @@ export default function B2CSession() {
 
     // Fetch session on mount — auto-start if already live
     useEffect(() => {
-        // Reset states for a fresh session
+        // Reset states for a fresh session automatically
+        setSessionId(initialSessionId);
         setSessionEnded(false);
         setRatingSubmitted(false);
         setIsCharging(false);
@@ -80,10 +88,10 @@ export default function B2CSession() {
         setSessionData(null);
         sliderPos.value = 0;
 
-        if (!sessionId) { setSessionLoading(false); return; }
+        if (!initialSessionId) { setSessionLoading(false); return; }
         (async () => {
             try {
-                const data = await getSession(sessionId);
+                const data = await getSession(initialSessionId);
                 setSessionData(data);
                 if (data?.current_soc) {
                     setChargePercent(data.current_soc);
@@ -96,14 +104,14 @@ export default function B2CSession() {
                 }
             } catch (err: any) {
                 console.error('[B2C] getSession API failed.', {
-                    endpoint: `GET /sessions/${sessionId}`,
+                    endpoint: `GET /sessions/${initialSessionId}`,
                     error: err?.response?.data || err?.message,
                 });
             } finally {
                 setSessionLoading(false);
             }
         })();
-    }, [sessionId]);
+    }, [paramsString]);
 
     useEffect(() => {
         pulseOpacity.value = withRepeat(
@@ -182,12 +190,13 @@ export default function B2CSession() {
         }
     };
 
-    const animProps = useAnimatedProps(() => ({
-        strokeDashoffset: CIRCUMFERENCE * (1 - progress.value),
-        stroke: progress.value < 0.25 ? COLORS.alertRed
-            : progress.value < 0.55 ? COLORS.warningOrange
-                : COLORS.successGreen,
-    }));
+    const strokeColor = chargePercent <= 20 ? COLORS.alertRed : chargePercent <= 40 ? COLORS.warningOrange : COLORS.successGreen;
+
+    const animProps = useAnimatedProps(() => {
+        return {
+            strokeDashoffset: CIRCUMFERENCE * (1 - progress.value),
+        };
+    });
 
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
@@ -241,7 +250,16 @@ export default function B2CSession() {
                 // Determined by feedback simulation
             }
             setRatingSubmitted(true);
-            setTimeout(() => router.replace('/b2c/dashboard'), 1500);
+            setTimeout(() => {
+                router.replace('/b2c/dashboard');
+                // Defer wiping the state so the screen animates out cleanly
+                setTimeout(() => {
+                    setSessionEnded(false);
+                    setRatingSubmitted(false);
+                    setSessionId(undefined);
+                    setSessionData(null);
+                }, 500);
+            }, 1000);
         } catch (error) {
             console.error('Error submitting rating:', error);
             Alert.alert('Error', 'Failed to submit feedback. Taking you to dashboard.');
@@ -348,6 +366,7 @@ export default function B2CSession() {
                             />
                             <AnimatedCircle
                                 cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
+                                stroke={strokeColor}
                                 strokeWidth={STROKE} fill="transparent"
                                 strokeDasharray={CIRCUMFERENCE} animatedProps={animProps}
                                 strokeLinecap="round" rotation="-90"

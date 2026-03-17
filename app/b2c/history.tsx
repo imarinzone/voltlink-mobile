@@ -11,6 +11,7 @@ import { getUserSessions } from '../../services/b2c.service';
 import { deleteBooking, getPendingBookings } from '../../services/booking.service';
 import { stopSession, getSessionsByVehicle } from '../../services/session.service';
 import { format } from 'date-fns';
+import { generate30MinSlot } from '../../utils/time';
 
 const TABS = ['Active', 'Past'];
 
@@ -101,7 +102,7 @@ export default function HistoryScreen() {
                     let timeLabel = 'Pending';
                     if (b.booking_time) {
                         try {
-                            timeLabel = format(new Date(b.booking_time), 'hh:mm a');
+                            timeLabel = generate30MinSlot(b.booking_time);
                         } catch { }
                     }
                     return {

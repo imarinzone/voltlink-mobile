@@ -31,17 +31,16 @@ export const BatteryIndicator: React.FC<BatteryIndicatorProps> = ({
     const circumference = radius * 2 * Math.PI;
     const progress = useSharedValue(0);
 
+    const targetColor = percentage <= 20 ? COLORS.alertRed
+        : percentage <= 40 ? COLORS.warningOrange
+        : COLORS.successGreen;
+
     useEffect(() => {
         progress.value = withTiming(percentage / 100, { duration: 1500 });
     }, [percentage]);
 
     const animatedProps = useAnimatedProps(() => ({
         strokeDashoffset: circumference * (1 - progress.value),
-        stroke: interpolateColor(
-            progress.value,
-            [0.2, 0.5, 0.8],
-            [COLORS.alertRed, COLORS.warningOrange, COLORS.successGreen]
-        ),
     }));
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
@@ -59,7 +58,7 @@ export const BatteryIndicator: React.FC<BatteryIndicatorProps> = ({
                 {/* Progress Circle */}
                 <AnimatedPath
                     d={`M ${center} ${center - radius} A ${radius} ${radius} 0 1 1 ${center} ${center + radius} A ${radius} ${radius} 0 1 1 ${center} ${center - radius}`}
-                    strokeWidth={strokeWidth} fill="transparent"
+                    stroke={targetColor} strokeWidth={strokeWidth} fill="transparent"
                     strokeDasharray={circumference}
                     animatedProps={animatedProps}
                     strokeLinecap="round"

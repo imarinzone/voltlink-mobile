@@ -8,6 +8,7 @@ export interface Vehicle {
     licensePlate: string;
     batteryLevel: number;
     rangeKm: number;
+    efficiency?: number;
     status: VehicleStatus;
     lastChargedAt: string;
     driverName?: string;

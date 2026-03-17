@@ -49,6 +49,7 @@ const DriverDashboard = () => {
     const isDark = theme === 'dark';
     const router = useRouter();
     const t = translations[language];
+    const scrollRef = React.useRef<ScrollView>(null);
 
     const [refreshing, setRefreshing] = useState(false);
     const [vehicle, setVehicle] = useState<Vehicle | null>(null);
@@ -56,7 +57,7 @@ const DriverDashboard = () => {
     const [recommendations, setRecommendations] = useState<Station[]>([]); // Added
     const [driverProfile, setDriverProfile] = useState<any>(null);
 
-    const { currentVehicleId, setCurrentVehicleId } = useVehicleStore();
+    const { currentVehicleId, setCurrentVehicleId, setMyVehicle } = useVehicleStore();
 
     const fetchData = async (forceRefresh: boolean = false) => {
         try {
@@ -77,6 +78,7 @@ const DriverDashboard = () => {
                 getAIRecommendations(vehicleId, forceRefresh)
             ]);
             setVehicle(vData);
+            setMyVehicle(vData as any); // Sync globally so Session gets live %
             setStats(sData);
             setRecommendations(rData);
         } catch (error) {
@@ -101,6 +103,7 @@ const DriverDashboard = () => {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
             <ScrollView
+                ref={scrollRef}
                 contentContainerStyle={styles.scrollContent}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.brandBlue} />}
             >
@@ -142,7 +145,7 @@ const DriverDashboard = () => {
                 {batteryLow && (
                     <TouchableOpacity
                         style={styles.alertBanner}
-                        onPress={() => router.push('/driver/recommendations' as any)}
+                        onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}
                         activeOpacity={0.85}
                     >
                         <AlertTriangle size={18} color={COLORS.alertRed} />
@@ -155,15 +158,14 @@ const DriverDashboard = () => {
                 {vehicle && (
                     <VehicleCard
                         vehicle={vehicle}
-                        onPress={() => router.push('/driver/recommendations' as any)}
                     />
                 )}
 
                 <SectionHeader title={t.stats} />
                 <View style={styles.statsRow}>
-                    <MetricCard label={t.efficiency} value={stats?.kwhConsumed || 0} unit="km/kWh" icon={<Zap size={16} color={COLORS.brandBlue} />} />
-                    <MetricCard label={t.distance} value="124.5" unit="km" icon={<Route size={16} color={COLORS.brandBlue} />} />
-                    <MetricCard label={t.energyUsed} value="18.4" unit="kWh" icon={<Zap size={16} color={COLORS.successGreen} />} />
+                    <MetricCard label={t.efficiency} value={vehicle?.efficiency || 6.8} unit="km/kWh" icon={<Zap size={16} color={COLORS.brandBlue} />} />
+                    <MetricCard label={t.distance} value={stats?.distanceKm || 0} unit="km" icon={<Route size={16} color={COLORS.brandBlue} />} />
+                    <MetricCard label={t.energyUsed} value={stats?.kwhConsumed || 0} unit="kWh" icon={<Zap size={16} color={COLORS.successGreen} />} />
                 </View>
 
                 <SectionHeader
@@ -176,7 +178,10 @@ const DriverDashboard = () => {
                         recommendation={item}
                         rank={index + 1}
                         isPrimary={index === 0}
-                        onBook={() => router.push(`/driver/booking?rank=${index + 1}` as any)}
+                        onBook={() => router.push({
+                            pathname: `/driver/booking`,
+                            params: { rank: index + 1, slot: item.slot, stationId: item.station_id || item.id }
+                        } as any)}
                     />
                 ))}
             </ScrollView>

@@ -15,7 +15,9 @@ export interface Station {
     totalChargers?: number;
     nextAvailableMinutes?: number;
     aiReason?: string;
+    slot?: string;
     partnerDiscount?: number;
+    station_id?: string | number;
     coordinates?: {
         latitude: number;
         longitude: number;

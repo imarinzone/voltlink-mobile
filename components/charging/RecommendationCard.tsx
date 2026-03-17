@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { Zap, Clock } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { Station } from '../../types/station.types';
 import { useThemeStore } from '../../store/themeStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { formatSlotRange } from '../../utils/time';
 
 const translations = {
     English: {
@@ -46,9 +48,11 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     const { language } = useLanguageStore();
     const isDark = theme === 'dark';
     const t = translations[language];
+
+    const isRank2 = rank === 2;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)';
+    const borderColor = isDark ? 'rgba(255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)';
 
     return (
         <GlassCard
@@ -66,8 +70,16 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             )}
 
             <View style={styles.header}>
-                <View style={[styles.rankBadge, isPrimary && styles.primaryRankBadge]}>
-                    <Text style={[styles.rankText, isPrimary && styles.primaryRankText]}>#{rank}</Text>
+                <View style={[
+                    styles.rankBadge, 
+                    isPrimary && { backgroundColor: COLORS.brandBlue }, 
+                    isRank2 && { backgroundColor: '#000000' }
+                ]}>
+                    <Text style={[
+                        styles.rankText, 
+                        isPrimary && { color: '#000000' }, 
+                        isRank2 && { color: COLORS.brandBlue }
+                    ]}>#{rank}</Text>
                 </View>
                 <Text style={styles.price}>₹{recommendation.effectivePrice || recommendation.pricePerKwh}/kWh</Text>
             </View>
@@ -84,8 +96,17 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             </View>
 
             {recommendation.aiReason && (
-                <View style={[styles.aiBadge, isPrimary && styles.primaryAiBadge]}>
+                <View style={styles.aiBadge}>
                     <Text style={styles.aiText}>{t.ai} {recommendation.aiReason}</Text>
+                </View>
+            )}
+
+            {recommendation.slot && (
+                <View style={styles.slotContainer}>
+                    <Clock size={12} color={COLORS.brandBlue} />
+                    <Text style={[styles.slotText, { color: textSecondary }]}>
+                        Recommended Slot: <Text style={{ color: COLORS.brandBlue, fontWeight: '700' }}>{formatSlotRange(recommendation.slot)}</Text>
+                    </Text>
                 </View>
             )}
 
@@ -101,10 +122,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     </TouchableOpacity>
                 )}
                 <TouchableOpacity
-                    style={[styles.bookButton, isPrimary && styles.primaryBookButton]}
+                    style={[styles.bookButton, isPrimary && { backgroundColor: COLORS.brandBlue }]}
                     onPress={onBook}
                 >
-                    <Text style={[styles.bookText, isPrimary && styles.primaryBookText]}>{t.bookNow}</Text>
+                    <Text style={[styles.bookText, isPrimary && { color: '#000' }]}>{t.bookNow}</Text>
                 </TouchableOpacity>
             </View>
         </GlassCard>
@@ -152,11 +173,7 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         borderRadius: 4,
     },
-    primaryRankBadge: {
-        backgroundColor: '#000',
-    },
     rankText: { color: '#000', fontSize: 10, fontWeight: '800' },
-    primaryRankText: { color: COLORS.brandBlue },
     price: { ...TYPOGRAPHY.label, fontWeight: '700', color: COLORS.successGreen },
     name: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, marginBottom: 4 },
     details: {
@@ -171,9 +188,6 @@ const styles = StyleSheet.create({
         padding: SPACING.sm,
         borderRadius: BORDER_RADIUS.sm,
         marginBottom: SPACING.md,
-    },
-    primaryAiBadge: {
-        backgroundColor: 'rgba(0, 212, 255, 0.18)',
     },
     aiText: { ...TYPOGRAPHY.label, color: COLORS.brandBlue, fontSize: 11, fontStyle: 'italic' },
     actionBtn: {
@@ -193,11 +207,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flex: 1,
     },
-    primaryBookButton: {
-        backgroundColor: COLORS.brandBlue,
-    },
     bookText: { color: COLORS.brandBlue, fontWeight: '800', fontSize: 13 },
-    primaryBookText: { color: '#000' },
     actionRow: {
         flexDirection: 'row',
         gap: SPACING.sm,
@@ -206,6 +216,17 @@ const styles = StyleSheet.create({
     actionText: {
         ...TYPOGRAPHY.label,
         fontWeight: '700',
+        fontSize: 12,
+    },
+    slotContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: SPACING.md,
+        paddingHorizontal: SPACING.xs,
+    },
+    slotText: {
+        ...TYPOGRAPHY.label,
         fontSize: 12,
     },
 });

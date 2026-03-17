@@ -3,7 +3,7 @@ import {
     StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, TextInput
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, MapPin, Zap, Clock, CheckCircle } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Zap, Clock, CheckCircle, Banknote } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
@@ -13,6 +13,7 @@ import { getStationSlots, SlotInfo, ConnectorSlots } from '../../services/sessio
 import { createBooking } from '../../services/booking.service';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { getStationById, getAIRecommendations } from '../../services/stations.service';
+import { generate30MinSlot, formatSlotRange } from '../../utils/time';
 
 const DEFAULT_DRIVER_ID = parseInt(process.env.EXPO_PUBLIC_DEFAULT_DRIVER_ID ?? '4', 10);
 
@@ -21,7 +22,7 @@ export default function DriverBooking() {
     const { currentVehicleId } = useVehicleStore();
     const isDark = theme === 'dark';
     const router = useRouter();
-    const params = useLocalSearchParams<{ stationId?: string, rank?: string }>();
+    const params = useLocalSearchParams<{ stationId?: string, rank?: string, slot?: string }>();
     const rank = params.rank;
 
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export default function DriverBooking() {
     const [showReasonScreen, setShowReasonScreen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [firstRecommendation, setFirstRecommendation] = useState<any>(null);
+    const [thisRecommendation, setThisRecommendation] = useState<any>(null);
 
     const scale = useSharedValue(1);
     const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -74,10 +76,16 @@ export default function DriverBooking() {
                     }
                 }
 
-                // If rank=2, fetch first recommendation to show comparison
-                if (rank === '2' && currentVehicleId) {
+                if (currentVehicleId) {
                     const recs = await getAIRecommendations(currentVehicleId);
                     if (recs.length > 0) setFirstRecommendation(recs[0]);
+                    
+                    if (rank) {
+                        const rankIndex = parseInt(rank as string, 10) - 1;
+                        if (recs.length > rankIndex && rankIndex >= 0) {
+                            setThisRecommendation(recs[rankIndex]);
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching booking data:', error);
@@ -107,10 +115,10 @@ export default function DriverBooking() {
     const connector = connectorSlots[0];
     const displaySlots = connector?.slots.map((s, i) => ({ ...s, id: `0-${i}` })) || [];
 
-    const estimatedKwh = 28;
+    const estimatedKwh = thisRecommendation?.predictedKwh || 28;
     const selectedPrice = displaySlots.find(s => s.id === selectedSlot)?.price_per_kwh
         || station?.pricePerKwh || 15;
-    const estimatedCost = estimatedKwh * selectedPrice;
+    const estimatedCost = thisRecommendation?.predictedCost || (estimatedKwh * selectedPrice);
     const creditsEarned = Math.round(estimatedCost * 0.1);
 
     const handleConfirm = async () => {
@@ -131,26 +139,31 @@ export default function DriverBooking() {
         try {
             if (!currentVehicleId) throw new Error('No vehicle selected');
 
-            const slot = displaySlots.find(s => s.id === selectedSlot);
-            let timeStr = slot?.time || "12:00";
-            let [hours, minutes] = timeStr.split(':');
-            hours = hours || "12";
-            minutes = minutes?.substring(0, 2) || "00";
+            let bookingTime = new Date();
+            if (params.slot) {
+                const [startTime] = params.slot.split('-');
+                const [hrs, mins] = startTime.split(':');
+                bookingTime.setHours(parseInt(hrs), parseInt(mins), 0, 0);
+            } else {
+                const slot = displaySlots.find(s => s.id === selectedSlot);
+                let timeStr = slot?.time || "12:00";
+                let [hours, minutes] = timeStr.split(':');
+                hours = hours || "12";
+                minutes = minutes?.substring(0, 2) || "00";
 
-            if (timeStr.toLowerCase().includes('pm') && parseInt(hours) < 12) {
-                hours = (parseInt(hours) + 12).toString();
-            } else if (timeStr.toLowerCase().includes('am') && parseInt(hours) === 12) {
-                hours = "00";
+                if (timeStr.toLowerCase().includes('pm') && parseInt(hours) < 12) {
+                    hours = (parseInt(hours) + 12).toString();
+                } else if (timeStr.toLowerCase().includes('am') && parseInt(hours) === 12) {
+                    hours = "00";
+                }
+                bookingTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
             }
-
-            const now = new Date();
-            now.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
             await createBooking({
                 connector_id: selectedConnectorId || connector?.connector_id || '',
                 vehicle_id: parseInt(currentVehicleId || '0', 10),
                 user_id: DEFAULT_DRIVER_ID,
-                booking_time: now.toISOString(),
+                booking_time: bookingTime.toISOString(),
             });
             setConfirmed(true);
             setSubmitting(false); // Reset to allow future bookings
@@ -167,14 +180,18 @@ export default function DriverBooking() {
         }
     };
 
-    if (loading) {
+    if (loading || (rank === '1' && !confirmed)) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: bg, justifyContent: 'center', alignItems: 'center' }]}>
                 <ActivityIndicator size="large" color={COLORS.brandBlue} />
+                {rank === '1' && !loading && (
+                    <Text style={[styles.confirmedSub, { color: textSecondary, marginTop: 16 }]}>
+                        Securing recommended slot...
+                    </Text>
+                )}
             </SafeAreaView>
         );
     }
-
 
     if (confirmed) {
         return (
@@ -198,115 +215,116 @@ export default function DriverBooking() {
                 <View style={{ width: 40 }} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Station Hero */}
-                <GlassCard style={styles.stationCard as any} intensity={30}>
-                    <Text style={[styles.stationName, { color: textPrimary }]}>{station?.name || 'Charging Station'}</Text>
-                    <Text style={[styles.cpoName, { color: COLORS.brandBlue }]}>{station?.cpoName || 'VoltLink Partner'}</Text>
-                    <View style={styles.stationMeta}>
-                        <View style={styles.metaItem}>
-                            <MapPin size={14} color={textSecondary} />
-                            <Text style={[styles.metaText, { color: textSecondary }]}>{station?.distanceKm || '?'} km away</Text>
+            <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} bounces={false}>
+                <View style={styles.content}>
+                    {/* Station Hero */}
+                    <GlassCard style={styles.stationCard as any} intensity={30}>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                            <View style={{flex: 1, paddingRight: 8}}>
+                                <Text style={[styles.stationName, { color: textPrimary }]}>{thisRecommendation?.station_name || station?.name || 'Charging Station'}</Text>
+                                <Text style={styles.cpoName}>{station?.cpoName || 'VoltLink Partner'}</Text>
+                            </View>
+                            <View style={{alignItems: 'flex-end'}}>
+                               <Text style={[styles.metaText, { color: textSecondary }]}>{station?.distanceKm || '?'} km away</Text>
+                               <Text style={[styles.metaText, { color: textSecondary }]}>{station?.etaMinutes || '?'} min ETA</Text>
+                               <Text style={styles.metaHighlight}>
+                                    {connector?.connector_type || 'CCS2'} {connector?.power_kw ? `${connector.power_kw}kW` : ''}
+                               </Text>
+                            </View>
                         </View>
-                        <View style={styles.metaItem}>
-                            <Clock size={14} color={textSecondary} />
-                            <Text style={[styles.metaText, { color: textSecondary }]}>{station?.etaMinutes || '?'} min ETA</Text>
-                        </View>
-                        <View style={styles.metaItem}>
-                            <Zap size={14} color={COLORS.successGreen} />
-                            <Text style={[styles.metaText, { color: textSecondary }]}>
-                                {connector?.connector_type || 'CCS2'} {connector?.power_kw ? `${connector.power_kw}kW` : ''}
-                            </Text>
-                        </View>
-                    </View>
-                </GlassCard>
+                    </GlassCard>
 
-                {/* Driver Booking: Slots and Estimates are hidden to streamline flow */}
-                {/* Reason & Potential Loss for second recommendation */}
-                {rank === '2' && (
-                    <View style={{ marginBottom: SPACING.lg }}>
-                        <Text style={[styles.reasonTitle, { color: textPrimary, fontSize: 18, marginBottom: SPACING.md }]}>
-                            Why choose this instead of #1?
-                        </Text>
+                    {/* Rank 2 Specific UI */}
+                    {rank === '2' && (
+                        <View style={{ marginBottom: SPACING.xs }}>
+                            <Text style={[styles.sectionTitle, { color: textSecondary }]}>Potential Loss Summary</Text>
+                            <View style={styles.lossBlocksContainer}>
+                                <View style={[styles.lossBlock, { backgroundColor: isDark ? 'rgba(255,68,68,0.1)' : 'rgba(255,68,68,0.05)' }]}>
+                                    <Banknote size={20} color={COLORS.alertRed} />
+                                    <Text style={[styles.lossLabel, { color: textSecondary }]}>Higher Price</Text>
+                                    <Text style={styles.lossValue}>
+                                        {thisRecommendation?.predictedRevenueLoss !== undefined 
+                                            ? `+₹${thisRecommendation.predictedRevenueLoss}` 
+                                            : `+₹${((station?.pricePerKwh ?? 0) - (firstRecommendation?.pricePerKwh ?? 0) > 0) ? ((station?.pricePerKwh ?? 0) - (firstRecommendation?.pricePerKwh ?? 0)).toFixed(2) : '0.00'}`}
+                                    </Text>
+                                </View>
+                                <View style={[styles.lossBlock, { backgroundColor: isDark ? 'rgba(255,68,68,0.1)' : 'rgba(255,68,68,0.05)' }]}>
+                                    <MapPin size={20} color={COLORS.alertRed} />
+                                    <Text style={[styles.lossLabel, { color: textSecondary }]}>Further Dist.</Text>
+                                    <Text style={styles.lossValue}>+{((station?.distanceKm ?? 0) - (firstRecommendation?.distanceKm ?? 0) > 0) ? ((station?.distanceKm ?? 0) - (firstRecommendation?.distanceKm ?? 0)).toFixed(1) : '0.0'} km</Text>
+                                </View>
+                                <View style={[styles.lossBlock, { backgroundColor: isDark ? 'rgba(255,68,68,0.1)' : 'rgba(255,68,68,0.05)' }]}>
+                                    <Clock size={20} color={COLORS.alertRed} />
+                                    <Text style={[styles.lossLabel, { color: textSecondary }]}>Longer Wait</Text>
+                                    <Text style={styles.lossValue}>+{thisRecommendation?.predictedWaitTime ?? 15} min</Text>
+                                </View>
+                            </View>
 
-                        <GlassCard style={styles.lossCard as any} intensity={15}>
-                            <Text style={[styles.lossHeader, { color: COLORS.alertRed }]}>Potential Loss Summary</Text>
-                            <View style={styles.lossItem}>
-                                <Text style={[styles.lossLabel, { color: textSecondary }]}>Higher Price</Text>
-                                <Text style={[styles.lossValue, { color: COLORS.alertRed }]}>
-                                    +₹{((station?.pricePerKwh ?? 0) - (firstRecommendation?.pricePerKwh ?? 0) > 0) ? ((station?.pricePerKwh ?? 0) - (firstRecommendation?.pricePerKwh ?? 0)).toFixed(2) : '0.00'}/kWh
+                            <Text style={[styles.sectionTitle, { color: textSecondary }]}>Reason for Selection</Text>
+                            <TextInput
+                                style={[styles.reasonInput, { color: textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: borderColor }]}
+                                placeholder="Enter reason to enable booking..."
+                                placeholderTextColor={textSecondary}
+                                value={reason}
+                                onChangeText={setReason}
+                                multiline
+                                numberOfLines={3}
+                            />
+                        </View>
+                    )}
+
+                    {/* Booking Details */}
+                    <Text style={[styles.sectionTitle, { color: textSecondary }]}>Booking Details</Text>
+                    <GlassCard style={styles.detailsCard as any} intensity={15}>
+                        <View style={styles.detailsRow}>
+                             <View style={styles.detailCol}>
+                                <Text style={[styles.detailTitle, { color: textSecondary }]}>Selected Slot</Text>
+                                <Text style={styles.detailValueBlue}>
+                                    {params.slot ? formatSlotRange(params.slot) : (selectedSlot ? generate30MinSlot(displaySlots.find(s => s.id === selectedSlot)?.time || 'Auto') : 'Auto')}
                                 </Text>
-                            </View>
-                            <View style={styles.lossItem}>
-                                <Text style={[styles.lossLabel, { color: textSecondary }]}>Further Distance</Text>
-                                <Text style={[styles.lossValue, { color: COLORS.alertRed }]}>
-                                    +{((station?.distanceKm ?? 0) - (firstRecommendation?.distanceKm ?? 0) > 0) ? ((station?.distanceKm ?? 0) - (firstRecommendation?.distanceKm ?? 0)).toFixed(1) : '0.0'} km
+                             </View>
+                             <View style={styles.detailCol}>
+                                <Text style={[styles.detailTitle, { color: textSecondary }]}>Est. kWh</Text>
+                                <Text style={[styles.detailValue, {color: textPrimary}]}>{estimatedKwh} kWh</Text>
+                             </View>
+                             <View style={styles.detailColRight}>
+                                 <Text style={[styles.detailTitle, { color: textSecondary }]}>Estimated Cost</Text>
+                                 <Text style={[styles.costValue, {color: textPrimary}]}>₹{estimatedCost}</Text>
+                             </View>
+                        </View>
+                    </GlassCard>
+
+                    {/* Spacer to push button to bottom */}
+                    <View style={{ flex: 1, minHeight: SPACING.md }} />
+
+                    {/* Confirm Button */}
+                    <Animated.View style={animStyle}>
+                        <TouchableOpacity
+                            style={[
+                                styles.confirmBtn,
+                                {
+                                    backgroundColor: (selectedSlot && (rank !== '2' || reason.trim().length > 0))
+                                        ? COLORS.brandBlue
+                                        : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)')
+                                }
+                            ]}
+                            onPress={handleConfirm}
+                            activeOpacity={0.85}
+                            disabled={submitting || !selectedSlot || (rank === '2' && !reason.trim())}
+                        >
+                            {submitting ? (
+                                <ActivityIndicator color="#000" />
+                            ) : (
+                                <Text style={[
+                                    styles.confirmText,
+                                    { color: (selectedSlot && (rank !== '2' || reason.trim().length > 0)) ? '#000' : textSecondary }
+                                ]}>
+                                    Confirm and Book
                                 </Text>
-                            </View>
-                            <View style={styles.lossItem}>
-                                <Text style={[styles.lossLabel, { color: textSecondary }]}>Longer Wait</Text>
-                                <Text style={[styles.lossValue, { color: COLORS.alertRed }]}>+15 min</Text>
-                            </View>
-                        </GlassCard>
-
-                        <Text style={[styles.sectionLabel, { color: textSecondary, marginTop: SPACING.lg }]}>Reason for Selection</Text>
-                        <TextInput
-                            style={[styles.reasonInput, { color: textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: borderColor }]}
-                            placeholder="Enter your reason here..."
-                            placeholderTextColor={textSecondary}
-                            multiline
-                            numberOfLines={4}
-                            value={reason}
-                            onChangeText={setReason}
-                        />
-                    </View>
-                )}
-
-                <GlassCard style={styles.stationCard as any} intensity={15}>
-                    <Text style={[styles.sectionLabel, { color: textSecondary, marginTop: 0 }]}>Booking Details</Text>
-                    <View style={styles.estimateRow}>
-                        <Text style={[styles.estimateLabel, { color: textSecondary }]}>Selected Slot</Text>
-                        <Text style={[styles.estimateValue, { color: COLORS.brandBlue }]}>
-                            {displaySlots.find(s => s.id === selectedSlot)?.time || 'Auto-selected'}
-                        </Text>
-                    </View>
-                    <View style={styles.estimateRow}>
-                        <Text style={[styles.estimateLabel, { color: textSecondary }]}>Est. kWh</Text>
-                        <Text style={[styles.estimateValue, { color: textPrimary }]}>{estimatedKwh} kWh</Text>
-                    </View>
-                    <View style={styles.estimateRow}>
-                        <Text style={[styles.estimateLabel, { color: textSecondary }]}>Estimated Cost</Text>
-                        <Text style={[styles.estimateTotal, { color: textPrimary, fontSize: 18 }]}>₹{estimatedCost}</Text>
-                    </View>
-                </GlassCard>
-
-                {/* Confirm Button */}
-                <Animated.View style={animStyle}>
-                    <TouchableOpacity
-                        style={[
-                            styles.confirmBtn,
-                            {
-                                backgroundColor: (selectedSlot && (rank !== '2' || reason.trim().length > 0))
-                                    ? COLORS.brandBlue
-                                    : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
-                            }
-                        ]}
-                        onPress={handleConfirm}
-                        activeOpacity={0.85}
-                        disabled={submitting || !selectedSlot || (rank === '2' && !reason.trim())}
-                    >
-                        {submitting ? (
-                            <ActivityIndicator color="#000" />
-                        ) : (
-                            <Text style={[
-                                styles.confirmText,
-                                { color: selectedSlot ? '#000' : COLORS.textMutedDark }
-                            ]}>
-                                {rank === '2' ? 'Confirm and Book' : 'Confirm Booking'}
-                            </Text>
-                        )}
-                    </TouchableOpacity>
-                </Animated.View>
+                            )}
+                        </TouchableOpacity>
+                    </Animated.View>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -317,73 +335,41 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.lg,
-        paddingVertical: SPACING.md,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: 12,
     },
     backBtn: { padding: 4, width: 40 },
-    title: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, flex: 1, textAlign: 'center' },
-    content: { paddingHorizontal: SPACING.lg, paddingBottom: 120 },
-    stationCard: {
-        padding: SPACING.lg,
-        borderRadius: BORDER_RADIUS.xl,
-        marginBottom: SPACING.xl,
-    },
-    stationName: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, marginBottom: 4 },
-    cpoName: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: SPACING.md },
-    stationMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md },
-    metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    metaText: { ...TYPOGRAPHY.label },
-    sectionLabel: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: SPACING.md, marginTop: SPACING.sm },
-    slotScroll: { paddingBottom: SPACING.xl, gap: SPACING.sm },
-    slotCard: {
-        width: 90,
-        paddingVertical: SPACING.md,
-        paddingHorizontal: SPACING.sm,
-        borderRadius: BORDER_RADIUS.md,
-        borderWidth: 1,
-        alignItems: 'center',
-    },
-    slotUnavailable: {
-        opacity: 0.4,
-        borderColor: 'rgba(255,255,255,0.08)',
-        backgroundColor: 'transparent',
-    },
-    slotTime: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 14 },
-    slotPrice: { ...TYPOGRAPHY.label, marginTop: 4 },
-    estimateCard: {
-        padding: SPACING.lg,
-        borderRadius: BORDER_RADIUS.lg,
-        marginBottom: SPACING.lg,
-    },
-    estimateRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: SPACING.sm,
-    },
-    estimateDivider: {
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.1)',
-        marginTop: SPACING.sm,
-        paddingTop: SPACING.md,
-    },
-    estimateLabel: { ...TYPOGRAPHY.body },
-    estimateValue: { ...TYPOGRAPHY.body, fontWeight: '600' },
-    estimateTotal: { ...TYPOGRAPHY.hero, fontSize: 22, fontWeight: '700' },
-    creditsEarned: { ...TYPOGRAPHY.body, fontWeight: '700', color: COLORS.successGreen },
-    confirmBtn: {
-        height: 56, marginTop: SPACING.md, marginBottom: SPACING.xl,
-        borderRadius: BORDER_RADIUS.xl,
-        justifyContent: 'center', alignItems: 'center',
-    },
+    title: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, flex: 1, textAlign: 'center' },
+    
+    contentContainer: { flexGrow: 1 },
+    content: { flex: 1, paddingHorizontal: SPACING.md, paddingBottom: 110 },
+    
+    stationCard: { padding: SPACING.md, borderRadius: BORDER_RADIUS.lg, marginBottom: SPACING.sm },
+    stationName: { ...TYPOGRAPHY.sectionHeader, fontSize: 16, marginBottom: 4 },
+    cpoName: { ...TYPOGRAPHY.label, color: COLORS.brandBlue, fontWeight: '700' },
+    metaText: { ...TYPOGRAPHY.body, fontSize: 12, marginBottom: 2 },
+    metaHighlight: { ...TYPOGRAPHY.body, fontSize: 12, color: COLORS.successGreen, fontWeight: '700', marginTop: 2 },
+    
+    sectionTitle: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: 6, marginTop: SPACING.xs },
+    
+    lossBlocksContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.sm, marginHorizontal: -4 },
+    lossBlock: { flex: 1, borderRadius: BORDER_RADIUS.md, padding: 8, alignItems: 'center', marginHorizontal: 4, paddingVertical: 10 },
+    lossLabel: { ...TYPOGRAPHY.label, fontSize: 10, marginTop: 6, textAlign: 'center' },
+    lossValue: { ...TYPOGRAPHY.label, fontSize: 13, fontWeight: '800', color: COLORS.alertRed, marginTop: 2 },
+    
+    reasonInput: { height: 80, borderRadius: BORDER_RADIUS.md, borderWidth: 1, padding: SPACING.md, textAlignVertical: 'top', ...TYPOGRAPHY.body, marginBottom: SPACING.xs },
+    
+    detailsCard: { padding: SPACING.md, borderRadius: BORDER_RADIUS.lg, marginBottom: SPACING.xs },
+    detailsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    detailCol: { flex: 1 },
+    detailColRight: { flex: 1.2, alignItems: 'flex-end' },
+    detailTitle: { ...TYPOGRAPHY.label, marginBottom: 2 },
+    detailValueBlue: { ...TYPOGRAPHY.body, color: COLORS.brandBlue, fontWeight: '800', fontSize: 15 },
+    detailValue: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 15 },
+    costValue: { ...TYPOGRAPHY.hero, fontSize: 20, fontWeight: '800' },
+    
+    confirmBtn: { height: 50, borderRadius: BORDER_RADIUS.xl, justifyContent: 'center', alignItems: 'center', width: '100%' },
     confirmText: { ...TYPOGRAPHY.body, fontSize: 16, fontWeight: '700' },
-    confirmedTitle: { ...TYPOGRAPHY.hero, fontSize: 28, marginTop: SPACING.xl, textAlign: 'center' },
+    confirmedTitle: { ...TYPOGRAPHY.hero, fontSize: 24, marginTop: SPACING.xl, textAlign: 'center' },
     confirmedSub: { ...TYPOGRAPHY.body, marginTop: SPACING.sm, textAlign: 'center' },
-    reasonTitle: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, marginBottom: SPACING.lg, lineHeight: 28 },
-    lossCard: { padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg, backgroundColor: 'rgba(255,68,68,0.05)', borderWidth: 1, borderColor: 'rgba(255,68,68,0.2)' },
-    lossHeader: { ...TYPOGRAPHY.label, fontWeight: '800', marginBottom: SPACING.md, letterSpacing: 0.5 },
-    lossItem: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.sm },
-    lossLabel: { ...TYPOGRAPHY.body, fontSize: 14 },
-    lossValue: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 14 },
-    reasonInput: { height: 120, borderRadius: BORDER_RADIUS.md, borderWidth: 1, padding: SPACING.md, textAlignVertical: 'top', ...TYPOGRAPHY.body, fontSize: 14 },
 });

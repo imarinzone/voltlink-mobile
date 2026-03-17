@@ -29,13 +29,14 @@ export interface MyVehicle {
 const DEFAULT_USER_ID = process.env.EXPO_PUBLIC_DEFAULT_USER_ID ?? '11';
 
 interface VehicleState {
-    myVehicle: MyVehicle;
+    myVehicle: MyVehicle | null;
     currentVehicleId: string | null;
     familyVehicles: FamilyVehicle[];
     addFamilyVehicle: (vehicle: Omit<FamilyVehicle, 'id'>) => void;
     removeFamilyVehicle: (id: string) => void;
     updateMyVehicleBattery: (level: number) => void;
     setCurrentVehicleId: (id: string | null) => void;
+    setMyVehicle: (vehicle: MyVehicle | null) => void;
     setMyVehicleFromUserData: (v: any) => void;
     fetchMyVehicle: (vehicleId?: string | null) => Promise<void>;
     fetchFamilyVehicles: (userId?: string) => Promise<void>;
@@ -58,7 +59,7 @@ const EMPTY_VEHICLE: MyVehicle = {
 export const useVehicleStore = create<VehicleState>()(
     persist(
         (set, get) => ({
-            myVehicle: EMPTY_VEHICLE,
+            myVehicle: null, // Changed initial state to null
             currentVehicleId: null,
             familyVehicles: [],
             addFamilyVehicle: (v) => set((state) => ({
@@ -68,9 +69,10 @@ export const useVehicleStore = create<VehicleState>()(
                 familyVehicles: state.familyVehicles.filter((v) => v.id !== id)
             })),
             updateMyVehicleBattery: (level) => set((state) => ({
-                myVehicle: { ...state.myVehicle, batteryLevel: level }
+                myVehicle: state.myVehicle ? { ...state.myVehicle, batteryLevel: level } : null
             })),
             setCurrentVehicleId: (id) => set({ currentVehicleId: id }),
+            setMyVehicle: (vehicle) => set({ myVehicle: vehicle }),
             setMyVehicleFromUserData: (v: any) => {
                 if (!v) { set({ myVehicle: EMPTY_VEHICLE }); return; }
                 const soc = v.current_soc ?? 0;

@@ -40,10 +40,19 @@ export default function SessionScreen() {
 
     const [sessionId, setSessionId] = useState<string | undefined>(initialSessionId);
     const { myVehicle } = useVehicleStore();
+    const paramsString = JSON.stringify({ initialSessionId, bookingId, paramConnectorId, paramVehicleId, paramBatteryLevel });
 
     const parsedBattery = paramBatteryLevel != null ? Number(paramBatteryLevel) : NaN;
-    const initialBattery = Number.isFinite(parsedBattery) ? Math.min(100, Math.max(0, parsedBattery)) : (myVehicle?.batteryLevel ?? 20);
-    const [chargePercent, setChargePercent] = useState(initialBattery);
+    // VERY IMPORTANT: Initialize dynamically. myVehicle is available here
+    const [chargePercent, setChargePercent] = useState(() => {
+        if (Number.isFinite(parsedBattery)) return Math.min(100, Math.max(0, parsedBattery));
+        if (myVehicle?.batteryLevel != null) return myVehicle.batteryLevel;
+        return 72; // match B2C logic explicitly
+    });
+    
+    // Store the initial reading so ETA calculations remain relative
+    const [initialBattery, setInitialBattery] = useState(chargePercent);
+
     const [isCharging, setIsCharging] = useState(false);
     const [sessionEnded, setSessionEnded] = useState(false);
     const [stationRating, setStationRating] = useState(0);
@@ -54,18 +63,33 @@ export default function SessionScreen() {
     const [sessionData, setSessionData] = useState<any>(null);
     const [sessionLoading, setSessionLoading] = useState(true);
 
-    const [batteryInitialized, setBatteryInitialized] = useState(paramBatteryLevel != null || myVehicle?.batteryLevel != null);
     const progress = useSharedValue(chargePercent / 100);
     const sliderPos = useSharedValue(0);
     const SLIDER_WIDTH = 320;
     const SLIDER_BTN_SIZE = 56;
     const pulseOpacity = useSharedValue(1);
 
+    // Completely clear feedback screen state whenever the route parameters fundamentally change
+    // This solves the persistent feedback screen bug. We do not do this across re-renders for the *same* session.
     useEffect(() => {
-        if (!batteryInitialized && myVehicle?.batteryLevel != null) {
+        setSessionId(initialSessionId); // Keep ID in sync with the param
+        setSessionEnded(false);
+        setRatingSubmitted(false);
+        setIsCharging(false);
+        setElapsed(0);
+        setStationRating(0);
+        setAppRating(0);
+        setSessionData(null);
+        sliderPos.value = 0;
+    }, [paramsString]);
+
+    // Track vehicle battery updates and sync to local state IF we were waiting for it and are not currently overriding
+    // it by having an active (charging) session tracking real percentage.
+    useEffect(() => {
+        if (myVehicle?.batteryLevel != null && !isCharging && (chargePercent === 72 || chargePercent === 20)) {
             setChargePercent(myVehicle.batteryLevel);
+            setInitialBattery(myVehicle.batteryLevel);
             progress.value = myVehicle.batteryLevel / 100;
-            setBatteryInitialized(true);
         }
     }, [myVehicle?.batteryLevel]);
 
@@ -171,12 +195,13 @@ export default function SessionScreen() {
         }
     };
 
-    const animProps = useAnimatedProps(() => ({
-        strokeDashoffset: CIRCUMFERENCE * (1 - progress.value),
-        stroke: progress.value < 0.25 ? COLORS.alertRed
-            : progress.value < 0.55 ? COLORS.warningOrange
-                : COLORS.successGreen,
-    }));
+    const strokeColor = chargePercent <= 20 ? COLORS.alertRed : chargePercent <= 40 ? COLORS.warningOrange : COLORS.successGreen;
+
+    const animProps = useAnimatedProps(() => {
+        return {
+            strokeDashoffset: CIRCUMFERENCE * (1 - progress.value),
+        };
+    });
 
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
@@ -231,7 +256,16 @@ export default function SessionScreen() {
                 // Feedback simulation
             }
             setRatingSubmitted(true);
-            setTimeout(() => router.replace('/driver/dashboard'), 1500);
+            setTimeout(() => {
+                router.replace('/driver/dashboard');
+                // Defer wiping the state so the screen animates out cleanly
+                setTimeout(() => {
+                    setSessionEnded(false);
+                    setRatingSubmitted(false);
+                    setSessionId(undefined);
+                    setSessionData(null);
+                }, 500);
+            }, 1000);
         } catch (error) {
             console.error('Error submitting rating:', error);
             Alert.alert('Error', 'Failed to submit feedback. Taking you to dashboard.');
@@ -341,6 +375,7 @@ export default function SessionScreen() {
                                 cx={SIZE / 2}
                                 cy={SIZE / 2}
                                 r={RADIUS}
+                                stroke={strokeColor}
                                 strokeWidth={STROKE}
                                 fill="transparent"
                                 strokeDasharray={CIRCUMFERENCE}

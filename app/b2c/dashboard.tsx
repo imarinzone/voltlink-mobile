@@ -3,7 +3,7 @@ import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity, M
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
     Wallet, Leaf, Zap, ChevronRight, Plus, X, MapPin, Bot, User,
-    Car, BatteryCharging, Plug, IndianRupee, CalendarCheck, CheckCircle
+    Car, BatteryCharging, Plug, IndianRupee, CalendarCheck, CheckCircle, Clock
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
@@ -19,6 +19,7 @@ import { useThemeStore } from '../../store/themeStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { useRouter } from 'expo-router';
 import { useLanguageStore, Language } from '../../store/languageStore';
+import { formatSlotRange } from '../../utils/time';
 
 const DEFAULT_USER_ID = process.env.EXPO_PUBLIC_DEFAULT_USER_ID ?? '11';
 
@@ -146,7 +147,8 @@ const B2CDashboard = () => {
         setSimVisible(true);
 
         try {
-            const slotsData = await getStationSlots(station.id);
+            const actualStationId = (station as any).station_id || station.id;
+            const slotsData = await getStationSlots(actualStationId);
 
             let matchedConnector: any = null;
             let firstAvailableSlot: any = null;
@@ -163,23 +165,29 @@ const B2CDashboard = () => {
                 throw new Error('No available slots at this station right now.');
             }
 
-            let timeStr = firstAvailableSlot.time || "12:00";
-            let [hours, minutes] = timeStr.split(':');
-            hours = hours || "12";
-            minutes = minutes?.substring(0, 2) || "00";
-            if (timeStr.toLowerCase().includes('pm') && parseInt(hours) < 12) {
-                hours = (parseInt(hours) + 12).toString();
-            } else if (timeStr.toLowerCase().includes('am') && parseInt(hours) === 12) {
-                hours = "00";
+            let bookingTime = new Date();
+            if (station.slot) {
+                const [startTime] = station.slot.split('-');
+                const [hrs, mins] = startTime.split(':');
+                bookingTime.setHours(parseInt(hrs), parseInt(mins), 0, 0);
+            } else {
+                let timeStr = firstAvailableSlot.time || "12:00";
+                let [hours, minutes] = timeStr.split(':');
+                hours = hours || "12";
+                minutes = minutes?.substring(0, 2) || "00";
+                if (timeStr.toLowerCase().includes('pm') && parseInt(hours) < 12) {
+                    hours = (parseInt(hours) + 12).toString();
+                } else if (timeStr.toLowerCase().includes('am') && parseInt(hours) === 12) {
+                    hours = "00";
+                }
+                bookingTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
             }
-            const now = new Date();
-            now.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
             await createBooking({
                 connector_id: matchedConnector.connector_id,
                 vehicle_id: parseInt(currentVehicleId || '0', 10),
                 user_id: parseInt(DEFAULT_USER_ID, 10),
-                booking_time: now.toISOString(),
+                booking_time: bookingTime.toISOString(),
             });
 
             setSimLoading(false);
@@ -334,6 +342,14 @@ const B2CDashboard = () => {
                                                     </Text>
                                                 </View>
                                             </View>
+
+                                            {/* Slot Display */}
+                                            {station.slot && (
+                                                <View style={[styles.aiChip, { marginBottom: 6, backgroundColor: isDark ? 'rgba(0,212,255,0.08)' : 'rgba(0,212,255,0.05)', alignSelf: 'flex-start' }]}>
+                                                    <Clock size={10} color={COLORS.brandBlue} />
+                                                    <Text style={[styles.aiChipText, { color: COLORS.brandBlue, fontWeight: '700' }]}>{formatSlotRange(station.slot)}</Text>
+                                                </View>
+                                            )}
 
                                             {/* Price */}
                                             <Text style={styles.aiPrice}>

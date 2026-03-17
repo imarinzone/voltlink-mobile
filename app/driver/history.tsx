@@ -16,6 +16,7 @@ import { getUserSessions } from '../../services/b2c.service';
 import { cancelBooking, deleteBooking, getPendingBookings } from '../../services/booking.service';
 import { stopSession, getSessionsByVehicle } from '../../services/session.service';
 import { format } from 'date-fns';
+import { generate30MinSlot } from '../../utils/time';
 
 type SessionItem = {
     id: string;
@@ -296,7 +297,7 @@ export default function DriverHistory() {
                                 <MapPin size={12} color={textSecondary} />
                                 <Text style={[styles.sessionMetaText, { color: textSecondary }]}>{item.connectorType}</Text>
                                 <Clock size={12} color={textSecondary} />
-                                <Text style={[styles.sessionMetaText, { color: textSecondary }]}>{item.duration}</Text>
+                                <Text style={[styles.sessionMetaText, { color: textSecondary }]}>{item.source === 'booking' ? generate30MinSlot(item.bookingTime || '') : item.duration}</Text>
                             </View>
                         </View>
                         {(item.status === 'active' || item.status === 'pending') ? (

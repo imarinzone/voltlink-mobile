@@ -17,6 +17,7 @@ import { getStationSlots, SlotInfo, ConnectorSlots } from '../../services/sessio
 import { createBooking } from '../../services/booking.service';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { getStationById } from '../../services/stations.service';
+import { generate30MinSlot } from '../../utils/time';
 
 const DEFAULT_USER_ID = parseInt(process.env.EXPO_PUBLIC_DEFAULT_USER_ID ?? '5', 10);
 
@@ -334,7 +335,7 @@ export default function B2CBooking() {
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Station Hero */}
                 <GlassCard style={styles.stationCard as any} intensity={30}>
-                    <Text style={[styles.stationName, { color: textPrimary }]}>{station?.name || 'Charging Station'}</Text>
+                    <Text style={[styles.stationName, { color: textPrimary }]}>{station?.name || station?.station_name || 'Charging Station'}</Text>
                     <Text style={[styles.cpoName, { color: COLORS.brandBlue }]}>{station?.cpoName || 'VoltLink Partner'}</Text>
                     <View style={styles.stationMeta}>
                         <View style={styles.metaItem}>
@@ -382,7 +383,7 @@ export default function B2CBooking() {
                                     styles.slotTime,
                                     { color: isSelected ? '#000' : slot.available ? textPrimary : textSecondary }
                                 ]}>
-                                    {slot.time}
+                                    {generate30MinSlot(slot.time)}
                                 </Text>
                                 <Text style={[
                                     styles.slotPrice,
@@ -411,7 +412,7 @@ export default function B2CBooking() {
                         <Text style={[styles.estimateTotal, { color: textPrimary }]}>₹{estimatedCost}</Text>
                     </View>
                     <View style={styles.estimateRow}>
-                        <Text style={[styles.estimateLabel, { color: textSecondary }]}>VoltCredits earned</Text>
+                        <Text style={[styles.estimateLabel, { color: textSecondary }]}>Estimated Credits earned</Text>
                         <Text style={styles.creditsEarned}>+{creditsEarned} credits</Text>
                     </View>
                 </GlassCard>
@@ -462,13 +463,14 @@ const styles = StyleSheet.create({
     sectionLabel: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: SPACING.md, marginTop: SPACING.sm },
     slotScroll: { paddingBottom: SPACING.xl, gap: SPACING.sm },
     slotCard: {
-        width: 90, paddingVertical: SPACING.md, paddingHorizontal: SPACING.sm,
-        borderRadius: BORDER_RADIUS.md, borderWidth: 1, alignItems: 'center',
+        width: 140, paddingVertical: SPACING.md, paddingHorizontal: SPACING.md,
+        borderRadius: BORDER_RADIUS.lg, borderWidth: 1.5, alignItems: 'center',
+        justifyContent: 'center',
     },
     slotUnavailable: {
-        opacity: 0.4, borderColor: 'rgba(255,255,255,0.08)', backgroundColor: 'transparent',
+        opacity: 0.3, borderColor: 'rgba(255,255,255,0.05)', backgroundColor: 'transparent',
     },
-    slotTime: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 14 },
+    slotTime: { ...TYPOGRAPHY.body, fontWeight: '800', fontSize: 13, textAlign: 'center' },
     successBox: {
         flexDirection: 'row',
         alignItems: 'center',

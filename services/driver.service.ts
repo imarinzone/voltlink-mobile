@@ -28,6 +28,7 @@ export const getVehicleDashboard = async (vehicleId: string, forceRefresh?: bool
             licensePlate: d.license_plate || '',
             batteryLevel: soc,
             rangeKm,
+            efficiency: efficiency,
             status: d.status as any,
             lastChargedAt: d.last_location_update || d.updated_at || 'Unknown',
             driverName: '',   // driver name comes from getDriverProfile

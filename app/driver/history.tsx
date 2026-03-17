@@ -321,25 +321,27 @@ export default function DriverHistory() {
                         )}
                     </View>
 
-                    <View style={styles.sessionStats}>
-                        <View style={styles.sessionStat}>
-                            <Zap size={14} color={COLORS.brandBlue} />
-                            <Text style={[styles.sessionStatValue, { color: textPrimary }]}>{item.kwh} kWh</Text>
-                        </View>
-                        <View style={styles.sessionStat}>
-                            <Text style={[styles.sessionStatValue, { color: COLORS.successGreen }]}>₹{item.cost.toFixed(0)}</Text>
-                        </View>
-                        {item.currentSoc !== undefined && (
+                    {item.status !== 'active' && item.status !== 'pending' && (
+                        <View style={styles.sessionStats}>
                             <View style={styles.sessionStat}>
-                                <Text style={[styles.sessionStatValue, { color: COLORS.brandBlue }]}>🔋 {item.currentSoc}%</Text>
+                                <Zap size={14} color={COLORS.brandBlue} />
+                                <Text style={[styles.sessionStatValue, { color: textPrimary }]}>{item.kwh} kWh</Text>
                             </View>
-                        )}
-                        {item.carbonSaved > 0 && (
                             <View style={styles.sessionStat}>
-                                <Text style={[styles.sessionStatValue, { color: textSecondary }]}>🌱 {item.carbonSaved.toFixed(1)} kg</Text>
+                                <Text style={[styles.sessionStatValue, { color: COLORS.successGreen }]}>₹{item.cost.toFixed(0)}</Text>
                             </View>
-                        )}
-                    </View>
+                            {item.currentSoc !== undefined && (
+                                <View style={styles.sessionStat}>
+                                    <Text style={[styles.sessionStatValue, { color: COLORS.brandBlue }]}>🔋 {item.currentSoc}%</Text>
+                                </View>
+                            )}
+                            {item.carbonSaved > 0 && (
+                                <View style={styles.sessionStat}>
+                                    <Text style={[styles.sessionStatValue, { color: textSecondary }]}>🌱 {item.carbonSaved.toFixed(1)} kg</Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
 
                     {item.rating > 0 && (
                         <View style={styles.ratingRow}>

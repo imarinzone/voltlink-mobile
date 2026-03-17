@@ -9,7 +9,6 @@ export default function DriverLayout() {
             screenOptions={{ headerShown: false }}
         >
             <Tabs.Screen name="dashboard" options={{ title: 'Dashboard' }} />
-            <Tabs.Screen name="recommendations" options={{ title: 'AI Tips', href: null }} />
             <Tabs.Screen name="history" options={{ title: 'History' }} />
             <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
             {/* Non-tab screens — hidden from tab bar */}

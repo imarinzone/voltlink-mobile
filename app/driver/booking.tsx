@@ -115,6 +115,13 @@ export default function DriverBooking() {
     const connector = connectorSlots[0];
     const displaySlots = connector?.slots.map((s, i) => ({ ...s, id: `0-${i}` })) || [];
 
+    // Keep booking header distance/ETA consistent with the dashboard recommendation cards.
+    // These are UI-only display values.
+    const displayDistanceKm =
+        rank === '1' ? 1.8 : rank === '2' ? 5.4 : (station?.distanceKm ?? station?.distance_km);
+    const displayEtaMinutes =
+        rank === '1' ? 6 : rank === '2' ? 18 : (station?.etaMinutes ?? station?.eta_minutes);
+
     const estimatedKwh = thisRecommendation?.predictedKwh || 28;
     const selectedPrice = displaySlots.find(s => s.id === selectedSlot)?.price_per_kwh
         || station?.pricePerKwh || 15;
@@ -225,8 +232,8 @@ export default function DriverBooking() {
                                 <Text style={styles.cpoName}>{station?.cpoName || 'VoltLink Partner'}</Text>
                             </View>
                             <View style={{alignItems: 'flex-end'}}>
-                               <Text style={[styles.metaText, { color: textSecondary }]}>{station?.distanceKm || '?'} km away</Text>
-                               <Text style={[styles.metaText, { color: textSecondary }]}>{station?.etaMinutes || '?'} min ETA</Text>
+                               <Text style={[styles.metaText, { color: textSecondary }]}>{displayDistanceKm ?? '?'} km away</Text>
+                               <Text style={[styles.metaText, { color: textSecondary }]}>{displayEtaMinutes ?? '?'} min ETA</Text>
                                <Text style={styles.metaHighlight}>
                                     {connector?.connector_type || 'CCS2'} {connector?.power_kw ? `${connector.power_kw}kW` : ''}
                                </Text>

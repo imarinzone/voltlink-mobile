@@ -41,9 +41,9 @@ type SessionItem = {
 type FilterKey = 'all' | 'completed' | 'active';
 
 const FILTERS: { key: FilterKey; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'completed', label: 'Completed' },
     { key: 'active', label: 'Active' },
+    { key: 'completed', label: 'Completed' },
+    { key: 'all', label: 'All' },
 ];
 
 const DEFAULT_DRIVER_ID = process.env.EXPO_PUBLIC_DEFAULT_DRIVER_ID ?? '4';

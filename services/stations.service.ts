@@ -16,26 +16,39 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 const USER_LAT = parseFloat(process.env.EXPO_PUBLIC_DEFAULT_LAT ?? '12.9716');
 const USER_LNG = parseFloat(process.env.EXPO_PUBLIC_DEFAULT_LNG ?? '77.5946');
 
+const BANGALORE_BOUNDS = {
+    latMin: 12.75, latMax: 13.15,
+    lngMin: 77.35, lngMax: 77.85,
+};
+
+const isInBangalore = (lat?: number, lng?: number): boolean => {
+    if (lat == null || lng == null) return false;
+    return lat >= BANGALORE_BOUNDS.latMin && lat <= BANGALORE_BOUNDS.latMax &&
+           lng >= BANGALORE_BOUNDS.lngMin && lng <= BANGALORE_BOUNDS.lngMax;
+};
+
 export const getStations = async (params?: any, forceRefresh?: boolean): Promise<Station[]> =>
     fetchWithCache('/charging-stations', { params, forceRefresh }).then(data => {
         const stations = data.data || [];
-        return stations.map((s: any) => {
-            const dist = s.latitude && s.longitude
-                ? calculateDistance(USER_LAT, USER_LNG, s.latitude, s.longitude)
-                : 5.2;
-            return {
-                ...s,
-                id: s.id.toString(),
-                cpoName: s.operator_id || 'VoltLink Partner',
-                chargerTypes: s.charging_types || [],
-                availableChargers: s.available_chargers || 0,
-                totalChargers: s.total_chargers || 0,
-                distanceKm: dist,
-                etaMinutes: Math.round(dist * 2.5),
-                pricePerKwh: s.price_per_kwh || 0,
-                coordinates: { latitude: s.latitude, longitude: s.longitude },
-            };
-        });
+        return stations
+            .filter((s: any) => isInBangalore(s.latitude, s.longitude))
+            .map((s: any) => {
+                const dist = s.latitude && s.longitude
+                    ? calculateDistance(USER_LAT, USER_LNG, s.latitude, s.longitude)
+                    : 5.2;
+                return {
+                    ...s,
+                    id: s.id.toString(),
+                    cpoName: s.operator_id || 'VoltLink Partner',
+                    chargerTypes: s.charging_types || [],
+                    availableChargers: s.available_chargers || 0,
+                    totalChargers: s.total_chargers || 0,
+                    distanceKm: dist,
+                    etaMinutes: Math.round(dist * 2.5),
+                    pricePerKwh: s.price_per_kwh || 0,
+                    coordinates: { latitude: s.latitude, longitude: s.longitude },
+                };
+            });
     });
 
 export const getStationById = async (id: string, forceRefresh?: boolean): Promise<Station> =>

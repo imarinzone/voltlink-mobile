@@ -19,7 +19,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({ label, value, unit, icon
         <GlassCard style={styles.card}>
             <View style={styles.header}>
                 {icon}
-                <Text style={[styles.label, { color: isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight }]}>
+                <Text style={[styles.label, { color: isDark ? COLORS.textMutedDark : COLORS.textSecondaryLight }]}>
                     {label}
                 </Text>
             </View>
@@ -51,7 +51,10 @@ const styles = StyleSheet.create({
     },
     label: {
         ...TYPOGRAPHY.label,
-        marginLeft: 4,
+        marginLeft: 6,
+        fontSize: 11,
+        fontWeight: '500',
+        letterSpacing: 0.3,
     },
     valueContainer: {
         flexDirection: 'row',
@@ -64,6 +67,7 @@ const styles = StyleSheet.create({
     },
     unit: {
         ...TYPOGRAPHY.label,
-        marginLeft: 2,
+        marginLeft: 3,
+        fontSize: 11,
     },
 });

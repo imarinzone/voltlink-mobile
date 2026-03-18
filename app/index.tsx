@@ -105,12 +105,12 @@ function RoleCard({ selected, onPress, icon, title, subtitle, isDark, textPrimar
     const borderColor = selected
         ? COLORS.primaryGreen
         : isDark
-            ? 'rgba(255,255,255,0.10)'
+            ? COLORS.cardBorder
             : 'rgba(0,0,0,0.08)';
 
     const bgColor = selected
         ? isDark ? 'rgba(4, 234, 170, 0.12)' : 'rgba(4, 234, 170, 0.08)'
-        : isDark ? 'rgba(255,255,255,0.04)' : 'transparent';
+        : isDark ? COLORS.inputBg : 'transparent';
 
     return (
         <TouchableOpacity
@@ -129,7 +129,7 @@ function RoleCard({ selected, onPress, icon, title, subtitle, isDark, textPrimar
                 <View style={[styles.iconCircle, {
                     backgroundColor: selected
                         ? 'rgba(4, 234, 170, 0.12)'
-                        : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                        : isDark ? COLORS.inputBg : 'rgba(0,0,0,0.04)',
                 }]}>
                     {icon}
                 </View>

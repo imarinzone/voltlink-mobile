@@ -7,7 +7,7 @@ import Animated, {
     withTiming,
     interpolateColor
 } from 'react-native-reanimated';
-import { COLORS, TYPOGRAPHY } from '../../utils/theme';
+import { COLORS, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { Vehicle } from '../../types/vehicle.types';
 import { useThemeStore } from '../../store/themeStore';
@@ -45,17 +45,15 @@ export const BatteryIndicator: React.FC<BatteryIndicatorProps> = ({
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const trackColor = isDark ? COLORS.darkTertiary : '#e0e0e0';
+    const trackColor = isDark ? COLORS.cardBorder : '#e0e0e0';
 
     return (
         <View style={[styles.container, { width: size, height: size }]}>
             <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                {/* Background Circle */}
                 <Circle
                     cx={center} cy={center} r={radius}
                     stroke={trackColor} strokeWidth={strokeWidth} fill="transparent"
                 />
-                {/* Progress Circle */}
                 <AnimatedPath
                     d={`M ${center} ${center - radius} A ${radius} ${radius} 0 1 1 ${center} ${center + radius} A ${radius} ${radius} 0 1 1 ${center} ${center - radius}`}
                     stroke={targetColor} strokeWidth={strokeWidth} fill="transparent"
@@ -89,7 +87,7 @@ export const VehicleCard: React.FC<{ vehicle: Vehicle; onPress?: () => void }> =
                     <Text style={[styles.vehicleDetail, { color: textSecondary }]}>
                         {vehicle.licensePlate || 'License Plate N/A'}
                     </Text>
-                    <Text style={[styles.vehicleDetail, { color: COLORS.brandBlue }]}>
+                    <Text style={[styles.vehicleDetail, { color: COLORS.primaryGreen }]}>
                         Range: {vehicle.rangeKm} km remaining
                     </Text>
                 </View>
@@ -101,16 +99,16 @@ export const VehicleCard: React.FC<{ vehicle: Vehicle; onPress?: () => void }> =
 const styles = StyleSheet.create({
     container: { alignItems: 'center', justifyContent: 'center' },
     textContainer: { position: 'absolute', alignItems: 'center' },
-    percentage: { ...TYPOGRAPHY.hero, fontSize: 32 },
-    label: { ...TYPOGRAPHY.label, marginTop: -4 },
+    percentage: { ...TYPOGRAPHY.hero, fontSize: 28, fontWeight: '800' },
+    label: { ...TYPOGRAPHY.label, marginTop: -4, fontSize: 11 },
     card: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 24,
-        borderRadius: 32,
-        marginBottom: 20,
+        padding: 20,
+        borderRadius: BORDER_RADIUS.xl,
+        marginBottom: 16,
     },
-    cardInfo: { marginLeft: 24, flex: 1 },
-    vehicleName: { ...TYPOGRAPHY.hero, fontSize: 24 },
-    vehicleDetail: { ...TYPOGRAPHY.label, marginTop: 4 },
+    cardInfo: { marginLeft: 20, flex: 1 },
+    vehicleName: { ...TYPOGRAPHY.hero, fontSize: 22, fontWeight: '700' },
+    vehicleDetail: { ...TYPOGRAPHY.label, marginTop: 4, fontSize: 13 },
 });

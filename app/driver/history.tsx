@@ -83,7 +83,7 @@ export default function DriverHistory() {
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.08)';
 
     const mapSessions = (data: any[], source: 'session' | 'booking' = 'session'): SessionItem[] =>
         (data || []).map((s: any) => {
@@ -422,7 +422,7 @@ export default function DriverHistory() {
                         style={[
                             styles.filterChip,
                             filter === f.key && { backgroundColor: COLORS.brandBlue },
-                            filter !== f.key && { backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' },
+                            filter !== f.key && { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' },
                         ]}
                         onPress={() => setFilter(f.key)}
                     >
@@ -460,7 +460,7 @@ export default function DriverHistory() {
                 onRequestClose={() => setCancelTarget(null)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: isDark ? '#1a1a2e' : '#fff' }]}>
+                    <View style={[styles.modalContent, { backgroundColor: isDark ? COLORS.cardBg : '#fff' }]}>
                         <View style={[styles.modalIcon, { backgroundColor: COLORS.alertRed + '15' }]}>
                             <XCircle size={32} color={COLORS.alertRed} />
                         </View>
@@ -478,7 +478,7 @@ export default function DriverHistory() {
                                 style={{
                                     width: '100%',
                                     height: 80,
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                                    backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.03)',
                                     borderRadius: BORDER_RADIUS.md,
                                     padding: SPACING.md,
                                     color: textPrimary,

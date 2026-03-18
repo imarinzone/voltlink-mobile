@@ -230,10 +230,10 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         justifyContent: 'center', alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
-        backgroundColor: 'rgba(255,255,255,0.05)'
+        borderColor: COLORS.cardBorder,
+        backgroundColor: COLORS.inputBg
     },
-    langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: 4 },
+    langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
     langText: { fontSize: 10, fontWeight: '800' },
 });

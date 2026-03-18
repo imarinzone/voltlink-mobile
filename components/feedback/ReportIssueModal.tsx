@@ -28,8 +28,8 @@ export default function ReportIssueModal({ visible, onClose, onSubmit, stationNa
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const inputBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+    const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.03)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.08)';
 
     const handleSubmit = () => {
         if (!selectedType || !description) return;

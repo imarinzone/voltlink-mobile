@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
@@ -31,8 +31,8 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 style={[
                     styles.tabBar,
                     {
-                        backgroundColor: isDark ? 'rgba(26, 26, 26, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                        borderTopColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                        backgroundColor: isDark ? COLORS.surfaceBg + 'BF' : 'rgba(255, 255, 255, 0.85)',
+                        borderTopColor: isDark ? COLORS.cardBorder : 'rgba(0, 0, 0, 0.1)',
                         paddingBottom: insets.bottom,
                         height: 65 + insets.bottom,
                     }
@@ -40,8 +40,6 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             >
                 {state.routes.map((route, index) => {
                     const { options } = descriptors[route.key];
-                    // Skip non-tab screens — booking/session are navigated to programmatically
-                    // Skip profile screen — moved to top search bar
                     if (['booking', 'session', 'recommendations', 'profile'].includes(route.name)) return null;
                     const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
                     const isFocused = state.index === index;
@@ -64,17 +62,20 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                         <TouchableOpacity
                             key={index}
                             onPress={onPress}
-                            style={styles.tabItem}
+                            style={[
+                                styles.tabItem,
+                                isFocused && styles.tabItemActive,
+                            ]}
                             activeOpacity={0.7}
                         >
                             <Icon
-                                size={24}
-                                color={isFocused ? COLORS.brandBlue : (isDark ? COLORS.textMutedDark : COLORS.textSecondaryLight)}
+                                size={22}
+                                color={isFocused ? COLORS.primaryGreen : (isDark ? COLORS.textMutedDark : COLORS.textSecondaryLight)}
                             />
                             {isFocused && (
                                 <Text style={[
                                     styles.label,
-                                    { color: COLORS.brandBlue }
+                                    { color: COLORS.primaryGreen }
                                 ]}>
                                     {label as string}
                                 </Text>
@@ -108,12 +109,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 20,
+        paddingHorizontal: 14,
+        borderRadius: BORDER_RADIUS.md,
+    },
+    tabItemActive: {
+        backgroundColor: 'rgba(4,234,170,0.12)',
     },
     label: {
         marginLeft: 8,
         fontSize: 12,
-        fontWeight: '600',
+        fontWeight: '700',
+        letterSpacing: 0.3,
     },
 });

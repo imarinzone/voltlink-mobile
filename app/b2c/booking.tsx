@@ -338,7 +338,7 @@ export default function B2CBooking() {
                                         {!isLast && (
                                             <View style={[
                                                 styles.timelineSegment,
-                                                { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }
+                                                { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' }
                                             ]} />
                                         )}
                                         {!isLast && isCompleted && (
@@ -446,8 +446,8 @@ export default function B2CBooking() {
                                     !slot.available && styles.slotUnavailable,
                                     isSelected && { backgroundColor: COLORS.brandBlue, borderColor: COLORS.brandBlue },
                                     !isSelected && slot.available && {
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
-                                        borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
+                                        backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)',
+                                        borderColor: isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.1)',
                                     }
                                 ]}
                                 activeOpacity={slot.available ? 0.7 : 1}
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     slotUnavailable: {
-        opacity: 0.3, borderColor: 'rgba(255,255,255,0.05)', backgroundColor: 'transparent',
+        opacity: 0.3, borderColor: COLORS.cardBorder, backgroundColor: 'transparent',
     },
     slotTime: { ...TYPOGRAPHY.body, fontWeight: '800', fontSize: 13, textAlign: 'center' },
     successBox: {
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
         alignItems: 'center', paddingVertical: SPACING.sm,
     },
     estimateDivider: {
-        borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)',
+        borderTopWidth: 1, borderTopColor: COLORS.cardBorder,
         marginTop: SPACING.sm, paddingTop: SPACING.md,
     },
     estimateLabel: { ...TYPOGRAPHY.body },

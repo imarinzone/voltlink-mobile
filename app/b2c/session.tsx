@@ -359,7 +359,7 @@ export default function B2CSession() {
                             </View>
 
                             <TouchableOpacity
-                                style={[styles.submitBtn, { backgroundColor: (stationRating > 0 && appRating > 0) ? COLORS.brandBlue : 'rgba(255,255,255,0.1)' }]}
+                                style={[styles.submitBtn, { backgroundColor: (stationRating > 0 && appRating > 0) ? COLORS.brandBlue : COLORS.cardBorder }]}
                                 onPress={handleRatingSubmit}
                             >
                                 <Text style={{ color: (stationRating > 0 && appRating > 0) ? '#000' : COLORS.textMutedDark, fontWeight: '700' }}>
@@ -452,7 +452,7 @@ export default function B2CSession() {
                                 <Animated.View style={[styles.sliderFill, sliderTrackStyle]} />
                                 <View style={styles.sliderLabelContainer}>
                                     <Text style={styles.sliderText} numberOfLines={1}>Swipe to start charging</Text>
-                                    <ChevronsRight size={24} color="rgba(255,255,255,0.4)" />
+                                    <ChevronsRight size={24} color={COLORS.textMutedDark} />
                                 </View>
                                 <PanGestureHandler
                                     activeOffsetX={[-10, 10]}
@@ -566,12 +566,12 @@ const styles = StyleSheet.create({
     ratingRowCategory: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
     categoryLabel: { ...TYPOGRAPHY.label, fontWeight: '600', fontSize: 13 },
     thumbsRow: { flexDirection: 'row', gap: SPACING.lg },
-    thumbBtn: { width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)' },
+    thumbBtn: { width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: COLORS.cardBorder, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.inputBg },
     submitBtn: { width: '100%', height: 50, borderRadius: BORDER_RADIUS.xl, justifyContent: 'center', alignItems: 'center' },
 
     sliderWrapper: { width: '100%', marginTop: SPACING.sm, marginBottom: SPACING.lg, alignItems: 'center' },
     sliderContainer: { width: 320, height: 72, borderRadius: 36, justifyContent: 'center', padding: 8, overflow: 'hidden' },
-    sliderFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.15)' },
+    sliderFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: COLORS.hoverBg },
     sliderLabelContainer: { position: 'absolute', width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 70 },
     sliderBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', zIndex: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
     sliderBtnInner: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' },

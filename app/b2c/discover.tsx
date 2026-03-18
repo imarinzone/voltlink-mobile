@@ -97,11 +97,11 @@ export default function DiscoverScreen() {
         fetchData(true);
     };
 
-    const surfaceBg = isDark ? '#1C1C1E' : '#FFFFFF';
+    const surfaceBg = isDark ? COLORS.surfaceBg : '#FFFFFF';
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
-    const inputBg = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.07)';
+    const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.06)';
 
     const filtered = stations.filter(s => {
         const q = query.toLowerCase();
@@ -176,7 +176,7 @@ export default function DiscoverScreen() {
                     </View>
 
                     {item.aiReason && (
-                        <View style={[styles.aiBadge, { backgroundColor: 'rgba(0,212,255,0.08)' }]}>
+                        <View style={[styles.aiBadge, { backgroundColor: COLORS.brandBlue + '14' }]}>
                             <Text style={styles.aiText}>🤖 {item.aiReason}</Text>
                         </View>
                     )}
@@ -238,7 +238,7 @@ export default function DiscoverScreen() {
                         autoFocus={false}
                     />
                     <TouchableOpacity
-                        style={[styles.iconBtn, { backgroundColor: showFilters ? COLORS.brandBlue + '20' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'), marginRight: SPACING.xs, borderColor: showFilters ? COLORS.brandBlue : 'transparent', borderWidth: showFilters ? 1 : 0 }]}
+                        style={[styles.iconBtn, { backgroundColor: showFilters ? COLORS.brandBlue + '20' : (isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)'), marginRight: SPACING.xs, borderColor: showFilters ? COLORS.brandBlue : 'transparent', borderWidth: showFilters ? 1 : 0 }]}
                         onPress={() => {
                             setShowFilters(!showFilters);
                             if (!showFilters) sheetRef.current?.snapToIndex(2); // Expand when opening filters

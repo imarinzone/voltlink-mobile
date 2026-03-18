@@ -24,8 +24,8 @@ export default function RatingModal({ visible, onClose, onSubmit, stationName }:
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const inputBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+    const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.03)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.08)';
 
     const handleSubmit = () => {
         if (stationRating === 0 || appRating === 0) return;
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     },
     closeBtn: {
         padding: 4,
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: COLORS.inputBg,
         borderRadius: 12,
     },
     title: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, fontWeight: '800' },
@@ -163,10 +163,10 @@ const styles = StyleSheet.create({
         height: 54,
         borderRadius: 27,
         borderWidth: 1.5,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: COLORS.cardBorder,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.03)',
+        backgroundColor: COLORS.inputBg,
     },
     divider: {
         height: 1,

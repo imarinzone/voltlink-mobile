@@ -28,12 +28,10 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
     const { theme } = useThemeStore();
     const isDark = theme === 'dark';
 
-    // Extract unique CPOs
     const allCpos = Array.from(new Set(stations.map(s => s.cpoName).filter(Boolean)));
 
     const [filters, setFilters] = useState<FilterState>(currentFilters);
 
-    // Initial default connectors based on vehicle
     useEffect(() => {
         if (currentFilters.connectors.length === 0 && myVehicle?.model) {
             let defaultConnectors = ['CCS2'];
@@ -53,8 +51,8 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-    const inputBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.1)';
+    const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)';
 
     const renderChip = (label: string, isSelected: boolean, onPress: () => void) => (
         <TouchableOpacity
@@ -62,10 +60,10 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
             style={[
                 styles.chip,
                 { backgroundColor: inputBg, borderColor },
-                isSelected && { backgroundColor: COLORS.brandBlue + '20', borderColor: COLORS.brandBlue }
+                isSelected && { backgroundColor: 'rgba(4,234,170,0.15)', borderColor: COLORS.primaryGreen }
             ]}
         >
-            <Text style={[styles.chipText, { color: isSelected ? COLORS.brandBlue : textPrimary }]}>
+            <Text style={[styles.chipText, { color: isSelected ? COLORS.primaryGreen : textPrimary }]}>
                 {label}
             </Text>
         </TouchableOpacity>
@@ -75,7 +73,7 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
         <View style={styles.container}>
             <View style={[styles.header, { borderBottomColor: borderColor }]}>
                 <Text style={[styles.title, { color: textPrimary }]}>Filters</Text>
-                <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: isDark ? COLORS.hoverBg : 'rgba(0,0,0,0.05)' }]}>
                     <X color={textSecondary} size={20} />
                 </TouchableOpacity>
             </View>
@@ -88,21 +86,19 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
                     <Text style={[styles.smallBtnText, { color: textSecondary }]}>Clear All</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[styles.smallBtn, { backgroundColor: COLORS.brandBlue }]}
+                    style={[styles.smallBtn, { backgroundColor: COLORS.primaryGreen }]}
                     onPress={() => onApply(filters)}
                 >
-                    <Text style={[styles.smallBtnText, { color: '#FFF' }]}>Apply Filters</Text>
+                    <Text style={[styles.smallBtnText, { color: COLORS.darkBg }]}>Apply Filters</Text>
                 </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-                {/* Status */}
                 <Text style={[styles.sectionTitle, { color: textSecondary }]}>Status</Text>
                 <View style={styles.chipGroup}>
                     {renderChip('Available Now', filters.availableOnly, () => setFilters(f => ({ ...f, availableOnly: !f.availableOnly })))}
                 </View>
 
-                {/* Power Rating */}
                 <Text style={[styles.sectionTitle, { color: textSecondary, marginTop: SPACING.lg }]}>Power Rating</Text>
                 <View style={styles.chipGroup}>
                     {POWER_RATINGS.map(rating =>
@@ -112,7 +108,6 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
                     )}
                 </View>
 
-                {/* Connector Types */}
                 <Text style={[styles.sectionTitle, { color: textSecondary, marginTop: SPACING.lg }]}>Connector Types</Text>
                 <View style={styles.chipGroup}>
                     {CONNECTOR_TYPES.map(type =>
@@ -122,7 +117,6 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
                     )}
                 </View>
 
-                {/* Brands / CPOs */}
                 {allCpos.length > 0 && (
                     <>
                         <Text style={[styles.sectionTitle, { color: textSecondary, marginTop: SPACING.lg }]}>Brand / CPO</Text>
@@ -156,8 +150,7 @@ const styles = StyleSheet.create({
         right: SPACING.lg,
         top: SPACING.md,
         padding: 4,
-        backgroundColor: 'rgba(0,0,0,0.05)',
-        borderRadius: 14,
+        borderRadius: BORDER_RADIUS.md,
     },
     actionRowTop: {
         flexDirection: 'row',
@@ -168,8 +161,8 @@ const styles = StyleSheet.create({
     },
     smallBtn: {
         flex: 1,
-        height: 40,
-        borderRadius: 20,
+        height: 42,
+        borderRadius: BORDER_RADIUS.md,
         justifyContent: 'center',
         alignItems: 'center',
     },

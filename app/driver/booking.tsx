@@ -47,7 +47,7 @@ export default function DriverBooking() {
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.08)';
 
     const resetBookingState = useCallback(() => {
         setConfirmed(false);
@@ -328,7 +328,7 @@ export default function DriverBooking() {
 
                             <Text style={[styles.sectionTitle, { color: textSecondary }]}>Reason for Selection</Text>
                             <TextInput
-                                style={[styles.reasonInput, { color: textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: borderColor }]}
+                                style={[styles.reasonInput, { color: textPrimary, backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.03)', borderColor: borderColor }]}
                                 placeholder="Enter reason to enable booking..."
                                 placeholderTextColor={textSecondary}
                                 value={reason}
@@ -371,7 +371,7 @@ export default function DriverBooking() {
                                 {
                                     backgroundColor: (selectedSlot && (rank !== '2' || reason.trim().length > 0))
                                         ? COLORS.brandBlue
-                                        : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)')
+                                        : (isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)')
                                 }
                             ]}
                             onPress={handleConfirm}

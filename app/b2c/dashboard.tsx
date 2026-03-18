@@ -233,8 +233,8 @@ const B2CDashboard = () => {
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
-    const inputBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.08)';
+    const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.03)';
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
@@ -267,7 +267,7 @@ const B2CDashboard = () => {
                                 ))}
                             </View>
                             <TouchableOpacity
-                                style={[styles.profileAvatar, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}
+                                style={[styles.profileAvatar, { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' }]}
                                 onPress={() => router.push('/b2c/profile' as any)}
                             >
                                 <User size={20} color={textPrimary} />
@@ -352,7 +352,7 @@ const B2CDashboard = () => {
 
                                             {/* Slot Display */}
                                             {station.slot && (
-                                                <View style={[styles.aiChip, { marginBottom: 6, backgroundColor: isDark ? 'rgba(0,212,255,0.08)' : 'rgba(0,212,255,0.05)', alignSelf: 'flex-start' }]}>
+                                                <View style={[styles.aiChip, { marginBottom: 6, backgroundColor: COLORS.brandBlue + '14', alignSelf: 'flex-start' }]}>
                                                     <Clock size={10} color={COLORS.brandBlue} />
                                                     <Text style={[styles.aiChipText, { color: COLORS.brandBlue, fontWeight: '700' }]}>{formatSlotRange(station.slot)}</Text>
                                                 </View>
@@ -366,7 +366,7 @@ const B2CDashboard = () => {
 
                                             {/* Meta chips */}
                                             <View style={styles.aiMeta}>
-                                                <View style={[styles.aiChip, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}>
+                                                <View style={[styles.aiChip, { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' }]}>
                                                     <MapPin size={10} color={textSecondary} />
                                                     <Text style={[styles.aiChipText, { color: textSecondary }]}>{station.distanceKm} km</Text>
                                                 </View>
@@ -444,7 +444,7 @@ const B2CDashboard = () => {
                                                     {!isLast && (
                                                         <View style={[
                                                             styles.timelineSegment,
-                                                            { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }
+                                                            { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' }
                                                         ]} />
                                                     )}
                                                     {!isLast && isCompleted && (
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     header: { marginBottom: SPACING.lg, marginTop: Platform.OS === 'android' ? SPACING.md : 0 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     headerRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-    langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: 4 },
+    langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
     langText: { fontSize: 10, fontWeight: '800' },
     profileAvatar: {
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     },
     familyAvatar: {
         width: 40, height: 40, borderRadius: 20,
-        backgroundColor: 'rgba(0,212,255,0.12)',
+        backgroundColor: COLORS.brandBlue + '1F',
         justifyContent: 'center', alignItems: 'center',
         marginBottom: 6,
     },
@@ -559,17 +559,17 @@ const styles = StyleSheet.create({
     },
     creditHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md },
     creditInfo: { flex: 1 },
-    creditLabel: { ...TYPOGRAPHY.label, color: 'rgba(255,255,255,0.8)' },
+    creditLabel: { ...TYPOGRAPHY.label, color: COLORS.textSecondaryDark },
     creditValue: { ...TYPOGRAPHY.hero, color: '#FFF', fontSize: 36 },
     creditFooter: {
         flexDirection: 'row', alignItems: 'center',
-        borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.2)', paddingTop: SPACING.sm,
+        borderTopWidth: 1, borderTopColor: COLORS.cardBorder, paddingTop: SPACING.sm,
     },
     creditSubtext: { ...TYPOGRAPHY.label, color: '#FFF', marginRight: 4 },
     discoverCta: {
         flexDirection: 'row', alignItems: 'center',
-        backgroundColor: 'rgba(0,212,255,0.08)',
-        borderWidth: 1, borderColor: 'rgba(0,212,255,0.25)',
+        backgroundColor: COLORS.brandBlue + '14',
+        borderWidth: 1, borderColor: COLORS.brandBlue + '40',
         borderRadius: BORDER_RADIUS.lg, padding: SPACING.md, gap: SPACING.sm,
     },
     discoverText: { ...TYPOGRAPHY.body, color: COLORS.brandBlue, flex: 1, fontWeight: '600' },
@@ -593,12 +593,12 @@ const styles = StyleSheet.create({
     aiMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 6 },
     aiChip: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6 },
     aiChipText: { ...TYPOGRAPHY.label, fontSize: 10 },
-    aiReasonBadge: { backgroundColor: 'rgba(0,212,255,0.08)', borderRadius: 7, padding: 5, marginBottom: 8 },
+    aiReasonBadge: { backgroundColor: COLORS.brandBlue + '14', borderRadius: 7, padding: 5, marginBottom: 8 },
     aiReasonText: { ...TYPOGRAPHY.label, color: COLORS.brandBlue, fontSize: 10, lineHeight: 14 },
     aiBookBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         gap: 3, paddingVertical: 7,
-        borderTopWidth: 1, borderTopColor: 'rgba(0,212,255,0.15)',
+        borderTopWidth: 1, borderTopColor: COLORS.brandBlue + '26',
     },
     aiBookText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 12, color: COLORS.brandBlue },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: SPACING.lg },

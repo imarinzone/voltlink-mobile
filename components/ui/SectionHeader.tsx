@@ -41,10 +41,13 @@ const styles = StyleSheet.create({
     },
     title: {
         ...TYPOGRAPHY.sectionHeader,
+        fontSize: 20,
+        fontWeight: '700',
     },
     action: {
         ...TYPOGRAPHY.label,
-        color: COLORS.brandBlue,
+        color: COLORS.primaryGreen,
         fontWeight: '600',
+        fontSize: 13,
     },
 });

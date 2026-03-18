@@ -74,7 +74,7 @@ export default function HistoryScreen() {
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.08)';
 
     const fetchData = async (forceRefresh: boolean = false) => {
         setLoading(true);
@@ -414,7 +414,7 @@ export default function HistoryScreen() {
                 onRequestClose={() => setCancelTarget(null)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: isDark ? '#1a1a2e' : '#fff' }]}>
+                    <View style={[styles.modalContent, { backgroundColor: isDark ? COLORS.cardBg : '#fff' }]}>
                         <View style={[styles.modalIcon, { backgroundColor: COLORS.alertRed + '15' }]}>
                             <AlertTriangle size={28} color={COLORS.alertRed} />
                         </View>

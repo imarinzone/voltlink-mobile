@@ -57,9 +57,9 @@ export default function CreditsScreen() {
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const cardBg = isDark ? '#121820' : '#fff';
-    const borderColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
-    const inputBg = isDark ? '#1a2230' : '#f0f2f5';
+    const cardBg = isDark ? COLORS.cardBg : '#fff';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.08)';
+    const inputBg = isDark ? COLORS.inputBg : '#f0f2f5';
 
     const fetchData = async () => {
         setLoading(true);
@@ -272,7 +272,7 @@ export default function CreditsScreen() {
                                 style={[
                                     styles.txRow,
                                     { borderBottomColor: borderColor },
-                                    i % 2 !== 0 && { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }
+                                    i % 2 !== 0 && { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.02)' }
                                 ]}
                             >
                                 {/* Type pill */}
@@ -471,10 +471,10 @@ const styles = StyleSheet.create({
     availableText: { ...TYPOGRAPHY.label, fontSize: 11, marginBottom: SPACING.sm },
     sourceChip: {
         paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: COLORS.inputBg,
     },
     sourceChipActive: { backgroundColor: COLORS.successGreen },
-    sourceChipText: { ...TYPOGRAPHY.label, color: '#ccc', fontWeight: '600' },
+    sourceChipText: { ...TYPOGRAPHY.label, color: COLORS.textMutedDark, fontWeight: '600' },
     transferBtn: {
         marginTop: SPACING.lg, backgroundColor: COLORS.successGreen + 'CC',
         height: 52, borderRadius: BORDER_RADIUS.xl,

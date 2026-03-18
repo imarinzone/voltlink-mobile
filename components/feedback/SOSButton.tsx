@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
         padding: SPACING.md,
         borderRadius: BORDER_RADIUS.md,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
+        borderColor: COLORS.cardBorder,
         alignItems: 'center',
     },
     cancelText: {

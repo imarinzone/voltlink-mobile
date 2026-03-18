@@ -41,8 +41,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const borderColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
-    const inputBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+    const borderColor = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.07)';
+    const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.03)';
 
     const handleLogout = () => {
         setRole(null as any);

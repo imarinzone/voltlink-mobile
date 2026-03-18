@@ -57,6 +57,7 @@ export default function B2CSession() {
     const [ratingSubmitted, setRatingSubmitted] = useState(false);
     // Frontend-only charging simulation state (must not use backend values)
     const [elapsed, setElapsed] = useState(0);
+    const [initialEstimatedTime, setInitialEstimatedTime] = useState<number | null>(null);
     const [simKwh, setSimKwh] = useState(0);
     const [simCost, setSimCost] = useState(0);
     const [actionLoading, setActionLoading] = useState(false);
@@ -129,6 +130,12 @@ export default function B2CSession() {
     }, []);
 
 
+
+    useEffect(() => {
+        if (isCharging && initialEstimatedTime === null) {
+            setInitialEstimatedTime(Math.max(0, 100 - chargePercent) * 2);
+        }
+    }, [isCharging]);
 
     // Realistic charging simulation (frontend only, 1-second ticks, tapering rate)
     useEffect(() => {
@@ -246,15 +253,16 @@ export default function B2CSession() {
     const connectorId = sessionData?.connector_id || '';
     const kwhDelivered = simKwh;
     const estimatedCost = simCost;
-    const estimatedCompletion = sessionData?.estimated_completion;
-
     const formatTime = (secs: number) => {
         const m = Math.floor(secs / 60);
         const s = secs % 60;
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     };
 
-    const timeRemainingMin = estimatedCompletion ?? Math.max(0, 100 - chargePercent) * 2;
+    const elapsedMinutes = elapsed / 60;
+    const timeRemainingMin = initialEstimatedTime !== null
+        ? Math.max(0, Math.round((initialEstimatedTime - elapsedMinutes) * 10) / 10)
+        : Math.max(0, 100 - chargePercent) * 2;
 
 
     const handleStop = async () => {

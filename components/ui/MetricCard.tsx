@@ -19,12 +19,21 @@ export const MetricCard: React.FC<MetricCardProps> = ({ label, value, unit, icon
         <GlassCard style={styles.card}>
             <View style={styles.header}>
                 {icon}
-                <Text style={[styles.label, { color: isDark ? COLORS.textMutedDark : COLORS.textSecondaryLight }]}>
+                <Text 
+                    style={[styles.label, { color: isDark ? COLORS.textMutedDark : COLORS.textSecondaryLight }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                >
                     {label}
                 </Text>
             </View>
             <View style={styles.valueContainer}>
-                <Text style={[styles.value, { color: isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight }]}>
+                <Text 
+                    style={[styles.value, { color: isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                >
                     {value}
                 </Text>
                 {unit && (
@@ -42,17 +51,17 @@ const styles = StyleSheet.create({
         flex: 1,
         minWidth: 0,
         marginHorizontal: 4,
-        padding: SPACING.md,
+        padding: 10,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: SPACING.sm,
+        marginBottom: 6,
     },
     label: {
         ...TYPOGRAPHY.label,
         marginLeft: 6,
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: '500',
         letterSpacing: 0.3,
     },
@@ -67,7 +76,7 @@ const styles = StyleSheet.create({
     },
     unit: {
         ...TYPOGRAPHY.label,
-        marginLeft: 3,
-        fontSize: 11,
+        marginLeft: 2,
+        fontSize: 12,
     },
 });

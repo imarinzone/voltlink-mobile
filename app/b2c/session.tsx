@@ -423,15 +423,15 @@ export default function B2CSession() {
                     {/* Stats Row */}
                     <View style={styles.statsRow}>
                         <GlassCard style={styles.statCard as any} intensity={20}>
-                            <Text style={[styles.statValue, { color: textPrimary }]}>{kwhDelivered.toFixed(2)}</Text>
+                            <Text style={[styles.statValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>{kwhDelivered.toFixed(2)}</Text>
                             <Text style={[styles.statLabel, { color: textSecondary }]}>kWh</Text>
                         </GlassCard>
                         <GlassCard style={styles.statCard as any} intensity={20}>
-                            <Text style={[styles.statValue, { color: textPrimary }]}>₹{estimatedCost}</Text>
+                            <Text style={[styles.statValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>₹{estimatedCost}</Text>
                             <Text style={[styles.statLabel, { color: textSecondary }]}>Cost</Text>
                         </GlassCard>
                         <GlassCard style={styles.statCard as any} intensity={20}>
-                            <Text style={[styles.statValue, { color: textPrimary }]}>{formatTime(elapsed)}</Text>
+                            <Text style={[styles.statValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>{formatTime(elapsed)}</Text>
                             <Text style={[styles.statLabel, { color: textSecondary }]}>Elapsed</Text>
                         </GlassCard>
                     </View>
@@ -505,7 +505,7 @@ export default function B2CSession() {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    content: { padding: SPACING.lg, paddingBottom: 130, alignItems: 'center' },
+    content: { padding: SPACING.md, paddingBottom: 130, alignItems: 'center' },
     sessionHeader: {
         flexDirection: 'row', alignItems: 'center',
         justifyContent: 'space-between', width: '100%', marginBottom: 4,
@@ -514,10 +514,10 @@ const styles = StyleSheet.create({
     livePill: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 10, paddingVertical: 4,
-        borderRadius: 12, gap: 6,
+        borderRadius: 12,
     },
     liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.successGreen },
-    liveText: { ...TYPOGRAPHY.label, color: COLORS.successGreen, fontWeight: '800', fontSize: 10 },
+    liveText: { ...TYPOGRAPHY.label, color: COLORS.successGreen, fontWeight: '800', fontSize: 10, marginLeft: 6 },
     chargerId: { ...TYPOGRAPHY.label, alignSelf: 'flex-start', marginBottom: SPACING.xl },
     arcContainer: {
         width: SIZE, height: SIZE,
@@ -527,16 +527,16 @@ const styles = StyleSheet.create({
     arcCenter: { position: 'absolute', alignItems: 'center' },
     chargePercent: { ...TYPOGRAPHY.hero, fontSize: 44, fontWeight: '800' },
     chargeLabel: { ...TYPOGRAPHY.label },
-    statsRow: { flexDirection: 'row', width: '100%', gap: SPACING.sm, marginBottom: SPACING.md },
-    statCard: { flex: 1, padding: SPACING.md, alignItems: 'center', borderRadius: BORDER_RADIUS.md },
+    statsRow: { flexDirection: 'row', marginBottom: SPACING.md, marginHorizontal: -4, alignItems: 'stretch' },
+    statCard: { flex: 1, padding: 8, alignItems: 'center', borderRadius: BORDER_RADIUS.md, marginHorizontal: 4, minWidth: 0 },
     statValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 16, fontWeight: '700' },
     statLabel: { ...TYPOGRAPHY.label, marginTop: 2, textAlign: 'center' },
     etaCard: {
-        flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
+        flexDirection: 'row', alignItems: 'center',
         padding: SPACING.md, borderRadius: BORDER_RADIUS.md,
         width: '100%', marginBottom: SPACING.sm,
     },
-    etaText: { ...TYPOGRAPHY.body, flex: 1 },
+    etaText: { ...TYPOGRAPHY.body, flex: 1, marginLeft: SPACING.sm },
 
     stopBtn: {
         width: '100%', height: 68, borderRadius: BORDER_RADIUS.xl,
@@ -546,15 +546,15 @@ const styles = StyleSheet.create({
         marginVertical: SPACING.lg, padding: 6,
     },
     stopBtnContent: {
-        flexDirection: 'row', alignItems: 'center', gap: 14,
+        flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 20, width: '100%'
     },
     stopIconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.alertRed, justifyContent: 'center', alignItems: 'center' },
     stopSquare: { width: 14, height: 14, backgroundColor: '#fff', borderRadius: 3 },
-    stopText: { ...TYPOGRAPHY.body, color: COLORS.alertRed, fontWeight: '700', fontSize: 18, letterSpacing: 0.5 },
+    stopText: { ...TYPOGRAPHY.body, color: COLORS.alertRed, fontWeight: '700', fontSize: 18, letterSpacing: 0.5, marginLeft: 14 },
 
-    reportLink: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: SPACING.sm },
-    reportText: { ...TYPOGRAPHY.label },
+    reportLink: { flexDirection: 'row', alignItems: 'center', paddingVertical: SPACING.sm },
+    reportText: { ...TYPOGRAPHY.label, marginLeft: 6 },
     ratingCenter: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.lg, paddingBottom: 100 },
     ratingCard: { width: '100%' },
     ratingInner: { padding: SPACING.xl, borderRadius: BORDER_RADIUS.xl, alignItems: 'center' },
@@ -562,15 +562,15 @@ const styles = StyleSheet.create({
     ratingCost: { ...TYPOGRAPHY.hero, fontSize: 32, fontWeight: '800', marginTop: SPACING.sm },
     ratingKwh: { ...TYPOGRAPHY.body, marginTop: SPACING.xs },
     ratingPrompt: { ...TYPOGRAPHY.body, marginTop: SPACING.lg, marginBottom: SPACING.md },
-    ratingSection: { width: '100%', gap: SPACING.md, marginBottom: SPACING.xl },
-    ratingRowCategory: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
+    ratingSection: { width: '100%', marginBottom: SPACING.xl },
+    ratingRowCategory: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: SPACING.md },
     categoryLabel: { ...TYPOGRAPHY.label, fontWeight: '600', fontSize: 13 },
-    thumbsRow: { flexDirection: 'row', gap: SPACING.lg },
-    thumbBtn: { width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: COLORS.cardBorder, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.inputBg },
+    thumbsRow: { flexDirection: 'row' },
+    thumbBtn: { width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: COLORS.cardBorder, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.inputBg, marginLeft: SPACING.lg },
     submitBtn: { width: '100%', height: 50, borderRadius: BORDER_RADIUS.xl, justifyContent: 'center', alignItems: 'center' },
 
     sliderWrapper: { width: '100%', marginTop: SPACING.sm, marginBottom: SPACING.lg, alignItems: 'center' },
-    sliderContainer: { width: 320, height: 72, borderRadius: 36, justifyContent: 'center', padding: 8, overflow: 'hidden' },
+    sliderContainer: { width: '100%', height: 72, borderRadius: 36, justifyContent: 'center', padding: 8, overflow: 'hidden' },
     sliderFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: COLORS.hoverBg },
     sliderLabelContainer: { position: 'absolute', width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 70 },
     sliderBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', zIndex: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },

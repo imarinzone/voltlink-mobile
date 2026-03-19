@@ -308,9 +308,9 @@ export default function DriverHistory() {
                         <View style={styles.sessionInfo}>
                             <Text style={[styles.sessionStation, { color: textPrimary }]}>{item.stationName}</Text>
                             <View style={styles.sessionMeta}>
-                                <MapPin size={12} color={textSecondary} />
-                                <Text style={[styles.sessionMetaText, { color: textSecondary }]}>{item.connectorType}</Text>
-                                <Clock size={12} color={textSecondary} />
+                                <MapPin size={12} color={textSecondary} style={{ marginRight: 4 }} />
+                                <Text style={[styles.sessionMetaText, { color: textSecondary, marginRight: 8 }]}>{item.connectorType}</Text>
+                                <Clock size={12} color={textSecondary} style={{ marginRight: 4 }} />
                                 <Text style={[styles.sessionMetaText, { color: textSecondary }]}>{item.source === 'booking' ? generate30MinSlot(item.bookingTime || '') : item.duration}</Text>
                             </View>
                         </View>
@@ -324,7 +324,7 @@ export default function DriverHistory() {
                     {item.status !== 'active' && item.status !== 'pending' && (
                         <View style={styles.sessionStats}>
                             <View style={styles.sessionStat}>
-                                <Zap size={14} color={COLORS.brandBlue} />
+                                <Zap size={14} color={COLORS.brandBlue} style={{ marginRight: 4 }} />
                                 <Text style={[styles.sessionStatValue, { color: textPrimary }]}>{item.kwh} kWh</Text>
                             </View>
                             <View style={styles.sessionStat}>
@@ -359,10 +359,10 @@ export default function DriverHistory() {
                     {(item.status === 'active' || item.status === 'pending') && (
                         <View style={styles.actionRow}>
                             <TouchableOpacity
-                                style={[styles.actionBtn, { borderColor: COLORS.brandBlue }]}
+                                style={[styles.actionBtn, { borderColor: COLORS.brandBlue, marginRight: SPACING.md }]}
                                 onPress={openDirections}
                             >
-                                <MapPin size={14} color={COLORS.brandBlue} />
+                                <MapPin size={14} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
                                 <Text style={[styles.actionBtnText, { color: COLORS.brandBlue }]}>View Directions</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -380,7 +380,7 @@ export default function DriverHistory() {
                                     router.push({ pathname: '/driver/session', params });
                                 }}
                             >
-                                <Play size={14} color={COLORS.successGreen} />
+                                <Play size={14} color={COLORS.successGreen} style={{ marginRight: 6 }} />
                                 <Text style={[styles.actionBtnText, { color: COLORS.successGreen }]}>Open Session</Text>
                             </TouchableOpacity>
                         </View>
@@ -420,9 +420,9 @@ export default function DriverHistory() {
                     <Pressable
                         key={f.key}
                         style={[
-                            styles.filterChip,
-                            filter === f.key && { backgroundColor: COLORS.brandBlue },
-                            filter !== f.key && { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' },
+                            styles.filterPill,
+                            filter === f.key && { backgroundColor: COLORS.brandBlue, borderColor: COLORS.brandBlue },
+                            filter !== f.key && { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)', borderColor: isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.1)' },
                         ]}
                         onPress={() => setFilter(f.key)}
                     >
@@ -500,6 +500,7 @@ export default function DriverHistory() {
                                 style={[styles.modalBtn, {
                                     backgroundColor: COLORS.alertRed,
                                     borderColor: COLORS.alertRed,
+                                    marginBottom: SPACING.md,
                                 }]}
                                 onPress={submitCancel}
                                 disabled={cancelling}
@@ -544,12 +545,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginHorizontal: SPACING.lg,
         marginBottom: SPACING.md,
-        gap: SPACING.sm,
     },
-    filterChip: {
+    filterPill: {
         paddingHorizontal: SPACING.md,
         paddingVertical: SPACING.xs,
         borderRadius: BORDER_RADIUS.md,
+        marginRight: SPACING.sm,
+        borderWidth: 1,
     },
     filterText: { ...TYPOGRAPHY.label, fontWeight: '600' },
     listContent: { paddingHorizontal: SPACING.lg, paddingBottom: 120 },
@@ -566,29 +568,37 @@ const styles = StyleSheet.create({
     },
     sessionInfo: { flex: 1, marginRight: SPACING.sm },
     sessionStation: { ...TYPOGRAPHY.body, fontWeight: '700' },
-    sessionMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+    statusContainer: { flexDirection: 'row', alignItems: 'center' },
+    statusIndicator: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
+    statusText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 11 },
+    sessionMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
     sessionMetaText: { ...TYPOGRAPHY.label },
     sessionDate: { ...TYPOGRAPHY.label },
     sessionStats: {
-        flexDirection: 'row', gap: SPACING.md, flexWrap: 'wrap',
+        flexDirection: 'row', flexWrap: 'wrap',
+        marginTop: SPACING.md,
     },
-    sessionStat: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    sessionStat: { flexDirection: 'row', alignItems: 'center', marginRight: SPACING.md },
     sessionStatValue: { ...TYPOGRAPHY.body, fontWeight: '600' },
     ratingRow: {
         flexDirection: 'row', gap: 2, marginTop: SPACING.sm,
     },
+    boltRow: {
+        flexDirection: 'row', marginTop: SPACING.sm,
+    },
+    boltIcon: { marginRight: 2 },
     centerLoader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     emptyText: { ...TYPOGRAPHY.body, textAlign: 'center', marginTop: SPACING.xl },
-    actionRow: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.md },
-    actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: BORDER_RADIUS.md, borderWidth: 1 },
+    actionRow: { flexDirection: 'row', marginTop: SPACING.md },
+    actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: BORDER_RADIUS.md, borderWidth: 1 },
     actionBtnText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 12 },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: SPACING.xl },
     modalContent: { width: '100%', padding: SPACING.xl, borderRadius: BORDER_RADIUS.xl, alignItems: 'center' },
     modalIcon: { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', marginBottom: SPACING.md },
     modalTitle: { ...TYPOGRAPHY.sectionHeader, fontSize: 22, marginBottom: 8 },
     modalSub: { ...TYPOGRAPHY.body, textAlign: 'center', marginBottom: SPACING.lg, opacity: 0.8 },
-    modalButtons: { width: '100%', gap: SPACING.md, alignItems: 'center' },
-    modalBtn: { width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 14, borderRadius: BORDER_RADIUS.lg, borderWidth: 1 },
+    modalButtons: { width: '100%', alignItems: 'center' },
+    modalBtn: { width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: BORDER_RADIUS.lg, borderWidth: 1 },
     modalBtnText: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 15 },
     modalCancel: { marginTop: SPACING.sm },
     modalCancelText: { ...TYPOGRAPHY.label, fontWeight: '600' },

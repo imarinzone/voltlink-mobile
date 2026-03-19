@@ -537,8 +537,8 @@ const styles = StyleSheet.create({
     arcCenter: { position: 'absolute', alignItems: 'center' },
     chargePercent: { ...TYPOGRAPHY.hero, fontSize: 44, fontWeight: '800' },
     chargeLabel: { ...TYPOGRAPHY.label },
-    statsRow: { flexDirection: 'row', width: '100%', marginBottom: SPACING.md },
-    statCard: { flex: 1, padding: SPACING.md, alignItems: 'center', borderRadius: BORDER_RADIUS.md, marginHorizontal: 4, minWidth: 0 },
+    statsRow: { flexDirection: 'row', marginBottom: SPACING.md, marginHorizontal: -4, alignItems: 'stretch' },
+    statCard: { flex: 1, padding: 12, alignItems: 'center', borderRadius: BORDER_RADIUS.md, marginHorizontal: 4, minWidth: 0 },
     statValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 16, fontWeight: '700' },
     statLabel: { ...TYPOGRAPHY.label, marginTop: 2, textAlign: 'center' },
     etaCard: {

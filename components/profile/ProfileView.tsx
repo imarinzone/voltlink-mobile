@@ -256,7 +256,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
 
                         <View style={styles.modalActions}>
                             <GlassButton title="Cancel" variant="secondary" style={{ flex: 1 }} onPress={() => setShowAddFamily(false)} />
-                            <GlassButton title="Add" style={{ flex: 1 }} onPress={handleAddMember} />
+                            <GlassButton title="Add" style={{ flex: 1, marginLeft: SPACING.md }} onPress={handleAddMember} />
                         </View>
                     </GlassCard>
                 </View>
@@ -292,8 +292,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         padding: SPACING.lg, borderBottomWidth: 1,
     },
-    menuLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-    menuText: { ...TYPOGRAPHY.body, fontWeight: '500' },
+    menuLeft: { flexDirection: 'row', alignItems: 'center' },
+    menuText: { ...TYPOGRAPHY.body, fontWeight: '500', marginLeft: SPACING.md },
     subText: { ...TYPOGRAPHY.label, fontSize: 12, marginTop: 2 },
     emptyText: { textAlign: 'center', padding: SPACING.xl, ...TYPOGRAPHY.label },
     memberAvatar: {
@@ -302,37 +302,39 @@ const styles = StyleSheet.create({
         justifyContent: 'center', alignItems: 'center',
     },
     memberInitial: { color: COLORS.brandBlue, fontWeight: 'bold' },
-    sustainGrid: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.xl },
+    sustainGrid: { flexDirection: 'row', marginBottom: SPACING.xl },
     sustainItem: {
         flex: 1,
-        padding: SPACING.sm, gap: 4, alignItems: 'center',
+        padding: SPACING.sm, alignItems: 'center',
         minWidth: 0,
+        marginHorizontal: 4,
     },
-    sustainValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 15, fontWeight: '800', textAlign: 'center' },
-    sustainLabel: { ...TYPOGRAPHY.label, fontSize: 10, letterSpacing: 0.5, textAlign: 'center' },
-    languageRow: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.sm, marginLeft: 36 },
+    sustainValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 15, fontWeight: '800', textAlign: 'center', marginTop: 4 },
+    sustainLabel: { ...TYPOGRAPHY.label, fontSize: 10, letterSpacing: 0.5, textAlign: 'center', marginTop: 4 },
+    languageRow: { flexDirection: 'row', marginTop: SPACING.sm, marginLeft: 36 },
     languagePill: {
         paddingHorizontal: SPACING.md, paddingVertical: 6,
         borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
+        marginRight: SPACING.sm,
     },
     languageText: { ...TYPOGRAPHY.label, fontWeight: '600' },
     version: { ...TYPOGRAPHY.label, fontSize: 11, textAlign: 'center', marginTop: SPACING.md },
     logoutInline: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        gap: SPACING.sm, marginTop: SPACING.md,
+        marginTop: SPACING.md,
         paddingHorizontal: SPACING.xl, paddingVertical: SPACING.sm,
         borderRadius: BORDER_RADIUS.xl,
         borderWidth: 1, borderColor: 'rgba(255,68,68,0.35)',
         backgroundColor: 'rgba(255,68,68,0.08)',
     },
-    logoutText: { ...TYPOGRAPHY.body, color: COLORS.alertRed, fontWeight: '700', fontSize: 14 },
+    logoutText: { ...TYPOGRAPHY.body, color: COLORS.alertRed, fontWeight: '700', fontSize: 14, marginLeft: SPACING.sm },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: SPACING.lg },
     modalContent: { padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg },
     modalTitle: { ...TYPOGRAPHY.sectionHeader, marginBottom: SPACING.lg },
     input: { height: 48, borderRadius: BORDER_RADIUS.md, borderWidth: 1, paddingHorizontal: SPACING.md, marginBottom: SPACING.md, ...TYPOGRAPHY.body },
     subLabel: { ...TYPOGRAPHY.label, fontSize: 10, fontWeight: '800', marginBottom: SPACING.sm },
-    relationRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginBottom: SPACING.xl },
-    relationPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
+    relationRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: SPACING.xl },
+    relationPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', marginRight: SPACING.sm, marginBottom: SPACING.sm },
     relationText: { ...TYPOGRAPHY.label, fontSize: 11, fontWeight: '700' },
-    modalActions: { flexDirection: 'row', gap: SPACING.md }
+    modalActions: { flexDirection: 'row', marginTop: SPACING.sm }
 });

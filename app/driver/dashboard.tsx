@@ -117,9 +117,9 @@ const DriverDashboard = () => {
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.headerTop}>
-                        <View>
+                        <View style={styles.headerTextContainer}>
                             <Text style={[styles.greeting, { color: textSecondary }]}>{t.greeting}</Text>
-                            <Text style={[styles.name, { color: textPrimary }]}>{driverProfile?.name || vehicle?.driverName || 'Driver'}</Text>
+                            <Text style={[styles.name, { color: textPrimary }]} numberOfLines={1}>{driverProfile?.name || vehicle?.driverName || 'Driver'}</Text>
                         </View>
                         <View style={styles.headerRight}>
                             <View style={styles.langSwitch}>
@@ -219,21 +219,22 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.md,
         padding: SPACING.md,
         marginBottom: SPACING.md,
-        gap: SPACING.sm,
     },
-    alertText: { ...TYPOGRAPHY.label, color: COLORS.alertRed, flex: 1, fontWeight: '600', lineHeight: 18 },
-    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: -4 },
+    alertText: { ...TYPOGRAPHY.label, color: COLORS.alertRed, flex: 1, fontWeight: '600', lineHeight: 18, marginLeft: SPACING.sm },
+    statsRow: { flexDirection: 'row' },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+    headerTextContainer: { flex: 1, minWidth: 0, marginRight: SPACING.sm },
+    headerRight: { flexDirection: 'row', alignItems: 'center' },
     profileAvatar: {
         width: 36, height: 36,
         borderRadius: 18,
         justifyContent: 'center', alignItems: 'center',
         borderWidth: 1,
         borderColor: COLORS.cardBorder,
-        backgroundColor: COLORS.inputBg
+        backgroundColor: COLORS.inputBg,
+        marginLeft: SPACING.sm,
     },
-    langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
+    langSwitch: { flexDirection: 'row', backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
     langText: { fontSize: 10, fontWeight: '800' },
 });

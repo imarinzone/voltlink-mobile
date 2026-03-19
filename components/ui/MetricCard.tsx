@@ -40,7 +40,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({ label, value, unit, icon
 const styles = StyleSheet.create({
     card: {
         flex: 1,
-        minWidth: 100,
+        minWidth: 0,
         marginHorizontal: 4,
         padding: SPACING.md,
     },

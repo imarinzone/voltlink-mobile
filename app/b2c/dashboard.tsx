@@ -310,8 +310,8 @@ const B2CDashboard = () => {
                 {aiStations.length > 0 && (
                     <View style={styles.aiSection}>
                         <View style={styles.sectionHeaderRow}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                                <Bot size={14} color={COLORS.brandBlue} />
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 6 }}>
+                                <Bot size={14} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
                                 <Text style={[styles.familyTitle, { color: textSecondary }]}>{t.aiRec}</Text>
                             </View>
                             <TouchableOpacity onPress={() => router.push('/b2c/discover' as any)}>
@@ -324,7 +324,7 @@ const B2CDashboard = () => {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.aiScroll}
                         >
-                            {aiStations.map((station) => {
+                            {aiStations.map((station, index) => {
                                 const ok = (station.availableChargers ?? 0) > 0;
                                 const dot = ok ? COLORS.successGreen : COLORS.alertRed;
                                 return (
@@ -333,11 +333,12 @@ const B2CDashboard = () => {
                                         activeOpacity={0.85}
                                         onPress={() => handleBookNow(station)}
                                         disabled={!ok}
+                                        style={index < aiStations.length - 1 ? { marginRight: SPACING.sm } : undefined}
                                     >
                                         <GlassCard style={styles.aiCard as any} intensity={20}>
                                             {/* Status dot + name */}
                                             <View style={styles.aiCardTop}>
-                                                <View style={[styles.aiDotOuter, { backgroundColor: `${dot}20` }]}>
+                                                <View style={[styles.aiDotOuter, { backgroundColor: `${dot}20`, marginRight: 8 }]}>
                                                     <View style={[styles.aiDotInner, { backgroundColor: dot }]} />
                                                 </View>
                                                 <View style={{ flex: 1 }}>
@@ -353,7 +354,7 @@ const B2CDashboard = () => {
                                             {/* Slot Display */}
                                             {station.slot && (
                                                 <View style={[styles.aiChip, { marginBottom: 6, backgroundColor: COLORS.brandBlue + '14', alignSelf: 'flex-start' }]}>
-                                                    <Clock size={10} color={COLORS.brandBlue} />
+                                                    <Clock size={10} color={COLORS.brandBlue} style={{ marginRight: 3 }} />
                                                     <Text style={[styles.aiChipText, { color: COLORS.brandBlue, fontWeight: '700' }]}>{formatSlotRange(station.slot)}</Text>
                                                 </View>
                                             )}
@@ -367,11 +368,11 @@ const B2CDashboard = () => {
                                             {/* Meta chips */}
                                             <View style={styles.aiMeta}>
                                                 <View style={[styles.aiChip, { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' }]}>
-                                                    <MapPin size={10} color={textSecondary} />
+                                                    <MapPin size={10} color={textSecondary} style={{ marginRight: 3 }} />
                                                     <Text style={[styles.aiChipText, { color: textSecondary }]}>{station.distanceKm} km</Text>
                                                 </View>
                                                 <View style={[styles.aiChip, { backgroundColor: `${dot}15` }]}>
-                                                    <Zap size={10} color={dot} />
+                                                    <Zap size={10} color={dot} style={{ marginRight: 3 }} />
                                                     <Text style={[styles.aiChipText, { color: dot, fontWeight: '700' }]}>
                                                         {station.availableChargers}/{station.totalChargers} {ok ? t.available : t.full}
                                                     </Text>
@@ -392,7 +393,7 @@ const B2CDashboard = () => {
                                                 disabled={!ok}
                                             >
                                                 <Text style={styles.aiBookText}>{ok ? t.bookNow : t.full}</Text>
-                                                {ok && <ChevronRight size={13} color={COLORS.brandBlue} />}
+                                                {ok && <ChevronRight size={13} color={COLORS.brandBlue} style={{ marginLeft: 3 }} />}
                                             </TouchableOpacity>
                                         </GlassCard>
                                     </TouchableOpacity>
@@ -419,7 +420,7 @@ const B2CDashboard = () => {
                         <>
                             <View style={styles.loopHeader}>
                                 <GlassCard style={styles.botBadge as any} intensity={15}>
-                                    <Bot size={16} color={COLORS.brandBlue} />
+                                    <Bot size={16} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
                                     <Text style={[styles.botText, { color: textPrimary }]}>VoltLink AI Optimizer</Text>
                                 </GlassCard>
                                 <Text style={[styles.loopTitle, { color: textPrimary }]}>Processing your booking...</Text>
@@ -505,7 +506,7 @@ const B2CDashboard = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    scrollContent: { padding: SPACING.lg, paddingBottom: 120 },
+    scrollContent: { padding: SPACING.md, paddingBottom: 120 },
     header: { marginBottom: SPACING.lg, marginTop: Platform.OS === 'android' ? SPACING.md : 0 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     headerTextContainer: { flex: 1, minWidth: 0, marginRight: SPACING.sm },
@@ -525,7 +526,8 @@ const styles = StyleSheet.create({
     familyTitle: {
         ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 11, letterSpacing: 1.2,
     },
-    familyScroll: { gap: SPACING.sm, paddingBottom: SPACING.md },
+    familyScroll: { paddingBottom: SPACING.md },
+    familyCardWrapper: { marginRight: SPACING.sm },
     familyCard: {
         width: 110, padding: SPACING.md, borderRadius: BORDER_RADIUS.md, alignItems: 'center',
     },
@@ -554,7 +556,7 @@ const styles = StyleSheet.create({
     familyName: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: 2, fontSize: 12 },
     familyVehicle: { ...TYPOGRAPHY.label, fontSize: 10, marginBottom: 4, textAlign: 'center' },
     familyBattery: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 13 },
-    statsRow: { flexDirection: 'row', marginBottom: SPACING.md, marginTop: SPACING.sm },
+    statsRow: { flexDirection: 'row', marginBottom: SPACING.md, marginTop: SPACING.sm, marginHorizontal: -4, alignItems: 'stretch' },
     creditCard: {
         backgroundColor: COLORS.brandBlue,
         padding: SPACING.lg, marginBottom: SPACING.md, borderRadius: BORDER_RADIUS.lg,
@@ -579,27 +581,27 @@ const styles = StyleSheet.create({
     allStatsTitle: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: '700', marginBottom: SPACING.sm, marginTop: SPACING.sm },
 
     aiSection: { marginBottom: SPACING.md },
-    aiScroll: { gap: SPACING.sm, paddingBottom: SPACING.sm },
+    aiScroll: { paddingBottom: SPACING.sm }, // Removed gap
     aiCard: {
         width: 200,
         padding: SPACING.md,
         borderRadius: BORDER_RADIUS.lg,
     },
-    aiCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.xs ?? 4, gap: 8 },
+    aiCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.xs ?? 4 }, // Removed gap
     aiDotOuter: { width: 26, height: 26, borderRadius: 13, justifyContent: 'center', alignItems: 'center' },
     aiDotInner: { width: 9, height: 9, borderRadius: 4.5 },
     aiStationName: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 13 },
     aiCpoName: { ...TYPOGRAPHY.label, fontWeight: '600', fontSize: 10, marginTop: 1 },
     aiPrice: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: '800', color: COLORS.successGreen, marginBottom: 6 },
     aiPriceUnit: { fontSize: 11, fontWeight: '400' },
-    aiMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 6 },
-    aiChip: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6 },
+    aiMeta: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 6 }, // Removed gap
+    aiChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, marginRight: 4, marginBottom: 4 }, // Added marginRight and marginBottom
     aiChipText: { ...TYPOGRAPHY.label, fontSize: 10 },
     aiReasonBadge: { backgroundColor: COLORS.brandBlue + '14', borderRadius: 7, padding: 5, marginBottom: 8 },
     aiReasonText: { ...TYPOGRAPHY.label, color: COLORS.brandBlue, fontSize: 10, lineHeight: 14 },
     aiBookBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        gap: 3, paddingVertical: 7,
+        paddingVertical: 7, // Removed gap
         borderTopWidth: 1, borderTopColor: COLORS.brandBlue + '26',
     },
     aiBookText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 12, color: COLORS.brandBlue },

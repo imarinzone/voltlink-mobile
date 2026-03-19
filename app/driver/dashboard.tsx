@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.md,
     },
     alertText: { ...TYPOGRAPHY.label, color: COLORS.alertRed, flex: 1, fontWeight: '600', lineHeight: 18, marginLeft: SPACING.sm },
-    statsRow: { flexDirection: 'row' },
+    statsRow: { flexDirection: 'row', marginHorizontal: -4, alignItems: 'stretch' },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     headerTextContainer: { flex: 1, minWidth: 0, marginRight: SPACING.sm },
     headerRight: { flexDirection: 'row', alignItems: 'center' },

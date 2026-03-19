@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
         borderColor: COLORS.cardBorder,
         justifyContent: 'center',
         alignItems: 'center',
+        marginRight: SPACING.sm,
     },
     bookButton: {
         backgroundColor: COLORS.cardBorder,
@@ -209,7 +210,6 @@ const styles = StyleSheet.create({
     bookText: { color: COLORS.primaryGreen, fontWeight: '800', fontSize: 13 },
     actionRow: {
         flexDirection: 'row',
-        gap: SPACING.sm,
         alignItems: 'center',
     },
     actionText: {
@@ -220,12 +220,12 @@ const styles = StyleSheet.create({
     slotContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
         marginBottom: SPACING.md,
         paddingHorizontal: SPACING.xs,
     },
     slotText: {
         ...TYPOGRAPHY.label,
         fontSize: 12,
+        marginLeft: 6,
     },
 });

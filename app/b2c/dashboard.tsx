@@ -245,9 +245,9 @@ const B2CDashboard = () => {
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.headerTop}>
-                        <View>
+                        <View style={styles.headerTextContainer}>
                             <Text style={[styles.greeting, { color: textSecondary }]}>{t.welcome}</Text>
-                            <Text style={[styles.name, { color: textPrimary }]}>{stats?.user?.name || 'User'}</Text>
+                            <Text style={[styles.name, { color: textPrimary }]} numberOfLines={1}>{stats?.user?.name || 'User'}</Text>
                         </View>
                         <View style={styles.headerRight}>
                             <View style={styles.langSwitch}>
@@ -508,14 +508,16 @@ const styles = StyleSheet.create({
     scrollContent: { padding: SPACING.lg, paddingBottom: 120 },
     header: { marginBottom: SPACING.lg, marginTop: Platform.OS === 'android' ? SPACING.md : 0 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-    langSwitch: { flexDirection: 'row', gap: 4, backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
+    headerTextContainer: { flex: 1, minWidth: 0, marginRight: SPACING.sm },
+    headerRight: { flexDirection: 'row', alignItems: 'center' },
+    langSwitch: { flexDirection: 'row', backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
     langText: { fontSize: 10, fontWeight: '800' },
     profileAvatar: {
         width: 36, height: 36,
         borderRadius: 18,
         justifyContent: 'center', alignItems: 'center',
+        marginLeft: SPACING.sm,
     },
     greeting: { ...TYPOGRAPHY.label, fontSize: 15 },
     name: { ...TYPOGRAPHY.hero, fontSize: 28 },
@@ -552,7 +554,7 @@ const styles = StyleSheet.create({
     familyName: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: 2, fontSize: 12 },
     familyVehicle: { ...TYPOGRAPHY.label, fontSize: 10, marginBottom: 4, textAlign: 'center' },
     familyBattery: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 13 },
-    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: -4, marginBottom: SPACING.md, marginTop: SPACING.sm },
+    statsRow: { flexDirection: 'row', marginBottom: SPACING.md, marginTop: SPACING.sm },
     creditCard: {
         backgroundColor: COLORS.brandBlue,
         padding: SPACING.lg, marginBottom: SPACING.md, borderRadius: BORDER_RADIUS.lg,

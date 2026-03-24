@@ -50,6 +50,9 @@ export default function CreditsScreen() {
     const [selectedSourceId, setSelectedSourceId] = useState('');
     const [transferring, setTransferring] = useState(false);
 
+    // tab
+    const [activeTab, setActiveTab] = useState<'ONDC' | 'V2G'>('ONDC');
+
     // filter
     const [filterSource, setFilterSource] = useState('All Sources');
     const [showFilterMenu, setShowFilterMenu] = useState(false);
@@ -180,41 +183,59 @@ export default function CreditsScreen() {
                     </Text>
                 </View>
 
-                {/* ── 3-tile stat row ── */}
-                <View style={styles.statRow}>
-                    {/* Current Balance */}
-                    <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
-                        <View style={styles.statTileHeader}>
-                            <Wallet size={14} color={COLORS.brandBlue} />
-                            <Text style={[styles.statTileLabel, { color: textSecondary }]}>Credit Balance</Text>
-                        </View>
-                        <Text style={[styles.statTileValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
-                            {(balance?.current_balance ?? 0).toFixed(2)}
-                        </Text>
-                    </View>
-
-                    {/* Credits Received */}
-                    <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
-                        <View style={styles.statTileHeader}>
-                            <ArrowDownLeft size={14} color={COLORS.successGreen} />
-                            <Text style={[styles.statTileLabel, { color: textSecondary }]}>{'Received'}</Text>
-                        </View>
-                        <Text style={[styles.statTileValue, { color: COLORS.successGreen }]} numberOfLines={1} adjustsFontSizeToFit>
-                            +{totalReceived.toFixed(2)}
-                        </Text>
-                    </View>
-
-                    {/* Credits Sent */}
-                    <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
-                        <View style={styles.statTileHeader}>
-                            <ArrowUpRight size={14} color={COLORS.alertRed} />
-                            <Text style={[styles.statTileLabel, { color: textSecondary }]}>Sent</Text>
-                        </View>
-                        <Text style={[styles.statTileValue, { color: COLORS.alertRed }]} numberOfLines={1} adjustsFontSizeToFit>
-                            -{totalSent.toFixed(2)}
-                        </Text>
-                    </View>
+                {/* ── Tab Bar ── */}
+                <View style={styles.tabBar}>
+                    {(['ONDC', 'V2G'] as const).map(t => (
+                        <TouchableOpacity
+                            key={t}
+                            onPress={() => setActiveTab(t)}
+                            style={[styles.tab, activeTab === t && { borderBottomColor: COLORS.brandBlue }]}
+                        >
+                            <Text style={[styles.tabText, { color: activeTab === t ? COLORS.brandBlue : textSecondary }]}>
+                                {t}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
+
+                {/* ── ONDC Tab Content ── */}
+                {activeTab === 'ONDC' && (
+                    <>
+                        {/* ── 3-tile stat row ── */}
+                        <View style={styles.statRow}>
+                            {/* Current Balance */}
+                            <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
+                                <View style={styles.statTileHeader}>
+                                    <Wallet size={14} color={COLORS.brandBlue} />
+                                    <Text style={[styles.statTileLabel, { color: textSecondary }]}>Credit Balance</Text>
+                                </View>
+                                <Text style={[styles.statTileValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
+                                    {(balance?.current_balance ?? 0).toFixed(2)}
+                                </Text>
+                            </View>
+
+                            {/* Credits Received */}
+                            <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
+                                <View style={styles.statTileHeader}>
+                                    <ArrowDownLeft size={14} color={COLORS.successGreen} />
+                                    <Text style={[styles.statTileLabel, { color: textSecondary }]}>{'Received'}</Text>
+                                </View>
+                                <Text style={[styles.statTileValue, { color: COLORS.successGreen }]} numberOfLines={1} adjustsFontSizeToFit>
+                                    +{totalReceived.toFixed(2)}
+                                </Text>
+                            </View>
+
+                            {/* Credits Sent */}
+                            <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
+                                <View style={styles.statTileHeader}>
+                                    <ArrowUpRight size={14} color={COLORS.alertRed} />
+                                    <Text style={[styles.statTileLabel, { color: textSecondary }]}>Sent</Text>
+                                </View>
+                                <Text style={[styles.statTileValue, { color: COLORS.alertRed }]} numberOfLines={1} adjustsFontSizeToFit>
+                                    -{totalSent.toFixed(2)}
+                                </Text>
+                            </View>
+                        </View>
 
 
 
@@ -396,6 +417,15 @@ export default function CreditsScreen() {
                         }
                     </TouchableOpacity>
                 </GlassCard>
+                    </>
+                )}
+
+                {/* ── V2G Tab Content ── */}
+                {activeTab === 'V2G' && (
+                    <View style={styles.emptyContainer}>
+                        <Text style={[styles.emptyText, { color: textSecondary }]}>No records found</Text>
+                    </View>
+                )}
 
             </ScrollView>
         </SafeAreaView>
@@ -500,4 +530,13 @@ const styles = StyleSheet.create({
     statTileLabel: { ...TYPOGRAPHY.label, fontSize: 11, lineHeight: 14 },
     statTileValue: { ...TYPOGRAPHY.hero, fontSize: 15, fontWeight: '800' },
     statTileUnit: { fontSize: 13, fontWeight: '400' },
+
+    // tabs
+    tabBar: { flexDirection: 'row', marginBottom: SPACING.lg },
+    tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
+    tabText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 13 },
+
+    // empty state
+    emptyContainer: { alignItems: 'center', marginTop: 100 },
+    emptyText: { ...TYPOGRAPHY.body, opacity: 0.6 },
 });

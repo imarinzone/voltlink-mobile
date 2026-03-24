@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput, Dimensions, Platform } from 'react-native';
 const { width } = Dimensions.get('window');
-import { User, Shield, Info, LogOut, ChevronRight, Globe, Plus, Trash2, Leaf, Zap, Cloud, Trophy } from 'lucide-react-native';
+import { User, Shield, Info, LogOut, ChevronRight, Globe, Plus, Trash2, Leaf, Zap, Cloud, Trophy, Car, Edit2 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
@@ -23,7 +23,7 @@ const RELATIONS = ['Spouse', 'Child', 'Parent', 'Sibling', 'Other'];
 export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) => {
     const { theme } = useThemeStore();
     const { switchRole, setRole } = useRoleStore();
-    const { familyVehicles, fetchFamilyVehicles, addFamilyMemberApi, removeFamilyMemberApi } = useVehicleStore();
+    const { familyVehicles, fetchFamilyVehicles, addFamilyMemberApi, removeFamilyMemberApi, myVehicle, fetchMyVehicle } = useVehicleStore();
     const { language, setLanguage } = useLanguageStore();
     const isDark = theme === 'dark';
     const router = useRouter();
@@ -36,6 +36,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
         if (role === 'b2c') {
             getSustainabilityStats().then(setSustainability).catch(console.error);
             fetchFamilyVehicles();
+            if (!myVehicle?.id) {
+                fetchMyVehicle().catch(console.error);
+            }
         }
     }, [role]);
 
@@ -138,6 +141,48 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]} numberOfLines={1} adjustsFontSizeToFit>Global Rank</Text>
                             </GlassCard>
                         </View>
+                    </>
+                )}
+
+                {/* B2C Specific: Vehicle Details */}
+                {role === 'b2c' && myVehicle?.id && (
+                    <>
+                        <View style={styles.sectionHeaderRow}>
+                            <Text style={[styles.sectionTitle, { color: textSecondary }]}>VEHICLE DETAILS</Text>
+                            <TouchableOpacity>
+                                <Plus size={18} color={COLORS.primaryGreen} />
+                            </TouchableOpacity>
+                        </View>
+                        <GlassCard style={[styles.menuCard, { borderColor }] as any} intensity={15}>
+                            <View style={styles.vehicleDetailRow}>
+                                {/* Icon */}
+                                <View style={styles.vehicleIconWrap}>
+                                    <Car size={22} color={COLORS.brandBlue} />
+                                </View>
+
+                                {/* Model + Plate */}
+                                <View style={styles.vehicleInfo}>
+                                    <Text style={[styles.vehicleModelText, { color: textPrimary }]} numberOfLines={1}>
+                                        {[myVehicle.make, myVehicle.model].filter(Boolean).join(' ') || 'Unknown Vehicle'}
+                                    </Text>
+                                    <Text style={[styles.vehiclePlateText, { color: textSecondary }]} numberOfLines={1}>
+                                        {myVehicle.licensePlate || 'N/A'}
+                                    </Text>
+                                </View>
+
+                                {/* Action Buttons */}
+                                <View style={styles.vehicleActions}>
+                                    <TouchableOpacity style={[styles.vehicleActionBtn, { backgroundColor: COLORS.brandBlue + '18', borderColor: COLORS.brandBlue + '40' }]}>
+                                        <Edit2 size={13} color={COLORS.brandBlue} />
+                                        <Text style={[styles.vehicleActionText, { color: COLORS.brandBlue }]}>Edit</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.vehicleActionBtn, { backgroundColor: COLORS.alertRed + '15', borderColor: COLORS.alertRed + '40' }]}>
+                                        <Trash2 size={13} color={COLORS.alertRed} />
+                                        <Text style={[styles.vehicleActionText, { color: COLORS.alertRed }]}>Delete</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </GlassCard>
                     </>
                 )}
 
@@ -303,6 +348,53 @@ const styles = StyleSheet.create({
     },
     memberInitial: { color: COLORS.brandBlue, fontWeight: 'bold' },
     sustainGrid: { flexDirection: 'row', marginBottom: SPACING.xl, marginHorizontal: -4, alignItems: 'stretch' },
+    vehicleDetailRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: SPACING.lg,
+    },
+    vehicleIconWrap: {
+        width: 42,
+        height: 42,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: COLORS.brandBlue + '18',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: SPACING.md,
+    },
+    vehicleInfo: {
+        flex: 1,
+        minWidth: 0,
+        marginRight: SPACING.sm,
+    },
+    vehicleModelText: {
+        ...TYPOGRAPHY.body,
+        fontWeight: '700',
+        fontSize: 14,
+    },
+    vehiclePlateText: {
+        ...TYPOGRAPHY.label,
+        fontSize: 12,
+        marginTop: 3,
+    },
+    vehicleActions: {
+        flexDirection: 'row',
+        gap: 6,
+    },
+    vehicleActionBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: BORDER_RADIUS.md,
+        borderWidth: 1,
+        gap: 4,
+    },
+    vehicleActionText: {
+        ...TYPOGRAPHY.label,
+        fontSize: 11,
+        fontWeight: '700',
+    },
     sustainItem: {
         flex: 1,
         padding: 8, alignItems: 'center',

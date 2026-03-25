@@ -4,7 +4,7 @@
 VoltLink is an Expo React Native mobile application for EV (Electric Vehicle) charging intelligence. It supports two roles: Driver (fleet charging management) and B2C Customer (personal EV charging).
 
 ## Design System
-This project follows the VoltLink design system defined in `VOLTLINK_DESIGN_SYSTEM.md`.
+This project follows the VoltLink design system defined in `design-tokens.md`.
 
 ### Rules:
 - ALL visual changes (colors, typography, spacing, borders, shadows, radius, animations, icons) MUST follow the tokens and patterns in VOLTLINK_DESIGN_SYSTEM.md
@@ -13,7 +13,8 @@ This project follows the VoltLink design system defined in `VOLTLINK_DESIGN_SYST
 - Changes should be strictly cosmetic/visual — matching the VoltLink aesthetic
 - When touching a component, only change its styling properties — never its behavior
 - Phosphor Icons (duotone weight) are the icon standard. Replace any other icons with Phosphor equivalents
-- Montserrat is the primary font. Address Sans Pro is for numeric/display values
+- Montserrat is the primary font (loaded via Google Fonts CDN on web, expo-font on native). Address Sans Pro is for numeric/display values
+- Font families are defined in `FONT_FAMILY` export in `utils/theme.ts` with platform-aware values
 - Dark-only theme — do not add light mode
 
 ## Architecture

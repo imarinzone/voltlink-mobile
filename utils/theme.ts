@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const COLORS = {
   background: '#040C10',
   card: '#0A1419',
@@ -105,33 +107,50 @@ export const BORDER_RADIUS = {
   full: 9999,
 };
 
+const MONTSERRAT = Platform.OS === 'web' ? 'Montserrat, sans-serif' : 'Montserrat';
+
+export const FONT_FAMILY = {
+  regular: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-Regular',
+  medium: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-Medium',
+  semiBold: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-SemiBold',
+  bold: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-Bold',
+  display: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-Bold',
+  mono: 'monospace',
+};
+
 export const TYPOGRAPHY = {
   hero: {
     fontSize: 28,
     fontWeight: '700' as const,
-    fontFamily: 'System',
+    fontFamily: FONT_FAMILY.bold,
   },
   sectionHeader: {
     fontSize: 18,
     fontWeight: '600' as const,
-    fontFamily: 'System',
+    fontFamily: FONT_FAMILY.semiBold,
   },
   body: {
     fontSize: 14,
     fontWeight: '500' as const,
-    fontFamily: 'System',
+    fontFamily: FONT_FAMILY.medium,
   },
   label: {
     fontSize: 12,
     fontWeight: '500' as const,
-    fontFamily: 'System',
+    fontFamily: FONT_FAMILY.medium,
   },
   micro: {
     fontSize: 10,
     fontWeight: '600' as const,
     letterSpacing: 2,
     textTransform: 'uppercase' as const,
-    fontFamily: 'System',
+    fontFamily: FONT_FAMILY.semiBold,
+  },
+  display: {
+    fontSize: 40,
+    fontWeight: '700' as const,
+    fontFamily: FONT_FAMILY.display,
+    lineHeight: 48,
   },
 };
 

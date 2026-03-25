@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Lightning, Path, Warning, User } from 'phosphor-react-native';
+import { Lightning, PathIcon as Path, Warning, User } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { VehicleCard } from '../../components/vehicle/VehicleCard';
 import { MetricCard } from '../../components/ui/MetricCard';

@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
     detailTitle: { ...TYPOGRAPHY.label, marginBottom: 2 },
     detailValueBlue: { ...TYPOGRAPHY.body, color: COLORS.brandBlue, fontWeight: '700', fontSize: 15 },
     detailValue: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 15 },
-    costValue: { ...TYPOGRAPHY.hero, fontSize: 20, fontWeight: '700' },
+    costValue: { ...TYPOGRAPHY.display, fontSize: 20 },
     
     confirmBtn: { height: 50, borderRadius: BORDER_RADIUS.xl, justifyContent: 'center', alignItems: 'center', width: '100%' },
     confirmText: { ...TYPOGRAPHY.body, fontSize: 16, fontWeight: '700' },

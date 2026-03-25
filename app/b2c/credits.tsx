@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     },
     cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
     cardLabel: { ...TYPOGRAPHY.label, fontWeight: '600', fontSize: 13 },
-    bigValue: { ...TYPOGRAPHY.hero, fontSize: 22, fontWeight: '700', marginBottom: 2 },
+    bigValue: { ...TYPOGRAPHY.display, fontSize: 22, marginBottom: 2 },
     cardSub: { ...TYPOGRAPHY.label, fontSize: 11 },
 
     sectionHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginBottom: SPACING.md },
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     balancePanel: { borderRadius: BORDER_RADIUS.xl, borderWidth: 1, marginBottom: SPACING.md, overflow: 'hidden' },
     panelRow: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md },
     panelLabel: { ...TYPOGRAPHY.label, fontSize: 12, marginBottom: 2 },
-    panelValue: { ...TYPOGRAPHY.hero, fontSize: 20, fontWeight: '700' },
+    panelValue: { ...TYPOGRAPHY.display, fontSize: 20 },
     panelSub: { ...TYPOGRAPHY.label, fontSize: 11, marginTop: 2 },
     divider: { height: 1 },
 
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
     },
     statTileHeader: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: SPACING.sm },
     statTileLabel: { ...TYPOGRAPHY.label, fontSize: 11, lineHeight: 14 },
-    statTileValue: { ...TYPOGRAPHY.hero, fontSize: 15, fontWeight: '700' },
+    statTileValue: { ...TYPOGRAPHY.display, fontSize: 15 },
     statTileUnit: { fontSize: 13, fontWeight: '400' },
 
     // tabs

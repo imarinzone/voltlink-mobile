@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
     creditHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md },
     creditInfo: { flex: 1 },
     creditLabel: { ...TYPOGRAPHY.label, color: COLORS.textSecondaryDark },
-    creditValue: { ...TYPOGRAPHY.hero, color: '#FFF', fontSize: 36 },
+    creditValue: { ...TYPOGRAPHY.display, color: '#FFF', fontSize: 36 },
     creditFooter: {
         flexDirection: 'row', alignItems: 'center',
         borderTopWidth: 1, borderTopColor: COLORS.cardBorder, paddingTop: SPACING.sm,

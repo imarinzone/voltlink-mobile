@@ -99,7 +99,7 @@ export const VehicleCard: React.FC<{ vehicle: Vehicle; onPress?: () => void }> =
 const styles = StyleSheet.create({
     container: { alignItems: 'center', justifyContent: 'center' },
     textContainer: { position: 'absolute', alignItems: 'center' },
-    percentage: { ...TYPOGRAPHY.hero, fontSize: 28, fontWeight: '700' },
+    percentage: { ...TYPOGRAPHY.display, fontSize: 28 },
     label: { ...TYPOGRAPHY.label, marginTop: -4, fontSize: 11 },
     card: {
         flexDirection: 'row',

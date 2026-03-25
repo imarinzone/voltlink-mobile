@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
     },
     estimateLabel: { ...TYPOGRAPHY.body },
     estimateValue: { ...TYPOGRAPHY.body, fontWeight: '600' },
-    estimateTotal: { ...TYPOGRAPHY.hero, fontSize: 22, fontWeight: '700' },
+    estimateTotal: { ...TYPOGRAPHY.display, fontSize: 22 },
     creditsEarned: { ...TYPOGRAPHY.body, fontWeight: '700', color: COLORS.successGreen },
     confirmBtn: {
         height: 56, marginTop: SPACING.md, marginBottom: SPACING.xl,

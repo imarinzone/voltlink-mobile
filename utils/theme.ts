@@ -114,7 +114,9 @@ export const FONT_FAMILY = {
   medium: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-Medium',
   semiBold: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-SemiBold',
   bold: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-Bold',
-  display: Platform.OS === 'web' ? MONTSERRAT : 'Montserrat-Bold',
+  display: 'AddressSansPro-Bold',
+  displaySemiBold: 'AddressSansPro-SemiBold',
+  displayRegular: 'AddressSansPro-Regular',
   mono: 'monospace',
 };
 

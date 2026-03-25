@@ -13,8 +13,8 @@ This project follows the VoltLink design system defined in `design-tokens.md`.
 - Changes should be strictly cosmetic/visual — matching the VoltLink aesthetic
 - When touching a component, only change its styling properties — never its behavior
 - Phosphor Icons (duotone weight) are the icon standard. Replace any other icons with Phosphor equivalents
-- Montserrat is the primary font (loaded via Google Fonts CDN on web, expo-font on native). Address Sans Pro is for numeric/display values
-- Font families are defined in `FONT_FAMILY` export in `utils/theme.ts` with platform-aware values
+- Montserrat is the primary font (loaded via Google Fonts CDN on web, expo-font on native). Address Sans Pro is for numeric/display values (loaded from `assets/fonts/` via `@font-face` on web, `Font.loadAsync` on native)
+- Font families are defined in `FONT_FAMILY` export in `utils/theme.ts` with platform-aware values. `FONT_FAMILY.display` = Address Sans Pro Bold, `FONT_FAMILY.displaySemiBold` = Address Sans Pro SemiBold
 - Dark-only theme — do not add light mode
 
 ## Architecture

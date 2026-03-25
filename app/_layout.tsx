@@ -16,13 +16,36 @@ import {
 
 function injectWebFonts() {
     if (Platform.OS !== 'web') return;
-    if (document.getElementById('montserrat-fonts')) return;
+    if (document.getElementById('voltlink-fonts')) return;
 
     const link = document.createElement('link');
-    link.id = 'montserrat-fonts';
+    link.id = 'voltlink-fonts';
     link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @font-face {
+            font-family: 'AddressSansPro-Bold';
+            src: url('/assets/fonts/AddressSansPro-Bold.otf') format('opentype');
+            font-weight: 700;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'AddressSansPro-SemiBold';
+            src: url('/assets/fonts/AddressSansPro-SemiBold.otf') format('opentype');
+            font-weight: 600;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'AddressSansPro-Regular';
+            src: url('/assets/fonts/AddressSansPro-Regular.otf') format('opentype');
+            font-weight: 400;
+            font-display: swap;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 export default function RootLayout() {
@@ -42,6 +65,9 @@ export default function RootLayout() {
                 'Montserrat-Medium': Montserrat_500Medium,
                 'Montserrat-SemiBold': Montserrat_600SemiBold,
                 'Montserrat-Bold': Montserrat_700Bold,
+                'AddressSansPro-Bold': require('../assets/fonts/AddressSansPro-Bold.otf'),
+                'AddressSansPro-SemiBold': require('../assets/fonts/AddressSansPro-SemiBold.otf'),
+                'AddressSansPro-Regular': require('../assets/fonts/AddressSansPro-Regular.otf'),
             }).catch(() => {});
         }
     }, []);

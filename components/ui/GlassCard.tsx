@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, ViewStyle, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useThemeStore } from '../../store/themeStore';
-import { COLORS, BORDER_RADIUS, SHADOWS } from '../../utils/theme';
+import { COLORS, BORDER_RADIUS } from '../../utils/theme';
 
 interface GlassCardProps {
     children: React.ReactNode;
@@ -23,16 +23,15 @@ export const GlassCard: React.FC<GlassCardProps> = ({ children, style, intensity
     if (Platform.OS === 'web') {
         return (
             <View style={[cardStyle, {
-                backgroundColor: isDark ? COLORS.cardBg : COLORS.glassLight,
-                backdropFilter: 'blur(20px)',
-            }, SHADOWS.card]}>
+                backgroundColor: isDark ? COLORS.card : COLORS.glassLight,
+            }]}>
                 {children}
             </View>
         );
     }
 
     return (
-        <View style={[styles.container, SHADOWS.card]}>
+        <View style={styles.container}>
             <BlurView
                 intensity={intensity}
                 tint={isDark ? 'dark' : 'light'}
@@ -46,18 +45,18 @@ export const GlassCard: React.FC<GlassCardProps> = ({ children, style, intensity
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: BORDER_RADIUS.lg,
+        borderRadius: BORDER_RADIUS.base,
         overflow: 'hidden',
         marginVertical: 8,
     },
     card: {
-        padding: 16,
-        borderRadius: BORDER_RADIUS.lg,
+        padding: 20,
+        borderRadius: BORDER_RADIUS.base,
         borderWidth: 1,
     },
     cardDark: {
-        backgroundColor: COLORS.cardBg,
-        borderColor: COLORS.cardBorder,
+        backgroundColor: COLORS.card,
+        borderColor: COLORS.border,
     },
     cardLight: {
         backgroundColor: 'rgba(255, 255, 255, 0.85)',

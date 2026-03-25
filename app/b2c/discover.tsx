@@ -198,7 +198,7 @@ export default function DiscoverScreen() {
                         onPress={() => router.push({ pathname: '/b2c/booking', params: { stationId: item.id } })}
                         disabled={!ok}
                     >
-                        <Text style={[styles.actionText, { color: COLORS.brandBlue, fontWeight: '800', fontSize: 13 }]}>
+                        <Text style={[styles.actionText, { color: COLORS.brandBlue, fontWeight: '700', fontSize: 13 }]}>
                             {ok ? t.bookNow : t.full}
                         </Text>
                         {ok && <ChevronRight size={14} color={COLORS.brandBlue} />}
@@ -382,11 +382,6 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.xl,
         borderWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.07,
-        shadowRadius: 6,
-        elevation: 2,
     },
     cardTop: {
         flexDirection: 'row',
@@ -400,7 +395,7 @@ const styles = StyleSheet.create({
     dotInner: { width: 10, height: 10, borderRadius: 5 },
     stationName: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 15 },
     cpoName: { ...TYPOGRAPHY.label, fontWeight: '600', marginTop: 2 },
-    price: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, fontWeight: '800', color: COLORS.successGreen },
+    price: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, fontWeight: '700', color: COLORS.successGreen },
     priceUnit: { ...TYPOGRAPHY.label, fontSize: 11 },
     metaRow: {
         flexDirection: 'row', gap: SPACING.sm, flexWrap: 'wrap',

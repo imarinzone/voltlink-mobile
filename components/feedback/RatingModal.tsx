@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.inputBg,
         borderRadius: 12,
     },
-    title: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, fontWeight: '800' },
+    title: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, fontWeight: '700' },
     subtitle: { ...TYPOGRAPHY.label, fontSize: 12, marginTop: 4, letterSpacing: 0.5 },
     ratingSection: {
         marginBottom: SPACING.xl,

@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
     lossBlocksContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.sm, marginHorizontal: -4 },
     lossBlock: { flex: 1, borderRadius: BORDER_RADIUS.md, padding: 8, alignItems: 'center', marginHorizontal: 4, paddingVertical: 10 },
     lossLabel: { ...TYPOGRAPHY.label, fontSize: 10, marginTop: 6, textAlign: 'center' },
-    lossValue: { ...TYPOGRAPHY.label, fontSize: 13, fontWeight: '800', color: COLORS.alertRed, marginTop: 2 },
+    lossValue: { ...TYPOGRAPHY.label, fontSize: 13, fontWeight: '700', color: COLORS.alertRed, marginTop: 2 },
     
     reasonInput: { height: 80, borderRadius: BORDER_RADIUS.md, borderWidth: 1, padding: SPACING.md, textAlignVertical: 'top', ...TYPOGRAPHY.body, marginBottom: SPACING.xs },
     
@@ -430,9 +430,9 @@ const styles = StyleSheet.create({
     detailCol: { flex: 1 },
     detailColRight: { flex: 1.2, alignItems: 'flex-end' },
     detailTitle: { ...TYPOGRAPHY.label, marginBottom: 2 },
-    detailValueBlue: { ...TYPOGRAPHY.body, color: COLORS.brandBlue, fontWeight: '800', fontSize: 15 },
+    detailValueBlue: { ...TYPOGRAPHY.body, color: COLORS.brandBlue, fontWeight: '700', fontSize: 15 },
     detailValue: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 15 },
-    costValue: { ...TYPOGRAPHY.hero, fontSize: 20, fontWeight: '800' },
+    costValue: { ...TYPOGRAPHY.hero, fontSize: 20, fontWeight: '700' },
     
     confirmBtn: { height: 50, borderRadius: BORDER_RADIUS.xl, justifyContent: 'center', alignItems: 'center', width: '100%' },
     confirmText: { ...TYPOGRAPHY.body, fontSize: 16, fontWeight: '700' },

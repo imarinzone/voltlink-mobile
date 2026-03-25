@@ -119,9 +119,9 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         marginBottom: SPACING.xl,
     },
-    title: { ...TYPOGRAPHY.sectionHeader, fontSize: 22, fontWeight: '800' },
+    title: { ...TYPOGRAPHY.sectionHeader, fontSize: 22, fontWeight: '700' },
     subtitle: { ...TYPOGRAPHY.label, fontSize: 13, marginTop: 2 },
-    sectionLabel: { ...TYPOGRAPHY.label, fontSize: 10, fontWeight: '800', marginBottom: SPACING.md, letterSpacing: 1 },
+    sectionLabel: { ...TYPOGRAPHY.label, fontSize: 10, fontWeight: '700', marginBottom: SPACING.md, letterSpacing: 1 },
     typesRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',

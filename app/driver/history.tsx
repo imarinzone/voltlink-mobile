@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     sessionStation: { ...TYPOGRAPHY.body, fontWeight: '700' },
     statusContainer: { flexDirection: 'row', alignItems: 'center' },
     statusIndicator: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
-    statusText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 11 },
+    statusText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 11 },
     sessionMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
     sessionMetaText: { ...TYPOGRAPHY.label },
     sessionDate: { ...TYPOGRAPHY.label },

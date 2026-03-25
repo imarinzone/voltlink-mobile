@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     },
     primaryBannerText: {
         color: COLORS.darkBg,
-        fontWeight: '800',
+        fontWeight: '700',
         fontSize: 11,
         letterSpacing: 0.8,
     },
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
         paddingVertical: 3,
         borderRadius: BORDER_RADIUS.sm,
     },
-    rankText: { color: COLORS.darkBg, fontSize: 10, fontWeight: '800' },
+    rankText: { color: COLORS.darkBg, fontSize: 10, fontWeight: '700' },
     price: { ...TYPOGRAPHY.label, fontWeight: '700', color: COLORS.successGreen, fontSize: 13 },
     name: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, marginBottom: 4 },
     details: {
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flex: 1,
     },
-    bookText: { color: COLORS.primaryGreen, fontWeight: '800', fontSize: 13 },
+    bookText: { color: COLORS.primaryGreen, fontWeight: '700', fontSize: 13 },
     actionRow: {
         flexDirection: 'row',
         alignItems: 'center',

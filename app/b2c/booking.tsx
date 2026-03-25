@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     slotUnavailable: {
         opacity: 0.3, borderColor: COLORS.cardBorder, backgroundColor: 'transparent',
     },
-    slotTime: { ...TYPOGRAPHY.body, fontWeight: '800', fontSize: 13, textAlign: 'center' },
+    slotTime: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 13, textAlign: 'center' },
     successBox: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     },
     sessionBtnText: {
         ...TYPOGRAPHY.body,
-        fontWeight: '800',
+        fontWeight: '700',
         fontSize: 16,
         color: '#000',
     },
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     innerSessionText: {
         ...TYPOGRAPHY.label,
         color: COLORS.brandBlue,
-        fontWeight: '800',
+        fontWeight: '700',
         fontSize: 14,
     },
     slotPrice: { ...TYPOGRAPHY.label, marginTop: 4 },
@@ -629,7 +629,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12, paddingVertical: 4,
         borderRadius: 20, marginBottom: SPACING.sm,
     },
-    botText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 11 },
+    botText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 11 },
     loopTitle: { ...TYPOGRAPHY.hero, fontSize: 22, textAlign: 'center' },
     loopContent: { paddingHorizontal: SPACING.xl, paddingTop: SPACING.lg, paddingBottom: 200 },
     timelineContainer: { marginTop: SPACING.md },
@@ -649,10 +649,6 @@ const styles = StyleSheet.create({
         borderWidth: 2, zIndex: 10,
     },
     activeCircle: {
-        shadowColor: COLORS.brandBlue,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8, shadowRadius: 10,
-        elevation: 10,
     },
     stepMain: { flex: 1, paddingLeft: SPACING.md, paddingTop: 6 },
     stepHeaderRow: { flexDirection: 'row', alignItems: 'center' },

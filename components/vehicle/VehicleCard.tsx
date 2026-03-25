@@ -7,7 +7,7 @@ import Animated, {
     withTiming,
     interpolateColor
 } from 'react-native-reanimated';
-import { COLORS, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../../utils/theme';
+import { COLORS, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { Vehicle } from '../../types/vehicle.types';
 import { useThemeStore } from '../../store/themeStore';
@@ -45,7 +45,7 @@ export const BatteryIndicator: React.FC<BatteryIndicatorProps> = ({
 
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
-    const trackColor = isDark ? COLORS.cardBorder : '#e0e0e0';
+    const trackColor = isDark ? COLORS.divider : '#e0e0e0';
 
     return (
         <View style={[styles.container, { width: size, height: size }]}>
@@ -99,7 +99,7 @@ export const VehicleCard: React.FC<{ vehicle: Vehicle; onPress?: () => void }> =
 const styles = StyleSheet.create({
     container: { alignItems: 'center', justifyContent: 'center' },
     textContainer: { position: 'absolute', alignItems: 'center' },
-    percentage: { ...TYPOGRAPHY.hero, fontSize: 28, fontWeight: '800' },
+    percentage: { ...TYPOGRAPHY.hero, fontSize: 28, fontWeight: '700' },
     label: { ...TYPOGRAPHY.label, marginTop: -4, fontSize: 11 },
     card: {
         flexDirection: 'row',
@@ -109,6 +109,6 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     cardInfo: { marginLeft: 20, flex: 1 },
-    vehicleName: { ...TYPOGRAPHY.hero, fontSize: 22, fontWeight: '700' },
-    vehicleDetail: { ...TYPOGRAPHY.label, marginTop: 4, fontSize: 13 },
+    vehicleName: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: '600' },
+    vehicleDetail: { ...TYPOGRAPHY.body, marginTop: 4, fontSize: 14 },
 });

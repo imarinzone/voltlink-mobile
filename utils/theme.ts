@@ -1,7 +1,44 @@
 export const COLORS = {
+  background: '#040C10',
+  card: '#0A1419',
+  popover: '#0F1C23',
+  accent: '#152128',
+  muted: '#1C2B34',
+
+  border: '#152128',
+  borderSubtle: 'rgba(242, 245, 247, 0.08)',
+  divider: '#243038',
+
+  foreground: '#F2F5F7',
+  textPrimary: '#F2F5F7',
+  textSecondary: '#A8B8C2',
+  textMuted: '#7A8D9A',
+  textDisabled: '#455661',
+  placeholder: '#5A6D7A',
+
+  ecoGreen: '#04eaaa',
+  ecoGreenHover: '#1affc8',
+  ecoGreenPressed: '#03bb88',
+  ecoGreenLight: '#b3ffec',
+  ecoBlue: '#10a6de',
+  ecoBlueHover: '#1abaf1',
+  ecoBluePressed: '#0d85b2',
+  ecoTeal: '#207071',
+
+  success: '#04eaaa',
+  warning: '#f59e0b',
+  error: '#ef4444',
+  info: '#10a6de',
+
+  chartEmerald: '#04eaaa',
+  chartCyan: '#10a6de',
+  chartTeal: '#207071',
+  chartAmber: '#f59e0b',
+  chartSlate: '#5A6D7A',
+
   darkBg: '#040C10',
   darkSecondary: '#152128',
-  darkTertiary: '#1C2D36',
+  darkTertiary: '#1C2B34',
   darkPrimary: '#040C10',
 
   lightPrimary: '#f5f5f5',
@@ -11,7 +48,6 @@ export const COLORS = {
   brandBlue: '#10a6de',
   primaryGreen: '#04eaaa',
   secondaryBlue: '#10a6de',
-  ecoTeal: '#207071',
   gradientStart: '#04eaaa',
   gradientEnd: '#10a6de',
 
@@ -20,88 +56,116 @@ export const COLORS = {
   warningOrange: '#f59e0b',
 
   textPrimaryDark: '#F2F5F7',
-  textSecondaryDark: '#CBD5DB',
-  textMutedDark: '#A8B8C2',
-  placeholderDark: '#7A8D9A',
+  textSecondaryDark: '#A8B8C2',
+  textMutedDark: '#7A8D9A',
+  placeholderDark: '#5A6D7A',
 
   textPrimaryLight: '#1a1a1a',
   textSecondaryLight: 'rgba(17,17,17,0.7)',
 
-  glassDark: 'rgba(255,255,255,0.08)',
-  glassDarkBorder: 'rgba(255,255,255,0.15)',
+  glassDark: 'rgba(4, 12, 16, 0.70)',
+  glassDarkBorder: 'rgba(242, 245, 247, 0.08)',
   glassLight: 'rgba(255,255,255,0.95)',
   glassLightBorder: 'rgba(0,0,0,0.08)',
 
-  cardBg: '#152128',
-  cardBorder: '#243038',
-  borderDefault: '#243038',
-  borderHeavy: '#455661',
-  hoverBg: '#344149',
-  inputBg: '#1A2830',
-  surfaceBg: '#152128',
+  cardBg: '#0A1419',
+  cardBorder: '#152128',
+  borderDefault: '#152128',
+  borderHeavy: '#243038',
+  hoverBg: '#152128',
+  inputBg: '#0F1C23',
+  surfaceBg: '#0A1419',
 };
+
+export const statusBadge = (color: string) => ({
+  background: color + '1A',
+  border: color + '40',
+  text: color,
+});
 
 export const SPACING = {
   xs: 4,
   sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
+  md: 12,
+  base: 16,
+  lg: 20,
+  xl: 24,
+  '2xl': 32,
+  '3xl': 40,
+  '4xl': 48,
 };
 
 export const BORDER_RADIUS = {
   sm: 8,
   md: 12,
-  lg: 16,
-  xl: 20,
-  '2xl': 24,
+  lg: 12,
+  xl: 12,
+  '2xl': 12,
+  base: 12,
   full: 9999,
 };
 
 export const TYPOGRAPHY = {
   hero: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700' as const,
     fontFamily: 'System',
   },
   sectionHeader: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '600' as const,
     fontFamily: 'System',
   },
   body: {
-    fontSize: 16,
-    fontWeight: '400' as const,
+    fontSize: 14,
+    fontWeight: '500' as const,
     fontFamily: 'System',
   },
   label: {
     fontSize: 12,
-    fontWeight: '400' as const,
+    fontWeight: '500' as const,
+    fontFamily: 'System',
+  },
+  micro: {
+    fontSize: 10,
+    fontWeight: '600' as const,
+    letterSpacing: 2,
+    textTransform: 'uppercase' as const,
     fontFamily: 'System',
   },
 };
 
 export const SHADOWS = {
   card: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   button: {
-    shadowColor: '#04eaaa',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   subtle: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
+};
+
+export const gradients = {
+  brand: ['#04eaaa', '#10a6de'] as const,
+  brandHorizontal: ['#04eaaa', '#10a6de'] as const,
+};
+
+export const glassmorphism = {
+  background: 'rgba(4, 12, 16, 0.70)',
+  blur: 20,
+  border: 'rgba(242, 245, 247, 0.08)',
 };

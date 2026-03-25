@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     title: {
         ...TYPOGRAPHY.hero,
         fontSize: 34,
-        fontWeight: '800',
+        fontWeight: '700',
         letterSpacing: -0.5,
     },
     tagline: {
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     checkmarkText: {
         color: '#000',
         fontSize: 14,
-        fontWeight: '800',
+        fontWeight: '700',
     },
     buttonContainer: {
         marginTop: SPACING.xl,

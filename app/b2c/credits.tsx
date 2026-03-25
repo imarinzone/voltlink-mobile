@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     scroll: { paddingHorizontal: SPACING.lg, paddingBottom: 120 },
 
     header: { paddingTop: SPACING.lg, marginBottom: SPACING.lg },
-    title: { ...TYPOGRAPHY.hero, fontSize: 30, fontWeight: '800', marginBottom: 6 },
+    title: { ...TYPOGRAPHY.hero, fontSize: 30, fontWeight: '700', marginBottom: 6 },
     subtitle: { ...TYPOGRAPHY.body, lineHeight: 22 },
 
     card: {
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     },
     cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
     cardLabel: { ...TYPOGRAPHY.label, fontWeight: '600', fontSize: 13 },
-    bigValue: { ...TYPOGRAPHY.hero, fontSize: 22, fontWeight: '800', marginBottom: 2 },
+    bigValue: { ...TYPOGRAPHY.hero, fontSize: 22, fontWeight: '700', marginBottom: 2 },
     cardSub: { ...TYPOGRAPHY.label, fontSize: 11 },
 
     sectionHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginBottom: SPACING.md },
@@ -465,8 +465,8 @@ const styles = StyleSheet.create({
     renewableBadge: { backgroundColor: 'rgba(0,200,100,0.15)', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3 },
     renewableBadgeText: { ...TYPOGRAPHY.label, color: COLORS.successGreen, fontWeight: '700', fontSize: 10 },
     creditValue: { ...TYPOGRAPHY.body, fontWeight: '700' },
-    totalLabel: { flex: 2, ...TYPOGRAPHY.body, fontWeight: '800' },
-    totalValue: { ...TYPOGRAPHY.body, fontWeight: '800', fontSize: 16 },
+    totalLabel: { flex: 2, ...TYPOGRAPHY.body, fontWeight: '700' },
+    totalValue: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 16 },
 
     // filter
     filterRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.md },
@@ -510,13 +510,13 @@ const styles = StyleSheet.create({
         height: 52, borderRadius: BORDER_RADIUS.xl,
         justifyContent: 'center', alignItems: 'center',
     },
-    transferBtnText: { ...TYPOGRAPHY.body, color: '#fff', fontWeight: '800', fontSize: 16 },
+    transferBtnText: { ...TYPOGRAPHY.body, color: '#fff', fontWeight: '700', fontSize: 16 },
 
     // unified balance panel
     balancePanel: { borderRadius: BORDER_RADIUS.xl, borderWidth: 1, marginBottom: SPACING.md, overflow: 'hidden' },
     panelRow: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md },
     panelLabel: { ...TYPOGRAPHY.label, fontSize: 12, marginBottom: 2 },
-    panelValue: { ...TYPOGRAPHY.hero, fontSize: 20, fontWeight: '800' },
+    panelValue: { ...TYPOGRAPHY.hero, fontSize: 20, fontWeight: '700' },
     panelSub: { ...TYPOGRAPHY.label, fontSize: 11, marginTop: 2 },
     divider: { height: 1 },
 
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
     },
     statTileHeader: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: SPACING.sm },
     statTileLabel: { ...TYPOGRAPHY.label, fontSize: 11, lineHeight: 14 },
-    statTileValue: { ...TYPOGRAPHY.hero, fontSize: 15, fontWeight: '800' },
+    statTileValue: { ...TYPOGRAPHY.hero, fontSize: 15, fontWeight: '700' },
     statTileUnit: { fontSize: 13, fontWeight: '400' },
 
     // tabs

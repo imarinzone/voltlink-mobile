@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
     headerRight: { flexDirection: 'row', alignItems: 'center' },
     langSwitch: { flexDirection: 'row', backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
-    langText: { fontSize: 10, fontWeight: '800' },
+    langText: { fontSize: 10, fontWeight: '700' },
     profileAvatar: {
         width: 36, height: 36,
         borderRadius: 18,
@@ -552,10 +552,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center', alignItems: 'center',
         marginBottom: 6,
     },
-    familyInitial: { color: COLORS.brandBlue, fontWeight: '800', fontSize: 16 },
+    familyInitial: { color: COLORS.brandBlue, fontWeight: '700', fontSize: 16 },
     familyName: { ...TYPOGRAPHY.label, fontWeight: '700', marginBottom: 2, fontSize: 12 },
     familyVehicle: { ...TYPOGRAPHY.label, fontSize: 10, marginBottom: 4, textAlign: 'center' },
-    familyBattery: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 13 },
+    familyBattery: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 13 },
     statsRow: { flexDirection: 'row', marginBottom: SPACING.md, marginTop: SPACING.sm, marginHorizontal: -4, alignItems: 'stretch' },
     creditCard: {
         backgroundColor: COLORS.brandBlue,
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
     aiDotInner: { width: 9, height: 9, borderRadius: 4.5 },
     aiStationName: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 13 },
     aiCpoName: { ...TYPOGRAPHY.label, fontWeight: '600', fontSize: 10, marginTop: 1 },
-    aiPrice: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: '800', color: COLORS.successGreen, marginBottom: 6 },
+    aiPrice: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: '700', color: COLORS.successGreen, marginBottom: 6 },
     aiPriceUnit: { fontSize: 11, fontWeight: '400' },
     aiMeta: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 6 }, // Removed gap
     aiChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, marginRight: 4, marginBottom: 4 }, // Added marginRight and marginBottom
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
         paddingVertical: 7, // Removed gap
         borderTopWidth: 1, borderTopColor: COLORS.brandBlue + '26',
     },
-    aiBookText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 12, color: COLORS.brandBlue },
+    aiBookText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 12, color: COLORS.brandBlue },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: SPACING.lg },
     modalContent: { padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.xl },
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12, paddingVertical: 4,
         borderRadius: 20, marginBottom: SPACING.sm,
     },
-    botText: { ...TYPOGRAPHY.label, fontWeight: '800', fontSize: 11 },
+    botText: { ...TYPOGRAPHY.label, fontWeight: '700', fontSize: 11 },
     loopTitle: { ...TYPOGRAPHY.hero, fontSize: 22, textAlign: 'center' },
     loopContent: { paddingHorizontal: SPACING.xl, paddingTop: SPACING.lg, paddingBottom: 200 },
     timelineContainer: { marginTop: SPACING.md },
@@ -640,10 +640,6 @@ const styles = StyleSheet.create({
         borderWidth: 2, zIndex: 10,
     },
     activeCircle: {
-        shadowColor: COLORS.brandBlue,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8, shadowRadius: 10,
-        elevation: 10,
     },
     stepMain: { flex: 1, paddingLeft: SPACING.md, paddingTop: 6 },
     stepHeaderRow: { flexDirection: 'row', alignItems: 'center' },

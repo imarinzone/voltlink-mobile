@@ -1,0 +1,198 @@
+# VoltLink Mobile App — Design System Overhaul
+
+## Context
+The mobile app's UI does not match the web platform's polished look. I'm providing an exact design tokens specification (`design-tokens.md`) that defines every color, font, spacing, and component value used in the web platform. Your job is to update the mobile app to match these tokens **precisely** — not approximately.
+
+## Step 1: Create a Centralized Theme File
+
+Before touching any screens, create a single `theme.ts` (or `constants/theme.ts`) file that exports ALL design values. Every screen and component must import from this file — no hardcoded colors or sizes anywhere else.
+
+```typescript
+export const colors = {
+  // Backgrounds
+  background: '#040C10',
+  card: '#0A1419',
+  popover: '#0F1C23',
+  accent: '#152128',
+  muted: '#1C2B34',
+
+  // Borders
+  border: '#152128',
+  borderSubtle: 'rgba(242, 245, 247, 0.08)',
+  divider: '#243038',
+
+  // Text
+  foreground: '#F2F5F7',
+  textPrimary: '#F2F5F7',
+  textSecondary: '#A8B8C2',
+  textMuted: '#7A8D9A',
+  textDisabled: '#455661',
+  placeholder: '#5A6D7A',
+
+  // Brand
+  ecoGreen: '#04eaaa',
+  ecoGreenHover: '#1affc8',
+  ecoGreenPressed: '#03bb88',
+  ecoBlue: '#10a6de',
+  ecoBlueHover: '#1abaf1',
+  ecoBluePressed: '#0d85b2',
+  ecoTeal: '#207071',
+
+  // Status
+  success: '#04eaaa',
+  warning: '#f59e0b',
+  error: '#ef4444',
+  info: '#10a6de',
+
+  // Chart (only these 5 colors for all charts)
+  chartEmerald: '#04eaaa',
+  chartCyan: '#10a6de',
+  chartTeal: '#207071',
+  chartAmber: '#f59e0b',
+  chartSlate: '#5A6D7A',
+};
+
+export const statusBadge = (color: string) => ({
+  background: color + '1A', // 10% opacity
+  border: color + '40',     // 25% opacity
+  text: color,
+});
+
+export const fonts = {
+  heading: 'Montserrat',     // All text except numeric stats
+  display: 'AddressSansPro', // Numeric stat values, KPIs only
+  mono: 'SF Mono',           // Code, IDs
+};
+
+export const fontSizes = {
+  micro: 10,        // Overlines, section labels (uppercase)
+  xs: 12,           // Small labels, meta text, timestamps
+  sm: 14,           // Default body, descriptions
+  base: 16,         // Standard body
+  lg: 18,           // Card titles
+  xl: 20,           // Sub-headings
+  '2xl': 24,        // Section headings
+  '3xl': 28,        // Stat values (medium)
+  '4xl': 40,        // Hero stat values (Address Sans Pro)
+};
+
+export const fontWeights = {
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',      // Maximum weight. NEVER use 800 or 900.
+};
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  base: 16,
+  lg: 20,           // Card padding
+  xl: 24,           // Grid gaps, section spacing
+  '2xl': 32,        // Page padding
+  '3xl': 40,
+  '4xl': 48,
+};
+
+export const radii = {
+  sm: 8,             // Badges, small tags
+  base: 12,          // Cards, buttons, inputs, modals
+  full: 9999,        // Avatars, pills, dot indicators
+};
+
+export const borders = {
+  card: `1px solid ${colors.border}`,
+  subtle: `1px solid ${colors.borderSubtle}`,
+  divider: `1px solid ${colors.divider}`,
+  input: `1px solid ${colors.border}`,
+  focusRing: `2px solid rgba(4, 234, 170, 0.20)`,
+};
+
+export const gradients = {
+  brand: ['#04eaaa', '#10a6de'],    // -136.286deg angle
+  brandHorizontal: ['#04eaaa', '#10a6de'], // 90deg
+};
+
+export const glassmorphism = {
+  background: 'rgba(4, 12, 16, 0.70)',
+  blur: 20,
+  border: 'rgba(242, 245, 247, 0.08)',
+};
+```
+
+## Step 2: Apply to Every Screen (One at a Time)
+
+Go through each screen in this order and update every element:
+
+### Screen 1: Home / Dashboard
+- **Page background**: `#040C10` — not a lighter shade, not `#111`, not `#1a1a2e`. Exact `#040C10`.
+- **"Welcome back" text**: Montserrat, 14px, weight 400, color `#A8B8C2`
+- **User name**: Montserrat, 24px, weight 700, color `#F2F5F7`
+- **Vehicle hero card**: background `#0A1419`, border `1px solid #152128`, radius 12px, padding 20px
+  - Battery circle: stroke `#04eaaa` on `#243038` track, center text Address Sans Pro 24px bold `#F2F5F7`
+  - "Battery" label under circle: Montserrat 10px 500 `#7A8D9A`
+  - Vehicle name: Montserrat 18px 600 `#F2F5F7`
+  - License plate: Montserrat 14px 500 `#A8B8C2`
+  - Range: Montserrat 14px 400 `#04eaaa`
+- **"Charging Stats" section title**: Montserrat 18px 600 `#F2F5F7`
+- **Stat cards (Sessions, CO₂ Saved, Credits Earned)**: 3-column row
+  - Each: background `#0A1419`, border `1px solid #152128`, radius 12px, padding 16px
+  - Icon: Phosphor duotone 16px `#04eaaa`
+  - Label: Montserrat 12px 500 `#7A8D9A`
+  - Value: Address Sans Pro 28px 700 `#F2F5F7`
+  - Unit (kg, etc): Address Sans Pro 14px 400 `#A8B8C2`
+- **"AI RECOMMENDATIONS" overline**: Address Sans Pro 10px 600 `#7A8D9A`, uppercase, letter-spacing 0.2em, icon 12px `#04eaaa`
+- **"See All" link**: Montserrat 14px 500 `#10a6de`
+- **Recommendation cards**: background `#0A1419`, border `1px solid #152128`, radius 12px, padding 16px
+  - Station name: Montserrat 14px 600 `#F2F5F7`, truncate with ellipsis if too long
+  - "VoltLink Optimized" badge: Montserrat 11px 500 `#04eaaa`
+  - Time slot: Montserrat 12px 400 `#A8B8C2`, Clock icon 12px
+  - Price (₹7.11): Address Sans Pro 20px 700 `#F2F5F7`
+  - Unit (/kWh): Address Sans Pro 12px 400 `#A8B8C2`
+  - Meta row (0 km, availability): Montserrat 12px 400 `#7A8D9A`
+  - AI reason text: Montserrat 12px 400 `#04eaaa`
+  - "Book Now >" CTA: Montserrat 14px 600 `#04eaaa`, no background, no border
+
+### Screen 2: Stations / Map
+Apply the same token rules — all cards, text, backgrounds, and borders from the theme file.
+
+### Screen 3: Sessions / Charging History
+Apply the same token rules.
+
+### Screen 4: Profile / Settings
+Apply the same token rules.
+
+### Screen 5: Any remaining screens
+Apply the same token rules.
+
+## Step 3: Component-Level Checklist
+
+For EVERY component you touch, verify these:
+
+- [ ] Background uses exact hex from `colors` (not approximations)
+- [ ] All text uses Montserrat EXCEPT numeric stat values (which use Address Sans Pro)
+- [ ] Font weights never exceed 700
+- [ ] Card border-radius is 12px everywhere
+- [ ] Card borders are `1px solid #152128`
+- [ ] No box shadows on cards (dark mode uses background color elevation, not shadows)
+- [ ] Status badges follow the pattern: `bg: color/10%`, `border: color/25%`, `text: color`
+- [ ] Icons are Phosphor duotone weight
+- [ ] Spacing follows the 4px grid
+- [ ] Progress bars use gradient fill (`#04eaaa` → `#10a6de`) on `#152128` track
+- [ ] No pure black (`#000`) or pure white (`#FFF`) anywhere
+
+## Anti-Patterns to Fix
+
+Look for and fix these common issues:
+1. **Too-light backgrounds** — cards should be `#0A1419`, not `#1a2332` or `#1e293b`
+2. **Wrong grays** — never use standard gray (`#6b7280`, `#9ca3af`). Always use neutral-teal scale.
+3. **Mixed icon libraries** — remove any non-Phosphor icons
+4. **Rounded corners too small** — should be 12px, not 4px or 6px
+5. **Font weight too heavy** — if you see 800/900/extrabold anywhere, change to 700
+6. **Shadows on cards** — remove all box-shadows from cards in dark mode
+7. **Generic blue/green** — replace with exact `#04eaaa` (EcoGreen) and `#10a6de` (EcoBlue)
+
+## Reference
+
+The full design tokens specification is in `design-tokens.md`. When in doubt about any value, check that file — it is the single source of truth.

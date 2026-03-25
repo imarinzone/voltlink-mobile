@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     },
     langSwitch: { flexDirection: 'row', backgroundColor: COLORS.inputBg, borderRadius: 20, padding: 4 },
     langPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
-    langText: { fontSize: 10, fontWeight: '800' },
+    langText: { fontSize: 10, fontWeight: '700' },
 });
 
 export default DriverDashboard;

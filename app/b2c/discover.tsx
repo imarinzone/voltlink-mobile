@@ -50,7 +50,7 @@ export default function DiscoverScreen() {
     const { language } = useLanguageStore();
     const { familyVehicles, fetchFamilyVehicles } = useVehicleStore();
     const insets = useSafeAreaInsets();
-    const isDark = false;
+    const isDark = theme === 'dark';
     const router = useRouter();
     const t = T[language as keyof typeof T] || T.English;
 
@@ -212,7 +212,7 @@ export default function DiscoverScreen() {
         <View style={styles.root}>
             {/* ── Full-screen map ── */}
             <MapComponent
-                isDark={isDark}
+                isDark={false}
                 stations={filtered}
                 familyVehicles={familyVehicles}
                 t={t}

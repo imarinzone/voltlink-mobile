@@ -50,7 +50,7 @@ export default function DiscoverScreen() {
     const { language } = useLanguageStore();
     const { familyVehicles, fetchFamilyVehicles } = useVehicleStore();
     const insets = useSafeAreaInsets();
-    const isDark = theme === 'dark';
+    const isDark = false;
     const router = useRouter();
     const t = T[language as keyof typeof T] || T.English;
 

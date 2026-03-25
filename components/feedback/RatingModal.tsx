@@ -49,7 +49,6 @@ export default function RatingModal({ visible, onClose, onSubmit, stationName }:
                     <ThumbsDown weight="duotone"
                         size={28}
                         color={currentRating === 1 ? COLORS.alertRed : textSecondary}
-                        fill={currentRating === 1 ? COLORS.alertRed : 'transparent'}
                     />
                 </TouchableOpacity>
 
@@ -63,7 +62,6 @@ export default function RatingModal({ visible, onClose, onSubmit, stationName }:
                     <ThumbsUp weight="duotone"
                         size={28}
                         color={currentRating === 5 ? COLORS.successGreen : textSecondary}
-                        fill={currentRating === 5 ? COLORS.successGreen : 'transparent'}
                     />
                 </TouchableOpacity>
             </View>

@@ -337,10 +337,10 @@ export default function B2CSession() {
                                     <Text style={[styles.categoryLabel, { color: textSecondary }]}>Station</Text>
                                     <View style={styles.thumbsRow}>
                                         <TouchableOpacity onPress={() => setStationRating(1)} style={[styles.thumbBtn, stationRating === 1 && { borderColor: COLORS.alertRed, backgroundColor: COLORS.alertRed + '15' }]}>
-                                            <ThumbsDown weight="duotone" size={24} color={stationRating === 1 ? COLORS.alertRed : textSecondary} fill={stationRating === 1 ? COLORS.alertRed : 'transparent'} />
+                                            <ThumbsDown weight="duotone" size={24} color={stationRating === 1 ? COLORS.alertRed : textSecondary} />
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={() => setStationRating(5)} style={[styles.thumbBtn, stationRating === 5 && { borderColor: COLORS.successGreen, backgroundColor: COLORS.successGreen + '15' }]}>
-                                            <ThumbsUp weight="duotone" size={24} color={stationRating === 5 ? COLORS.successGreen : textSecondary} fill={stationRating === 5 ? COLORS.successGreen : 'transparent'} />
+                                            <ThumbsUp weight="duotone" size={24} color={stationRating === 5 ? COLORS.successGreen : textSecondary} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -349,10 +349,10 @@ export default function B2CSession() {
                                     <Text style={[styles.categoryLabel, { color: textSecondary }]}>App</Text>
                                     <View style={styles.thumbsRow}>
                                         <TouchableOpacity onPress={() => setAppRating(1)} style={[styles.thumbBtn, appRating === 1 && { borderColor: COLORS.alertRed, backgroundColor: COLORS.alertRed + '15' }]}>
-                                            <ThumbsDown weight="duotone" size={24} color={appRating === 1 ? COLORS.alertRed : textSecondary} fill={appRating === 1 ? COLORS.alertRed : 'transparent'} />
+                                            <ThumbsDown weight="duotone" size={24} color={appRating === 1 ? COLORS.alertRed : textSecondary} />
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={() => setAppRating(5)} style={[styles.thumbBtn, appRating === 5 && { borderColor: COLORS.successGreen, backgroundColor: COLORS.successGreen + '15' }]}>
-                                            <ThumbsUp weight="duotone" size={24} color={appRating === 5 ? COLORS.successGreen : textSecondary} fill={appRating === 5 ? COLORS.successGreen : 'transparent'} />
+                                            <ThumbsUp weight="duotone" size={24} color={appRating === 5 ? COLORS.successGreen : textSecondary} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>

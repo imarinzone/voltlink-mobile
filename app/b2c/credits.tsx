@@ -50,6 +50,11 @@ export default function CreditsScreen() {
     const [selectedSourceId, setSelectedSourceId] = useState('');
     const [transferring, setTransferring] = useState(false);
 
+    // sell form
+    const [sellAmt, setSellAmt] = useState('');
+    const [sellDesc, setSellDesc] = useState('');
+    const [sellSourceId, setSellSourceId] = useState('');
+
     // tab
     const [activeTab, setActiveTab] = useState<'ONDC' | 'V2G'>('ONDC');
 
@@ -415,6 +420,76 @@ export default function CreditsScreen() {
                             ? <ActivityIndicator color="#fff" />
                             : <Text style={styles.transferBtnText}>Transfer Credits</Text>
                         }
+                    </TouchableOpacity>
+                </GlassCard>
+
+                {/* ── Sell Credits ── */}
+                <GlassCard style={[styles.card, { backgroundColor: cardBg, borderColor }] as any} intensity={15}>
+                    <View style={styles.sectionHeader}>
+                        <ArrowUpRight weight="duotone" size={18} color={COLORS.warningOrange} />
+                        <View style={{ flex: 1 }}>
+                            <Text style={[styles.sectionTitle, { color: textPrimary }]}>Sell Credits</Text>
+                            <Text style={[styles.sectionSub, { color: textSecondary }]}>
+                                Convert your energy credits back to currency.
+                            </Text>
+                        </View>
+                    </View>
+
+                    <Text style={[styles.fieldLabel, { color: textPrimary }]}>Amount (CR)</Text>
+                    <TextInput
+                        style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
+                        placeholder="0.00"
+                        placeholderTextColor={textSecondary}
+                        value={sellAmt}
+                        onChangeText={setSellAmt}
+                        keyboardType="decimal-pad"
+                    />
+                    <Text style={[styles.availableText, { color: textSecondary }]}>
+                        Available: {(balance?.current_balance ?? 0).toFixed(2)} CR
+                    </Text>
+
+                    <Text style={[styles.fieldLabel, { color: textPrimary }]}>
+                        Energy Source <Text style={{ fontWeight: '400', opacity: 0.6 }}>(optional)</Text>
+                    </Text>
+                    <View style={[styles.input, { backgroundColor: inputBg, borderColor, justifyContent: 'center' }]}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                                <TouchableOpacity
+                                    onPress={() => setSellSourceId('')}
+                                    style={[styles.sourceChip, sellSourceId === '' && styles.sourceChipActive]}
+                                >
+                                    <Text style={[styles.sourceChipText, sellSourceId === '' && { color: '#000' }]}>
+                                        None
+                                    </Text>
+                                </TouchableOpacity>
+                                {uniqueSources.map(src => (
+                                    <TouchableOpacity
+                                        key={src.id}
+                                        onPress={() => setSellSourceId(src.id)}
+                                        style={[styles.sourceChip, sellSourceId === src.id && styles.sourceChipActive]}
+                                    >
+                                        <Text style={[styles.sourceChipText, sellSourceId === src.id && { color: '#000' }]}>
+                                            {src.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </ScrollView>
+                    </View>
+
+                    <Text style={[styles.fieldLabel, { color: textPrimary }]}>
+                        Description <Text style={{ fontWeight: '400', opacity: 0.6 }}>(optional)</Text>
+                    </Text>
+                    <TextInput
+                        style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
+                        placeholder="e.g., Selling renewable credits"
+                        placeholderTextColor={textSecondary}
+                        value={sellDesc}
+                        onChangeText={setSellDesc}
+                    />
+
+                    <TouchableOpacity style={styles.transferBtn}>
+                        <Text style={styles.transferBtnText}>Sell Credits</Text>
                     </TouchableOpacity>
                 </GlassCard>
                     </>

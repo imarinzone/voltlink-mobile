@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     },
     summaryRow: { flexDirection: 'row', justifyContent: 'space-around' },
     summaryItem: { alignItems: 'center' },
-    summaryValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 16, fontWeight: '700' },
+    summaryValue: { ...TYPOGRAPHY.display, fontSize: 16 },
     summaryLabel: { ...TYPOGRAPHY.label, marginTop: 2 },
     filterRow: {
         flexDirection: 'row',

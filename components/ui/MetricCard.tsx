@@ -70,9 +70,8 @@ const styles = StyleSheet.create({
         alignItems: 'baseline',
     },
     value: {
-        ...TYPOGRAPHY.sectionHeader,
+        ...TYPOGRAPHY.display,
         fontSize: 20,
-        fontWeight: '700',
     },
     unit: {
         ...TYPOGRAPHY.label,

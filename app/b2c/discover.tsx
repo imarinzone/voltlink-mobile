@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     dotInner: { width: 10, height: 10, borderRadius: 5 },
     stationName: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 15 },
     cpoName: { ...TYPOGRAPHY.label, fontWeight: '600', marginTop: 2 },
-    price: { ...TYPOGRAPHY.sectionHeader, fontSize: 20, fontWeight: '700', color: COLORS.successGreen },
+    price: { ...TYPOGRAPHY.display, fontSize: 20, color: COLORS.successGreen },
     priceUnit: { ...TYPOGRAPHY.label, fontSize: 11 },
     metaRow: {
         flexDirection: 'row', gap: SPACING.sm, flexWrap: 'wrap',

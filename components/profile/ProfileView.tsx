@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
         minWidth: 0,
         marginHorizontal: 4,
     },
-    sustainValue: { ...TYPOGRAPHY.sectionHeader, fontSize: 15, fontWeight: '700', textAlign: 'center', marginTop: 4 },
+    sustainValue: { ...TYPOGRAPHY.display, fontSize: 15, textAlign: 'center', marginTop: 4 },
     sustainLabel: { ...TYPOGRAPHY.label, fontSize: 12, letterSpacing: 0.5, textAlign: 'center', marginTop: 4 },
     languageRow: { flexDirection: 'row', marginTop: SPACING.sm, marginLeft: 36 },
     languagePill: {

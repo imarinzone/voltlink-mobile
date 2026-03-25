@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
     aiDotInner: { width: 9, height: 9, borderRadius: 4.5 },
     aiStationName: { ...TYPOGRAPHY.body, fontWeight: '700', fontSize: 13 },
     aiCpoName: { ...TYPOGRAPHY.label, fontWeight: '600', fontSize: 10, marginTop: 1 },
-    aiPrice: { ...TYPOGRAPHY.sectionHeader, fontSize: 18, fontWeight: '700', color: COLORS.successGreen, marginBottom: 6 },
+    aiPrice: { ...TYPOGRAPHY.display, fontSize: 18, color: COLORS.successGreen, marginBottom: 6 },
     aiPriceUnit: { fontSize: 11, fontWeight: '400' },
     aiMeta: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 6 }, // Removed gap
     aiChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, marginRight: 4, marginBottom: 4 }, // Added marginRight and marginBottom

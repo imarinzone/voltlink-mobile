@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, Modal, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { AlertCircle, ZapOff, ShieldAlert, CreditCard, MessageSquare, X } from 'lucide-react-native';
+import { WarningCircle, LightningSlash, ShieldWarning, CreditCard, ChatCircle, X } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
 import { useThemeStore } from '../../store/themeStore';
 
 const ISSUE_TYPES = [
-    { id: 'not_working', label: 'Not Working', icon: ZapOff, color: COLORS.alertRed },
-    { id: 'safety', label: 'Safety Hazard', icon: ShieldAlert, color: COLORS.warningOrange },
+    { id: 'not_working', label: 'Not Working', icon: LightningSlash, color: COLORS.alertRed },
+    { id: 'safety', label: 'Safety Hazard', icon: ShieldWarning, color: COLORS.warningOrange },
     { id: 'billing', label: 'Billing Issue', icon: CreditCard, color: COLORS.brandBlue },
-    { id: 'other', label: 'Other Issue', icon: MessageSquare, color: COLORS.textMutedDark },
+    { id: 'other', label: 'Other Issue', icon: ChatCircle, color: COLORS.textMutedDark },
 ];
 
 interface ReportIssueModalProps {
@@ -48,7 +48,7 @@ export default function ReportIssueModal({ visible, onClose, onSubmit, stationNa
                             <Text style={[styles.subtitle, { color: textSecondary }]}>{stationName}</Text>
                         </View>
                         <TouchableOpacity onPress={onClose}>
-                            <X size={24} color={textPrimary} />
+                            <X weight="duotone" size={24} color={textPrimary} />
                         </TouchableOpacity>
                     </View>
 
@@ -67,7 +67,7 @@ export default function ReportIssueModal({ visible, onClose, onSubmit, stationNa
                                     ]}
                                     onPress={() => setSelectedType(type.id)}
                                 >
-                                    <Icon size={20} color={isSelected ? type.color : textSecondary} />
+                                    <Icon weight="duotone" size={20} color={isSelected ? type.color : textSecondary} />
                                     <Text style={[styles.typeLabel, { color: isSelected ? textPrimary : textSecondary }]}>
                                         {type.label}
                                     </Text>

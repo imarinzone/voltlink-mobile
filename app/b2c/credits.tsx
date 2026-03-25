@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Wallet, ArrowDownLeft, ArrowUpRight, Leaf, Zap, ArrowLeftRight, ChevronDown } from 'lucide-react-native';
+import { Wallet, ArrowDownLeft, ArrowUpRight, Leaf, Lightning, ArrowsLeftRight, CaretDown } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { getCreditBalance, getCreditTransactions, transferCredits } from '../../services/b2c.service';
@@ -19,8 +19,8 @@ const titleCase = (s: string) =>
 
 const sourceIcon = (category: string, size = 16, color = COLORS.successGreen) =>
     category === 'renewable'
-        ? <Leaf size={size} color={color} />
-        : <Zap size={size} color={COLORS.warningOrange} />;
+        ? <Leaf weight="duotone" size={size} color={color} />
+        : <Lightning weight="duotone" size={size} color={COLORS.warningOrange} />;
 
 // ─── types ────────────────────────────────────────────────────────────────────
 interface LedgerEntry {
@@ -206,7 +206,7 @@ export default function CreditsScreen() {
                             {/* Current Balance */}
                             <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
                                 <View style={styles.statTileHeader}>
-                                    <Wallet size={14} color={COLORS.brandBlue} />
+                                    <Wallet weight="duotone" size={14} color={COLORS.brandBlue} />
                                     <Text style={[styles.statTileLabel, { color: textSecondary }]}>Credit Balance</Text>
                                 </View>
                                 <Text style={[styles.statTileValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
@@ -217,7 +217,7 @@ export default function CreditsScreen() {
                             {/* Credits Received */}
                             <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
                                 <View style={styles.statTileHeader}>
-                                    <ArrowDownLeft size={14} color={COLORS.successGreen} />
+                                    <ArrowDownLeft weight="duotone" size={14} color={COLORS.successGreen} />
                                     <Text style={[styles.statTileLabel, { color: textSecondary }]}>{'Received'}</Text>
                                 </View>
                                 <Text style={[styles.statTileValue, { color: COLORS.successGreen }]} numberOfLines={1} adjustsFontSizeToFit>
@@ -228,7 +228,7 @@ export default function CreditsScreen() {
                             {/* Credits Sent */}
                             <View style={[styles.statTile, { backgroundColor: cardBg, borderColor }]}>
                                 <View style={styles.statTileHeader}>
-                                    <ArrowUpRight size={14} color={COLORS.alertRed} />
+                                    <ArrowUpRight weight="duotone" size={14} color={COLORS.alertRed} />
                                     <Text style={[styles.statTileLabel, { color: textSecondary }]}>Sent</Text>
                                 </View>
                                 <Text style={[styles.statTileValue, { color: COLORS.alertRed }]} numberOfLines={1} adjustsFontSizeToFit>
@@ -243,7 +243,7 @@ export default function CreditsScreen() {
                 {/* ── Transaction History ── */}
                 <GlassCard style={[styles.card, { backgroundColor: cardBg, borderColor }] as any} intensity={15}>
                     <View style={styles.sectionHeader}>
-                        <ArrowLeftRight size={18} color={COLORS.successGreen} />
+                        <ArrowsLeftRight weight="duotone" size={18} color={COLORS.successGreen} />
                         <View style={{ flex: 1 }}>
                             <Text style={[styles.sectionTitle, { color: textPrimary }]}>Transaction History</Text>
                             <Text style={[styles.sectionSub, { color: textSecondary }]}>Recent credit movements</Text>
@@ -258,7 +258,7 @@ export default function CreditsScreen() {
                             onPress={() => setShowFilterMenu(v => !v)}
                         >
                             <Text style={[styles.filterPickerText, { color: textPrimary }]}>{filterSource}</Text>
-                            <ChevronDown size={14} color={textSecondary} />
+                            <CaretDown weight="duotone" size={14} color={textSecondary} />
                         </TouchableOpacity>
                     </View>
 
@@ -299,8 +299,8 @@ export default function CreditsScreen() {
                                 {/* Type pill */}
                                 <View style={styles.txTypeCell}>
                                     {isCredit
-                                        ? <ArrowDownLeft size={14} color={COLORS.successGreen} />
-                                        : <ArrowUpRight size={14} color={COLORS.alertRed} />
+                                        ? <ArrowDownLeft weight="duotone" size={14} color={COLORS.successGreen} />
+                                        : <ArrowUpRight weight="duotone" size={14} color={COLORS.alertRed} />
                                     }
                                     <View style={[
                                         styles.pill,
@@ -334,7 +334,7 @@ export default function CreditsScreen() {
                 {/* ── Transfer Credits ── */}
                 <GlassCard style={[styles.card, { backgroundColor: cardBg, borderColor }] as any} intensity={15}>
                     <View style={styles.sectionHeader}>
-                        <ArrowLeftRight size={18} color={COLORS.successGreen} />
+                        <ArrowsLeftRight weight="duotone" size={18} color={COLORS.successGreen} />
                         <View style={{ flex: 1 }}>
                             <Text style={[styles.sectionTitle, { color: textPrimary }]}>Transfer Credits</Text>
                             <Text style={[styles.sectionSub, { color: textSecondary }]}>

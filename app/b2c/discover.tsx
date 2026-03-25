@@ -7,7 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Search, MapPin, Zap, Clock, ChevronRight, Star, AlertCircle, Car, Menu, SlidersHorizontal, User } from 'lucide-react-native';
+import { MagnifyingGlass, MapPin, Lightning, Clock, CaretRight, Star, WarningCircle, Car, List, FadersHorizontal, User } from 'phosphor-react-native';
 import MapComponent from '../../components/map/MapComponent';
 import { FilterContent, FilterState } from '../../components/filters/FilterContent';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
@@ -160,15 +160,15 @@ export default function DiscoverScreen() {
 
                     <View style={styles.metaRow}>
                         <View style={[styles.chip, { backgroundColor: inputBg }]}>
-                            <MapPin size={12} color={textSecondary} />
+                            <MapPin weight="duotone" size={12} color={textSecondary} />
                             <Text style={[styles.chipText, { color: textSecondary }]}>{item.distanceKm} km</Text>
                         </View>
                         <View style={[styles.chip, { backgroundColor: inputBg }]}>
-                            <Clock size={12} color={textSecondary} />
+                            <Clock weight="duotone" size={12} color={textSecondary} />
                             <Text style={[styles.chipText, { color: textSecondary }]}>{item.etaMinutes} min</Text>
                         </View>
                         <View style={[styles.chip, { backgroundColor: `${dot}15` }]}>
-                            <Zap size={12} color={dot} />
+                            <Lightning weight="duotone" size={12} color={dot} />
                             <Text style={[styles.chipText, { color: dot, fontWeight: '700' }]}>
                                 {item.availableChargers}/{item.totalChargers} {ok ? t.available : t.full}
                             </Text>
@@ -184,12 +184,12 @@ export default function DiscoverScreen() {
 
                 <View style={[styles.actionRow, { borderTopColor: borderColor }]}>
                     <TouchableOpacity style={styles.actionBtn} onPress={() => { setSelectedStation(item); setShowRating(true); }}>
-                        <Star size={14} color={textSecondary} />
+                        <Star weight="duotone" size={14} color={textSecondary} />
                         <Text style={[styles.actionText, { color: textSecondary }]}>{t.rate}</Text>
                     </TouchableOpacity>
                     <View style={[styles.sep, { backgroundColor: borderColor }]} />
                     <TouchableOpacity style={styles.actionBtn} onPress={() => { setSelectedStation(item); setShowReport(true); }}>
-                        <AlertCircle size={14} color={COLORS.alertRed} />
+                        <WarningCircle weight="duotone" size={14} color={COLORS.alertRed} />
                         <Text style={[styles.actionText, { color: COLORS.alertRed }]}>{t.report}</Text>
                     </TouchableOpacity>
                     <View style={[styles.sep, { backgroundColor: borderColor }]} />
@@ -201,7 +201,7 @@ export default function DiscoverScreen() {
                         <Text style={[styles.actionText, { color: COLORS.brandBlue, fontWeight: '700', fontSize: 13 }]}>
                             {ok ? t.bookNow : t.full}
                         </Text>
-                        {ok && <ChevronRight size={14} color={COLORS.brandBlue} />}
+                        {ok && <CaretRight weight="duotone" size={14} color={COLORS.brandBlue} />}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -219,15 +219,15 @@ export default function DiscoverScreen() {
                 COLORS={COLORS}
                 darkMapStyle={darkMapStyle}
                 markerContainerStyle={styles.markerContainer}
-                MarkerZapIcon={<Zap size={14} color="#000" />}
-                MarkerCarIcon={<Car size={14} color="#FFF" />}
+                MarkerZapIcon={<Lightning weight="duotone" size={14} color="#000" />}
+                MarkerCarIcon={<Car weight="duotone" size={14} color="#FFF" />}
             />
 
             {/* ── Google Maps Style Search Bar Overlay ── */}
             <SafeAreaView style={styles.searchOverlay} edges={['top']} pointerEvents="box-none">
                 <View style={[styles.mainSearchBar, { backgroundColor: surfaceBg, borderColor: borderColor }]}>
                     <TouchableOpacity style={styles.menuIcon} onPress={() => router.back()}>
-                        <ChevronRight size={24} color={textPrimary} style={{ transform: [{ rotate: '180deg' }] }} />
+                        <CaretRight weight="duotone" size={24} color={textPrimary} style={{ transform: [{ rotate: '180deg' }] }} />
                     </TouchableOpacity>
                     <TextInput
                         placeholder={t.placeholder}
@@ -244,7 +244,7 @@ export default function DiscoverScreen() {
                             if (!showFilters) sheetRef.current?.snapToIndex(2); // Expand when opening filters
                         }}
                     >
-                        <SlidersHorizontal size={18} color={showFilters ? COLORS.brandBlue : textPrimary} />
+                        <FadersHorizontal weight="duotone" size={18} color={showFilters ? COLORS.brandBlue : textPrimary} />
                     </TouchableOpacity>
 
                 </View>
@@ -281,7 +281,7 @@ export default function DiscoverScreen() {
                         refreshing={false}
                         ListEmptyComponent={
                             <View style={styles.empty}>
-                                <Zap size={36} color={COLORS.textMutedDark} />
+                                <Lightning weight="duotone" size={36} color={COLORS.textMutedDark} />
                                 <Text style={[styles.emptyText, { color: textSecondary }]}>{t.noMatch}</Text>
                             </View>
                         }

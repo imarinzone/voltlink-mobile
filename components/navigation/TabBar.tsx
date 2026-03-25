@@ -5,7 +5,7 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { useThemeStore } from '../../store/themeStore';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../utils/theme';
-import { LayoutDashboard, Zap, History, User, Map, CreditCard } from 'lucide-react-native';
+import { SquaresFour, Lightning, ClockCounterClockwise, User, MapTrifold, CreditCard } from 'phosphor-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -15,11 +15,11 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const isDark = theme === 'dark';
 
     const icons: Record<string, any> = {
-        dashboard: LayoutDashboard,
-        recommendations: Zap,
-        history: History,
+        dashboard: SquaresFour,
+        recommendations: Lightning,
+        history: ClockCounterClockwise,
         profile: User,
-        discover: Map,
+        discover: MapTrifold,
         credits: CreditCard,
     };
 
@@ -56,7 +56,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                         }
                     };
 
-                    const Icon = icons[route.name.toLowerCase()] || LayoutDashboard;
+                    const Icon = icons[route.name.toLowerCase()] || SquaresFour;
 
                     return (
                         <TouchableOpacity
@@ -69,6 +69,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                             activeOpacity={0.7}
                         >
                             <Icon
+                                weight="duotone"
                                 size={22}
                                 color={isFocused ? COLORS.primaryGreen : (isDark ? COLORS.textMutedDark : COLORS.textSecondaryLight)}
                             />

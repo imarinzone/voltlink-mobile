@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { Zap, Clock } from 'lucide-react-native';
+import { Lightning, Clock } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { Station } from '../../types/station.types';
@@ -101,7 +101,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
             {recommendation.slot && (
                 <View style={styles.slotContainer}>
-                    <Clock size={12} color={COLORS.primaryGreen} />
+                    <Clock weight="duotone" size={12} color={COLORS.primaryGreen} />
                     <Text style={[styles.slotText, { color: textSecondary }]}>
                         Recommended Slot: <Text style={{ color: COLORS.primaryGreen, fontWeight: '700' }}>{formatSlotRange(recommendation.slot)}</Text>
                     </Text>

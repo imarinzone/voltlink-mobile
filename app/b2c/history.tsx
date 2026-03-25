@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, FlatList, Text, TouchableOpacity, Alert, Pressable, ActivityIndicator, Platform, Linking, Modal, TextInput } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Zap, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info, XCircle, Play, AlertTriangle } from 'lucide-react-native';
+import { Lightning, Clock, ThumbsUp, ThumbsDown, MapPin, CheckCircle, Info, XCircle, Play, Warning } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useThemeStore } from '../../store/themeStore';
@@ -261,7 +261,7 @@ export default function HistoryScreen() {
                         <View style={{ padding: SPACING.lg }}>
                             <View style={styles.cardHeader}>
                                 <View style={[styles.iconBox, { backgroundColor: item.status === 'pending' ? COLORS.brandBlue + '20' : COLORS.successGreen + '20' }]}>
-                                    <Zap size={18} color={item.status === 'pending' ? COLORS.brandBlue : COLORS.successGreen} />
+                                    <Lightning weight="duotone" size={18} color={item.status === 'pending' ? COLORS.brandBlue : COLORS.successGreen} />
                                 </View>
                                 <View style={styles.headerInfo}>
                                     <Text style={[styles.bookingTime, { color: textPrimary }]}>{item.time}</Text>
@@ -271,13 +271,13 @@ export default function HistoryScreen() {
                                     style={{ padding: 6 }}
                                     onPress={() => handleCancel(item)}
                                 >
-                                    <XCircle size={20} color={COLORS.alertRed} />
+                                    <XCircle weight="duotone" size={20} color={COLORS.alertRed} />
                                 </TouchableOpacity>
                             </View>
 
                             <View style={styles.bookingDetails}>
                                 <View style={styles.detailRow}>
-                                    <Zap size={14} color={COLORS.successGreen} />
+                                    <Lightning weight="duotone" size={14} color={COLORS.successGreen} />
                                     <Text style={[styles.detailText, { color: textSecondary }]}>
                                         {item.type}{item.cost ? ` · ₹${item.cost}` : ''}{item.kWh ? ` · ${item.kWh} kWh` : ''}{item.currentSoc ? ` · 🔋${item.currentSoc}%` : ''}
                                     </Text>
@@ -289,7 +289,7 @@ export default function HistoryScreen() {
                                     style={[styles.actionBtn, { borderColor: COLORS.brandBlue }]}
                                     onPress={openDirections}
                                 >
-                                    <MapPin size={14} color={COLORS.brandBlue} />
+                                    <MapPin weight="duotone" size={14} color={COLORS.brandBlue} />
                                     <Text style={[styles.actionBtnText, { color: COLORS.brandBlue }]}>View Directions</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
@@ -299,7 +299,7 @@ export default function HistoryScreen() {
                                         params: getSessionParams(item),
                                     })}
                                 >
-                                    <Play size={14} color={COLORS.successGreen} />
+                                    <Play weight="duotone" size={14} color={COLORS.successGreen} />
                                     <Text style={[styles.actionBtnText, { color: COLORS.successGreen }]}>Open Session</Text>
                                 </TouchableOpacity>
                             </View>
@@ -315,7 +315,7 @@ export default function HistoryScreen() {
                 <Pressable onPress={() => setExpandedSession(isExpanded ? null : item.id)}>
                     <View style={styles.sessionMain}>
                         <View style={[styles.iconBox, { backgroundColor: COLORS.successGreen + '15' }]}>
-                            <Zap size={18} color={COLORS.successGreen} />
+                            <Lightning weight="duotone" size={18} color={COLORS.successGreen} />
                         </View>
                         <View style={styles.sessionInfo}>
                             <Text style={[styles.sessionStation, { color: textPrimary }]} numberOfLines={1}>{item.station}</Text>
@@ -331,13 +331,13 @@ export default function HistoryScreen() {
                         <View style={[styles.expandedContent, { borderTopColor: borderColor }]}>
                             <View style={styles.grid}>
                                 <View style={styles.gridItem}>
-                                    <Clock size={12} color={textSecondary} />
+                                    <Clock weight="duotone" size={12} color={textSecondary} />
                                     <Text style={[styles.gridLabel, { color: textSecondary }]}>Duration</Text>
                                     <Text style={[styles.gridValue, { color: textPrimary }]}>{item.duration}</Text>
                                 </View>
                                 {item.currentSoc !== undefined && (
                                     <View style={styles.gridItem}>
-                                        <Zap size={12} color={textSecondary} />
+                                        <Lightning weight="duotone" size={12} color={textSecondary} />
                                         <Text style={[styles.gridLabel, { color: textSecondary }]}>Final SOC</Text>
                                         <Text style={[styles.gridValue, { color: COLORS.successGreen }]}>{item.currentSoc}%</Text>
                                     </View>
@@ -350,7 +350,7 @@ export default function HistoryScreen() {
                                 )}
                                 {item.status ? (
                                     <View style={styles.gridItem}>
-                                        <CheckCircle size={12} color={COLORS.successGreen} />
+                                        <CheckCircle weight="duotone" size={12} color={COLORS.successGreen} />
                                         <Text style={[styles.gridLabel, { color: textSecondary }]}>Status</Text>
                                         <Text style={[styles.gridValue, { color: COLORS.successGreen }]}>{item.status}</Text>
                                     </View>
@@ -416,7 +416,7 @@ export default function HistoryScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { backgroundColor: isDark ? COLORS.cardBg : '#fff' }]}>
                         <View style={[styles.modalIcon, { backgroundColor: COLORS.alertRed + '15' }]}>
-                            <AlertTriangle size={28} color={COLORS.alertRed} />
+                            <Warning weight="duotone" size={28} color={COLORS.alertRed} />
                         </View>
                         <Text style={[styles.modalTitle, { color: textPrimary }]}>
                             {cancelTarget?.source === 'session' ? 'Stop Session' : 'Cancel Booking'}

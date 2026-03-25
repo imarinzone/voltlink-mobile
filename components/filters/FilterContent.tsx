@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { X } from 'lucide-react-native';
+import { X } from 'phosphor-react-native';
 import { GlassButton } from '../ui/GlassButton';
 import { useThemeStore } from '../../store/themeStore';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
@@ -74,7 +74,7 @@ export const FilterContent = ({ currentFilters, onApply, onClose, stations, myVe
             <View style={[styles.header, { borderBottomColor: borderColor }]}>
                 <Text style={[styles.title, { color: textPrimary }]}>Filters</Text>
                 <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: isDark ? COLORS.hoverBg : 'rgba(0,0,0,0.05)' }]}>
-                    <X color={textSecondary} size={20} />
+                    <X weight="duotone" color={textSecondary} size={20} />
                 </TouchableOpacity>
             </View>
 

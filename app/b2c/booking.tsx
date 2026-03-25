@@ -4,9 +4,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-    ArrowLeft, MapPin, Zap, Clock, CheckCircle,
-    Car, BatteryCharging, Plug, IndianRupee, CalendarCheck, Bot
-} from 'lucide-react-native';
+    ArrowLeft, MapPin, Lightning, Clock, CheckCircle,
+    Car, BatteryCharging, Plug, CurrencyInr, CalendarCheck, Robot
+} from 'phosphor-react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -283,7 +283,7 @@ export default function B2CBooking() {
         // Simple success view for manual bookings
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: bg, justifyContent: 'center', alignItems: 'center' }]} edges={['top']}>
-                <CheckCircle size={80} color={COLORS.successGreen} />
+                <CheckCircle weight="duotone" size={80} color={COLORS.successGreen} />
                 <Text style={[styles.successTitle, { color: textPrimary, marginTop: 20 }]}>Booking Confirmed!</Text>
                 <Text style={[styles.successSub, { color: textSecondary, marginTop: 8, textAlign: 'center', paddingHorizontal: 40 }]}>
                     Redirecting to your history screen...
@@ -303,16 +303,16 @@ export default function B2CBooking() {
             { title: 'Battery Analyzed', sub: 'Determining charge type', detail: 'Battery < 50% → AC Fast charging recommended', Icon: BatteryCharging },
             { title: 'Route Scanned', sub: 'Finding CPOs within 5 km', detail: '3 CPOs found on Bangalore → Chennai route', Icon: MapPin },
             { title: 'Charger Matched', sub: 'Checking slot availability', detail: `${chargerSummary} @ ${stationName} — slot in ~${waitMins} min`, Icon: Plug },
-            { title: 'Price Calculated', sub: 'Applying dynamic pricing', detail: `₹${Number(pricePerKwh).toFixed(2)}/kWh · Credits earnable: ~${creditsEarned}`, Icon: IndianRupee },
+            { title: 'Price Calculated', sub: 'Applying dynamic pricing', detail: `₹${Number(pricePerKwh).toFixed(2)}/kWh · Credits earnable: ~${creditsEarned}`, Icon: CurrencyInr },
             { title: 'Slot Booked', sub: 'Reservation confirmed', detail: `Booked ${selectedSlotLabel} · Est. cost ₹${Number(estimatedCost).toFixed(2)}`, Icon: CalendarCheck },
-            { title: 'Charging Active', sub: 'Session in progress', detail: 'Charging to 80% · ETA 47 min remaining', Icon: Zap },
+            { title: 'Charging Active', sub: 'Session in progress', detail: 'Charging to 80% · ETA 47 min remaining', Icon: Lightning },
         ];
 
         return (
             <SafeAreaView key="task-loop" style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
                 <View style={styles.loopHeader}>
                     <GlassCard style={styles.botBadge as any} intensity={15}>
-                        <Bot size={16} color={COLORS.brandBlue} />
+                        <Robot weight="duotone" size={16} color={COLORS.brandBlue} />
                         <Text style={[styles.botText, { color: textPrimary }]}>VoltLink AI Optimizer</Text>
                     </GlassCard>
                     <Text style={[styles.loopTitle, { color: textPrimary }]}>Processing your booking...</Text>
@@ -350,7 +350,7 @@ export default function B2CBooking() {
                                             { borderColor: statusColor, backgroundColor: bg },
                                             isActive && styles.activeCircle
                                         ]}>
-                                            <s.Icon size={20} color={statusColor} />
+                                            <s.Icon weight="duotone" size={20} color={statusColor} />
                                         </View>
                                     </View>
 
@@ -360,7 +360,7 @@ export default function B2CBooking() {
                                             <Text style={[styles.stepTitle, { color: isCompleted || isActive ? textPrimary : textSecondary }]}>
                                                 {s.title}
                                             </Text>
-                                            {isCompleted && <CheckCircle size={16} color={COLORS.successGreen} style={{ marginLeft: 8 }} />}
+                                            {isCompleted && <CheckCircle weight="duotone" size={16} color={COLORS.successGreen} style={{ marginLeft: 8 }} />}
                                         </View>
                                         <Text style={[styles.stepSub, { color: textSecondary }]}>{s.sub}</Text>
 
@@ -377,7 +377,7 @@ export default function B2CBooking() {
 
                     {taskStep === 7 && (
                         <View style={[styles.successBox, { backgroundColor: isDark ? 'rgba(0,255,136,0.08)' : 'rgba(0,255,136,0.05)' }]}>
-                            <CheckCircle color={COLORS.successGreen} size={32} />
+                            <CheckCircle weight="duotone" color={COLORS.successGreen} size={32} />
                             <View style={{ flex: 1 }}>
                                 <Text style={[styles.successTitle, { color: textPrimary }]}>Success!</Text>
                                 <Text style={[styles.successSub, { color: textSecondary }]}>
@@ -399,7 +399,7 @@ export default function B2CBooking() {
         <SafeAreaView key="booking-form" style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <ArrowLeft size={24} color={textPrimary} />
+                    <ArrowLeft weight="duotone" size={24} color={textPrimary} />
                 </TouchableOpacity>
                 <Text style={[styles.title, { color: textPrimary }]}>Book a Slot</Text>
                 <View style={{ width: 40 }} />
@@ -412,15 +412,15 @@ export default function B2CBooking() {
                     <Text style={[styles.cpoName, { color: COLORS.brandBlue }]}>{station?.cpoName || 'VoltLink Partner'}</Text>
                     <View style={styles.stationMeta}>
                         <View style={styles.metaItem}>
-                            <MapPin size={14} color={textSecondary} />
+                            <MapPin weight="duotone" size={14} color={textSecondary} />
                             <Text style={[styles.metaText, { color: textSecondary }]}>{station?.distanceKm || '?'} km</Text>
                         </View>
                         <View style={styles.metaItem}>
-                            <Clock size={14} color={textSecondary} />
+                            <Clock weight="duotone" size={14} color={textSecondary} />
                             <Text style={[styles.metaText, { color: textSecondary }]}>{station?.etaMinutes || '?'} min</Text>
                         </View>
                         <View style={styles.metaItem}>
-                            <Zap size={14} color={COLORS.successGreen} />
+                            <Lightning weight="duotone" size={14} color={COLORS.successGreen} />
                             <Text style={[styles.metaText, { color: textSecondary }]}>
                                 {connector?.connector_type || 'CCS2'} {connector?.power_kw ? `${connector.power_kw}kW` : ''}
                             </Text>

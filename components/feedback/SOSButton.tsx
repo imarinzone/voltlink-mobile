@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, Modal } from 'react-native';
-import { AlertCircle, X } from 'lucide-react-native';
+import { WarningCircle, X } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 
@@ -14,7 +14,7 @@ export const SOSButton: React.FC = () => {
                 onPress={() => setModalVisible(true)}
                 activeOpacity={0.8}
             >
-                <AlertCircle color="#FFF" size={28} />
+                <WarningCircle weight="duotone" color="#FFF" size={28} />
             </TouchableOpacity>
 
             <Modal
@@ -28,12 +28,12 @@ export const SOSButton: React.FC = () => {
                         <View style={styles.modalHeader}>
                             <Text style={[styles.modalTitle, { color: COLORS.textPrimaryDark }]}>Emergency SOS</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                <X color={COLORS.textPrimaryDark} size={24} />
+                                <X weight="duotone" color={COLORS.textPrimaryDark} size={24} />
                             </TouchableOpacity>
                         </View>
 
                         <View style={styles.alertIconContainer}>
-                            <AlertCircle color={COLORS.alertRed} size={64} />
+                            <WarningCircle weight="duotone" color={COLORS.alertRed} size={64} />
                         </View>
 
                         <Text style={[styles.modalDescription, { color: COLORS.textSecondaryDark }]}>

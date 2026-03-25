@@ -6,7 +6,7 @@ import { GlassButton } from '../components/ui/GlassButton';
 import { useRoleStore } from '../store/roleStore';
 import { useThemeStore } from '../store/themeStore';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../utils/theme';
-import { Shield, User, Zap } from 'lucide-react-native';
+import { Shield, User, Lightning } from 'phosphor-react-native';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
@@ -53,7 +53,7 @@ export default function RoleSelector() {
 
             <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
                 <View style={styles.logoContainer}>
-                    <Zap color={COLORS.primaryGreen} size={40} />
+                    <Lightning weight="duotone" color={COLORS.primaryGreen} size={40} />
                 </View>
                 <Text style={[styles.title, { color: textPrimary }]}>VoltLink</Text>
                 <Text style={[styles.tagline, { color: textSecondary }]}>
@@ -68,7 +68,7 @@ export default function RoleSelector() {
                     <RoleCard
                         selected={selected === 'driver'}
                         onPress={() => setSelected('driver')}
-                        icon={<Shield color={selected === 'driver' ? COLORS.primaryGreen : textSecondary} size={28} />}
+                        icon={<Shield weight="duotone" color={selected === 'driver' ? COLORS.primaryGreen : textSecondary} size={28} />}
                         title="Driver"
                         subtitle="Fleet charging made simple"
                         isDark={isDark}
@@ -78,7 +78,7 @@ export default function RoleSelector() {
                     <RoleCard
                         selected={selected === 'b2c'}
                         onPress={() => setSelected('b2c')}
-                        icon={<User color={selected === 'b2c' ? COLORS.primaryGreen : textSecondary} size={28} />}
+                        icon={<User weight="duotone" color={selected === 'b2c' ? COLORS.primaryGreen : textSecondary} size={28} />}
                         title="B2C Customer"
                         subtitle="Personal EV charging"
                         isDark={isDark}

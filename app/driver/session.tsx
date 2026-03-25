@@ -8,7 +8,7 @@ import Animated, {
     useSharedValue, withTiming, useAnimatedProps, withRepeat, withSequence, useAnimatedStyle
 } from 'react-native-reanimated';
 import { PanGestureHandler, GestureHandlerRootView, TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler';
-import { Zap, AlertTriangle, ThumbsUp, ThumbsDown, ChevronRight, ChevronsRight } from 'lucide-react-native';
+import { Lightning, Warning, ThumbsUp, ThumbsDown, CaretRight, CaretDoubleRight } from 'phosphor-react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
@@ -328,7 +328,7 @@ export default function SessionScreen() {
                 <ScrollView contentContainerStyle={styles.ratingCenter}>
                     <View style={styles.ratingCard}>
                         <GlassCard style={styles.ratingInner as any} intensity={30}>
-                            <Zap size={48} color={COLORS.successGreen} />
+                            <Lightning weight="duotone" size={48} color={COLORS.successGreen} />
                             <Text style={[styles.ratingTitle, { color: textPrimary }]}>Session Complete</Text>
                             <Text style={[styles.ratingCost, { color: COLORS.brandBlue }]}>₹{estimatedCost} charged</Text>
                             <Text style={[styles.ratingKwh, { color: textSecondary }]}>{typeof kwhDelivered === 'number' ? kwhDelivered.toFixed(2) : kwhDelivered} kWh delivered</Text>
@@ -340,10 +340,10 @@ export default function SessionScreen() {
                                     <Text style={[styles.categoryLabel, { color: textSecondary }]}>Station</Text>
                                     <View style={styles.thumbsRow}>
                                         <TouchableOpacity onPress={() => setStationRating(1)} style={[styles.thumbBtn, stationRating === 1 && { borderColor: COLORS.alertRed, backgroundColor: COLORS.alertRed + '15' }]}>
-                                            <ThumbsDown size={24} color={stationRating === 1 ? COLORS.alertRed : textSecondary} fill={stationRating === 1 ? COLORS.alertRed : 'transparent'} />
+                                            <ThumbsDown weight="duotone" size={24} color={stationRating === 1 ? COLORS.alertRed : textSecondary} fill={stationRating === 1 ? COLORS.alertRed : 'transparent'} />
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={() => setStationRating(5)} style={[styles.thumbBtn, stationRating === 5 && { borderColor: COLORS.successGreen, backgroundColor: COLORS.successGreen + '15' }]}>
-                                            <ThumbsUp size={24} color={stationRating === 5 ? COLORS.successGreen : textSecondary} fill={stationRating === 5 ? COLORS.successGreen : 'transparent'} />
+                                            <ThumbsUp weight="duotone" size={24} color={stationRating === 5 ? COLORS.successGreen : textSecondary} fill={stationRating === 5 ? COLORS.successGreen : 'transparent'} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -352,10 +352,10 @@ export default function SessionScreen() {
                                     <Text style={[styles.categoryLabel, { color: textSecondary }]}>App</Text>
                                     <View style={styles.thumbsRow}>
                                         <TouchableOpacity onPress={() => setAppRating(1)} style={[styles.thumbBtn, appRating === 1 && { borderColor: COLORS.alertRed, backgroundColor: COLORS.alertRed + '15' }]}>
-                                            <ThumbsDown size={24} color={appRating === 1 ? COLORS.alertRed : textSecondary} fill={appRating === 1 ? COLORS.alertRed : 'transparent'} />
+                                            <ThumbsDown weight="duotone" size={24} color={appRating === 1 ? COLORS.alertRed : textSecondary} fill={appRating === 1 ? COLORS.alertRed : 'transparent'} />
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={() => setAppRating(5)} style={[styles.thumbBtn, appRating === 5 && { borderColor: COLORS.successGreen, backgroundColor: COLORS.successGreen + '15' }]}>
-                                            <ThumbsUp size={24} color={appRating === 5 ? COLORS.successGreen : textSecondary} fill={appRating === 5 ? COLORS.successGreen : 'transparent'} />
+                                            <ThumbsUp weight="duotone" size={24} color={appRating === 5 ? COLORS.successGreen : textSecondary} fill={appRating === 5 ? COLORS.successGreen : 'transparent'} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -449,7 +449,7 @@ export default function SessionScreen() {
 
                     {/* ETA */}
                     <GlassCard style={styles.etaCard as any} intensity={25}>
-                        <Zap size={18} color={COLORS.brandBlue} />
+                        <Lightning weight="duotone" size={18} color={COLORS.brandBlue} />
                         <Text style={[styles.etaText, { color: textPrimary }]}>
                             Est. {timeRemainingMin} min remaining to full charge
                         </Text>
@@ -462,7 +462,7 @@ export default function SessionScreen() {
                                 <Animated.View style={[styles.sliderFill, sliderTrackStyle]} />
                                 <View style={styles.sliderLabelContainer}>
                                     <Text style={styles.sliderText} numberOfLines={1}>Swipe to start charging</Text>
-                                    <ChevronsRight size={24} color={COLORS.textMutedDark} />
+                                    <CaretDoubleRight weight="duotone" size={24} color={COLORS.textMutedDark} />
                                 </View>
                                 <PanGestureHandler
                                     activeOffsetX={[-10, 10]}
@@ -473,7 +473,7 @@ export default function SessionScreen() {
                                 >
                                     <Animated.View style={[styles.sliderBtn, sliderBtnStyle]}>
                                         <View style={styles.sliderBtnInner}>
-                                            <ChevronRight size={32} color={COLORS.brandBlue} strokeWidth={3} />
+                                            <CaretRight weight="duotone" size={32} color={COLORS.brandBlue} />
                                         </View>
                                     </Animated.View>
                                 </PanGestureHandler>
@@ -504,7 +504,7 @@ export default function SessionScreen() {
                     {/* Report Issue */}
                     <TouchableOpacity style={styles.reportLink} onPress={() =>
                         Alert.alert('Report Sent', 'Charger issue reported to VoltLink support.')}>
-                        <AlertTriangle size={14} color={textSecondary} />
+                        <Warning weight="duotone" size={14} color={textSecondary} />
                         <Text style={[styles.reportText, { color: textSecondary }]}>Mark station as not working</Text>
                     </TouchableOpacity>
                 </ScrollView>

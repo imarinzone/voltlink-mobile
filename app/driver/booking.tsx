@@ -3,7 +3,7 @@ import {
     StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, TextInput
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, MapPin, Zap, Clock, CheckCircle, Banknote } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Lightning, Clock, CheckCircle, Money } from 'phosphor-react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
@@ -262,7 +262,7 @@ export default function DriverBooking() {
     if (confirmed) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: bg, justifyContent: 'center', alignItems: 'center' }]}>
-                <CheckCircle size={80} color={COLORS.successGreen} />
+                <CheckCircle weight="duotone" size={80} color={COLORS.successGreen} />
                 <Text style={[styles.confirmedTitle, { color: textPrimary }]}>Booking Confirmed!</Text>
                 <Text style={[styles.confirmedSub, { color: textSecondary, marginTop: 12 }]}>
                     Redirecting to History Screen...
@@ -275,7 +275,7 @@ export default function DriverBooking() {
         <SafeAreaView style={[styles.container, { backgroundColor: bg }]} edges={['top']}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <ArrowLeft size={24} color={textPrimary} />
+                    <ArrowLeft weight="duotone" size={24} color={textPrimary} />
                 </TouchableOpacity>
                 <Text style={[styles.title, { color: textPrimary }]}>Book a Slot</Text>
                 <View style={{ width: 40 }} />
@@ -306,7 +306,7 @@ export default function DriverBooking() {
                             <Text style={[styles.sectionTitle, { color: textSecondary }]}>Potential Loss Summary</Text>
                             <View style={styles.lossBlocksContainer}>
                                 <View style={[styles.lossBlock, { backgroundColor: isDark ? 'rgba(255,68,68,0.1)' : 'rgba(255,68,68,0.05)' }]}>
-                                    <Banknote size={20} color={COLORS.alertRed} />
+                                    <Money weight="duotone" size={20} color={COLORS.alertRed} />
                                     <Text style={[styles.lossLabel, { color: textSecondary }]}>Higher Price</Text>
                                     <Text style={styles.lossValue}>
                                         {thisRecommendation?.predictedRevenueLoss !== undefined 
@@ -315,12 +315,12 @@ export default function DriverBooking() {
                                     </Text>
                                 </View>
                                 <View style={[styles.lossBlock, { backgroundColor: isDark ? 'rgba(255,68,68,0.1)' : 'rgba(255,68,68,0.05)' }]}>
-                                    <MapPin size={20} color={COLORS.alertRed} />
+                                    <MapPin weight="duotone" size={20} color={COLORS.alertRed} />
                                     <Text style={[styles.lossLabel, { color: textSecondary }]}>Further Dist.</Text>
                                     <Text style={styles.lossValue}>+{((station?.distanceKm ?? 0) - (firstRecommendation?.distanceKm ?? 0) > 0) ? ((station?.distanceKm ?? 0) - (firstRecommendation?.distanceKm ?? 0)).toFixed(1) : '0.0'} km</Text>
                                 </View>
                                 <View style={[styles.lossBlock, { backgroundColor: isDark ? 'rgba(255,68,68,0.1)' : 'rgba(255,68,68,0.05)' }]}>
-                                    <Clock size={20} color={COLORS.alertRed} />
+                                    <Clock weight="duotone" size={20} color={COLORS.alertRed} />
                                     <Text style={[styles.lossLabel, { color: textSecondary }]}>Longer Wait</Text>
                                     <Text style={styles.lossValue}>+{thisRecommendation?.predictedWaitTime ?? 15} min</Text>
                                 </View>

@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity, Modal, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-    Wallet, Leaf, Zap, ChevronRight, Plus, X, MapPin, Bot, User,
-    Car, BatteryCharging, Plug, IndianRupee, CalendarCheck, CheckCircle, Clock
-} from 'lucide-react-native';
+    Wallet, Leaf, Lightning, CaretRight, Plus, X, MapPin, Robot, User,
+    Car, BatteryCharging, Plug, CurrencyInr, CalendarCheck, CheckCircle, Clock
+} from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { MetricCard } from '../../components/ui/MetricCard';
@@ -74,9 +74,9 @@ const AI_STEPS = [
     { title: 'Battery Analyzed', sub: 'Determining charge type', detail: 'Battery < 50% → AC Fast charging recommended', Icon: BatteryCharging },
     { title: 'Route Scanned', sub: 'Finding CPOs within 5 km', detail: '3 CPOs found on Bangalore → Chennai route', Icon: MapPin },
     { title: 'Charger Matched', sub: 'Checking slot availability', detail: 'AC Fast @ ChargeZone Hub — slot in 30 min', Icon: Plug },
-    { title: 'Price Calculated', sub: 'Applying dynamic pricing', detail: '₹8.00/kWh · Off-peak discount applied (−20%)', Icon: IndianRupee },
+    { title: 'Price Calculated', sub: 'Applying dynamic pricing', detail: '₹8.00/kWh · Off-peak discount applied (−20%)', Icon: CurrencyInr },
     { title: 'Slot Booked', sub: 'Reservation confirmed', detail: 'Booked 14:30–15:30 · Est. cost ₹259.20', Icon: CalendarCheck },
-    { title: 'Charging Active', sub: 'Session in progress', detail: 'Charging to 80% · ETA 47 min remaining', Icon: Zap },
+    { title: 'Charging Active', sub: 'Session in progress', detail: 'Charging to 80% · ETA 47 min remaining', Icon: Lightning },
 ];
 
 const B2CDashboard = () => {
@@ -270,7 +270,7 @@ const B2CDashboard = () => {
                                 style={[styles.profileAvatar, { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' }]}
                                 onPress={() => router.push('/b2c/profile' as any)}
                             >
-                                <User size={20} color={textPrimary} />
+                                <User weight="duotone" size={20} color={textPrimary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -290,18 +290,18 @@ const B2CDashboard = () => {
                     <MetricCard
                         label={t.sessions}
                         value={stats?.totalSessions || 0}
-                        icon={<Zap size={16} color={COLORS.brandBlue} />}
+                        icon={<Lightning weight="duotone" size={16} color={COLORS.brandBlue} />}
                     />
                     <MetricCard
                         label={t.co2Saved}
                         value={Number(stats?.carbonSavedKg ?? 0).toFixed(2)}
                         unit="kg"
-                        icon={<Leaf size={16} color={COLORS.successGreen} />}
+                        icon={<Leaf weight="duotone" size={16} color={COLORS.successGreen} />}
                     />
                     <MetricCard
                         label={t.creditsEarned}
                         value={Number(stats?.availableCredits ?? 0).toFixed(2)}
-                        icon={<Wallet size={16} color={COLORS.brandBlue} />}
+                        icon={<Wallet weight="duotone" size={16} color={COLORS.brandBlue} />}
                     />
                 </View>
 
@@ -311,7 +311,7 @@ const B2CDashboard = () => {
                     <View style={styles.aiSection}>
                         <View style={styles.sectionHeaderRow}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 6 }}>
-                                <Bot size={14} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
+                                <Robot weight="duotone" size={14} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
                                 <Text style={[styles.familyTitle, { color: textSecondary }]}>{t.aiRec}</Text>
                             </View>
                             <TouchableOpacity onPress={() => router.push('/b2c/discover' as any)}>
@@ -354,7 +354,7 @@ const B2CDashboard = () => {
                                             {/* Slot Display */}
                                             {station.slot && (
                                                 <View style={[styles.aiChip, { marginBottom: 6, backgroundColor: COLORS.brandBlue + '14', alignSelf: 'flex-start' }]}>
-                                                    <Clock size={10} color={COLORS.brandBlue} style={{ marginRight: 3 }} />
+                                                    <Clock weight="duotone" size={10} color={COLORS.brandBlue} style={{ marginRight: 3 }} />
                                                     <Text style={[styles.aiChipText, { color: COLORS.brandBlue, fontWeight: '700' }]}>{formatSlotRange(station.slot)}</Text>
                                                 </View>
                                             )}
@@ -368,11 +368,11 @@ const B2CDashboard = () => {
                                             {/* Meta chips */}
                                             <View style={styles.aiMeta}>
                                                 <View style={[styles.aiChip, { backgroundColor: isDark ? COLORS.inputBg : 'rgba(0,0,0,0.05)' }]}>
-                                                    <MapPin size={10} color={textSecondary} style={{ marginRight: 3 }} />
+                                                    <MapPin weight="duotone" size={10} color={textSecondary} style={{ marginRight: 3 }} />
                                                     <Text style={[styles.aiChipText, { color: textSecondary }]}>{station.distanceKm} km</Text>
                                                 </View>
                                                 <View style={[styles.aiChip, { backgroundColor: `${dot}15` }]}>
-                                                    <Zap size={10} color={dot} style={{ marginRight: 3 }} />
+                                                    <Lightning weight="duotone" size={10} color={dot} style={{ marginRight: 3 }} />
                                                     <Text style={[styles.aiChipText, { color: dot, fontWeight: '700' }]}>
                                                         {station.availableChargers}/{station.totalChargers} {ok ? t.available : t.full}
                                                     </Text>
@@ -393,7 +393,7 @@ const B2CDashboard = () => {
                                                 disabled={!ok}
                                             >
                                                 <Text style={styles.aiBookText}>{ok ? t.bookNow : t.full}</Text>
-                                                {ok && <ChevronRight size={13} color={COLORS.brandBlue} style={{ marginLeft: 3 }} />}
+                                                {ok && <CaretRight weight="duotone" size={13} color={COLORS.brandBlue} style={{ marginLeft: 3 }} />}
                                             </TouchableOpacity>
                                         </GlassCard>
                                     </TouchableOpacity>
@@ -420,7 +420,7 @@ const B2CDashboard = () => {
                         <>
                             <View style={styles.loopHeader}>
                                 <GlassCard style={styles.botBadge as any} intensity={15}>
-                                    <Bot size={16} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
+                                    <Robot weight="duotone" size={16} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
                                     <Text style={[styles.botText, { color: textPrimary }]}>VoltLink AI Optimizer</Text>
                                 </GlassCard>
                                 <Text style={[styles.loopTitle, { color: textPrimary }]}>Processing your booking...</Text>
@@ -456,7 +456,7 @@ const B2CDashboard = () => {
                                                         { borderColor: statusColor, backgroundColor: bg },
                                                         isActive && styles.activeCircle
                                                     ]}>
-                                                        <s.Icon size={20} color={statusColor} />
+                                                        <s.Icon weight="duotone" size={20} color={statusColor} />
                                                     </View>
                                                 </View>
 
@@ -465,7 +465,7 @@ const B2CDashboard = () => {
                                                         <Text style={[styles.stepTitle, { color: isCompleted || isActive ? textPrimary : textSecondary }]}>
                                                             {s.title}
                                                         </Text>
-                                                        {isCompleted && <CheckCircle size={16} color={COLORS.successGreen} style={{ marginLeft: 8 }} />}
+                                                        {isCompleted && <CheckCircle weight="duotone" size={16} color={COLORS.successGreen} style={{ marginLeft: 8 }} />}
                                                     </View>
                                                     <Text style={[styles.stepSub, { color: textSecondary }]}>{s.sub}</Text>
 
@@ -482,7 +482,7 @@ const B2CDashboard = () => {
 
                                 {simStep === 7 && (
                                     <View style={[styles.successBox, { backgroundColor: isDark ? 'rgba(0,255,136,0.08)' : 'rgba(0,255,136,0.05)' }]}>
-                                        <CheckCircle color={COLORS.successGreen} size={32} />
+                                        <CheckCircle weight="duotone" color={COLORS.successGreen} size={32} />
                                         <View style={{ flex: 1 }}>
                                             <Text style={[styles.successTitle, { color: textPrimary }]}>Success!</Text>
                                             <Text style={[styles.successSub, { color: textSecondary }]}>

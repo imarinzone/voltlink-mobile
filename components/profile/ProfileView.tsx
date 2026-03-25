@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput, Dimensions, Platform } from 'react-native';
 const { width } = Dimensions.get('window');
-import { User, Shield, Info, LogOut, ChevronRight, Globe, Plus, Trash2, Leaf, Zap, Cloud, Trophy, Car, Edit2 } from 'lucide-react-native';
+import { User, Shield, Info, SignOut, CaretRight, Globe, Plus, Trash, Leaf, Lightning, Cloud, Trophy, Car, PencilSimple } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
@@ -100,7 +100,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                 {/* Avatar + Name */}
                 <View style={styles.avatarSection}>
                     <View style={[styles.avatarCircle, { borderColor: COLORS.brandBlue }]}>
-                        <User color={COLORS.brandBlue} size={36} />
+                        <User weight="duotone" color={COLORS.brandBlue} size={36} />
                     </View>
                     <Text style={[styles.name, { color: textPrimary }]}>{name}</Text>
                     <Text style={[styles.email, { color: textSecondary }]}>{email}</Text>
@@ -109,7 +109,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                     </View>
 
                     <TouchableOpacity style={styles.logoutInline} onPress={handleLogout} activeOpacity={0.8}>
-                        <LogOut size={16} color={COLORS.alertRed} />
+                        <SignOut weight="duotone" size={16} color={COLORS.alertRed} />
                         <Text style={styles.logoutText}>Log Out</Text>
                     </TouchableOpacity>
                 </View>
@@ -120,21 +120,21 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                         <Text style={[styles.sectionTitle, { color: textSecondary }]}>SUSTAINABILITY SCORE</Text>
                         <View style={styles.sustainGrid}>
                             <GlassCard style={styles.sustainItem} intensity={10}>
-                                <Leaf size={18} color={COLORS.successGreen} />
+                                <Leaf weight="duotone" size={18} color={COLORS.successGreen} />
                                 <Text style={[styles.sustainValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
                                     {sustainability?.greenScore != null ? Number(sustainability.greenScore).toFixed(2) : '--'}
                                 </Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]} numberOfLines={1} adjustsFontSizeToFit>Green Score</Text>
                             </GlassCard>
                             <GlassCard style={styles.sustainItem} intensity={10}>
-                                <Cloud size={18} color={COLORS.brandBlue} />
+                                <Cloud weight="duotone" size={18} color={COLORS.brandBlue} />
                                 <Text style={[styles.sustainValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
                                     {sustainability?.carbonSavedKg != null ? Number(sustainability.carbonSavedKg).toFixed(2) : '--'}kg
                                 </Text>
                                 <Text style={[styles.sustainLabel, { color: textSecondary }]} numberOfLines={1} adjustsFontSizeToFit>CO2 Saved</Text>
                             </GlassCard>
                             <GlassCard style={styles.sustainItem} intensity={10}>
-                                <Trophy size={18} color={COLORS.warningOrange} />
+                                <Trophy weight="duotone" size={18} color={COLORS.warningOrange} />
                                 <Text style={[styles.sustainValue, { color: textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
                                     #{sustainability?.carbonRank ?? '--'}
                                 </Text>
@@ -150,14 +150,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                         <View style={styles.sectionHeaderRow}>
                             <Text style={[styles.sectionTitle, { color: textSecondary }]}>VEHICLE DETAILS</Text>
                             <TouchableOpacity>
-                                <Plus size={18} color={COLORS.primaryGreen} />
+                                <Plus weight="duotone" size={18} color={COLORS.primaryGreen} />
                             </TouchableOpacity>
                         </View>
                         <GlassCard style={[styles.menuCard, { borderColor }] as any} intensity={15}>
                             <View style={styles.vehicleDetailRow}>
                                 {/* Icon */}
                                 <View style={styles.vehicleIconWrap}>
-                                    <Car size={22} color={COLORS.brandBlue} />
+                                    <Car weight="duotone" size={22} color={COLORS.brandBlue} />
                                 </View>
 
                                 {/* Model + Plate */}
@@ -173,11 +173,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                                 {/* Action Buttons */}
                                 <View style={styles.vehicleActions}>
                                     <TouchableOpacity style={[styles.vehicleActionBtn, { backgroundColor: COLORS.brandBlue + '18', borderColor: COLORS.brandBlue + '40' }]}>
-                                        <Edit2 size={13} color={COLORS.brandBlue} />
+                                        <PencilSimple weight="duotone" size={13} color={COLORS.brandBlue} />
                                         <Text style={[styles.vehicleActionText, { color: COLORS.brandBlue }]}>Edit</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={[styles.vehicleActionBtn, { backgroundColor: COLORS.alertRed + '15', borderColor: COLORS.alertRed + '40' }]}>
-                                        <Trash2 size={13} color={COLORS.alertRed} />
+                                        <Trash weight="duotone" size={13} color={COLORS.alertRed} />
                                         <Text style={[styles.vehicleActionText, { color: COLORS.alertRed }]}>Delete</Text>
                                     </TouchableOpacity>
                                 </View>
@@ -192,7 +192,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                         <View style={styles.sectionHeaderRow}>
                             <Text style={[styles.sectionTitle, { color: textSecondary }]}>FAMILY MEMBERS</Text>
                             <TouchableOpacity onPress={() => setShowAddFamily(true)}>
-                                <Plus size={18} color={COLORS.primaryGreen} />
+                                <Plus weight="duotone" size={18} color={COLORS.primaryGreen} />
                             </TouchableOpacity>
                         </View>
                         <GlassCard style={[styles.menuCard, { borderColor }] as any} intensity={15}>
@@ -211,7 +211,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                                             </View>
                                         </View>
                                         <TouchableOpacity onPress={() => handleRemoveMember(member.id)}>
-                                            <Trash2 size={16} color={COLORS.alertRed} />
+                                            <Trash weight="duotone" size={16} color={COLORS.alertRed} />
                                         </TouchableOpacity>
                                     </View>
                                 ))
@@ -225,7 +225,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                 <GlassCard style={[styles.menuCard, { borderColor }] as any} intensity={15}>
                     <View style={[styles.menuItem, { borderBottomColor: borderColor, flexDirection: 'column', alignItems: 'flex-start' }]}>
                         <View style={styles.menuLeft}>
-                            <Globe size={20} color={COLORS.brandBlue} />
+                            <Globe weight="duotone" size={20} color={COLORS.brandBlue} />
                             <Text style={[styles.menuText, { color: textPrimary }]}>Language</Text>
                         </View>
                         <View style={styles.languageRow}>
@@ -248,12 +248,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
 
                     <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={handleSwitchRole}>
                         <View style={styles.menuLeft}>
-                            <Shield size={20} color={COLORS.brandBlue} />
+                            <Shield weight="duotone" size={20} color={COLORS.brandBlue} />
                             <Text style={[styles.menuText, { color: textPrimary }]}>
                                 Switch to {role === 'driver' ? 'B2C Customer' : 'Driver'} View
                             </Text>
                         </View>
-                        <ChevronRight size={16} color={COLORS.textMutedDark} />
+                        <CaretRight weight="duotone" size={16} color={COLORS.textMutedDark} />
                     </TouchableOpacity>
                 </GlassCard>
 
@@ -262,10 +262,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
                 <GlassCard style={[styles.menuCard, { borderColor }] as any} intensity={15}>
                     <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
                         <View style={styles.menuLeft}>
-                            <Info size={20} color={COLORS.brandBlue} />
+                            <Info weight="duotone" size={20} color={COLORS.brandBlue} />
                             <Text style={[styles.menuText, { color: textPrimary }]}>Help & Support</Text>
                         </View>
-                        <ChevronRight size={16} color={COLORS.textMutedDark} />
+                        <CaretRight weight="duotone" size={16} color={COLORS.textMutedDark} />
                     </TouchableOpacity>
                 </GlassCard>
 

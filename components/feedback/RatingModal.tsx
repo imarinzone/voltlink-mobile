@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, Modal, TextInput, TouchableOpacity, Platform } from 'react-native';
-import { ThumbsUp, ThumbsDown, X } from 'lucide-react-native';
+import { ThumbsUp, ThumbsDown, X } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
@@ -46,7 +46,7 @@ export default function RatingModal({ visible, onClose, onSubmit, stationName }:
                     ]}
                     onPress={() => setRating(1)}
                 >
-                    <ThumbsDown
+                    <ThumbsDown weight="duotone"
                         size={28}
                         color={currentRating === 1 ? COLORS.alertRed : textSecondary}
                         fill={currentRating === 1 ? COLORS.alertRed : 'transparent'}
@@ -60,7 +60,7 @@ export default function RatingModal({ visible, onClose, onSubmit, stationName }:
                     ]}
                     onPress={() => setRating(5)}
                 >
-                    <ThumbsUp
+                    <ThumbsUp weight="duotone"
                         size={28}
                         color={currentRating === 5 ? COLORS.successGreen : textSecondary}
                         fill={currentRating === 5 ? COLORS.successGreen : 'transparent'}
@@ -80,7 +80,7 @@ export default function RatingModal({ visible, onClose, onSubmit, stationName }:
                             <Text style={[styles.subtitle, { color: textSecondary }]} numberOfLines={1}>{stationName}</Text>
                         </View>
                         <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                            <X size={20} color={textPrimary} />
+                            <X weight="duotone" size={20} color={textPrimary} />
                         </TouchableOpacity>
                     </View>
 

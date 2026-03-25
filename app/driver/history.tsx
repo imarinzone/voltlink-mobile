@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Zap, Clock, MapPin, ThumbsUp, ThumbsDown, CheckCircle, XCircle, Info, Calendar, Play, AlertTriangle } from 'lucide-react-native';
+import { Lightning, Clock, MapPin, ThumbsUp, ThumbsDown, CheckCircle, XCircle, Info, Calendar, Play, Warning } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { SectionHeader } from '../../components/ui/SectionHeader';
@@ -282,7 +282,7 @@ export default function DriverHistory() {
                         onPress={() => handleCancelPress(item)}
                         style={{ position: 'absolute', right: SPACING.lg, top: SPACING.md, zIndex: 10, padding: 4 }}
                     >
-                        <XCircle size={20} color={COLORS.alertRed} />
+                        <XCircle weight="duotone" size={20} color={COLORS.alertRed} />
                     </TouchableOpacity>
                 )}
 
@@ -308,9 +308,9 @@ export default function DriverHistory() {
                         <View style={styles.sessionInfo}>
                             <Text style={[styles.sessionStation, { color: textPrimary }]}>{item.stationName}</Text>
                             <View style={styles.sessionMeta}>
-                                <MapPin size={12} color={textSecondary} style={{ marginRight: 4 }} />
+                                <MapPin weight="duotone" size={12} color={textSecondary} style={{ marginRight: 4 }} />
                                 <Text style={[styles.sessionMetaText, { color: textSecondary, marginRight: 8 }]}>{item.connectorType}</Text>
-                                <Clock size={12} color={textSecondary} style={{ marginRight: 4 }} />
+                                <Clock weight="duotone" size={12} color={textSecondary} style={{ marginRight: 4 }} />
                                 <Text style={[styles.sessionMetaText, { color: textSecondary }]}>{item.source === 'booking' ? generate30MinSlot(item.bookingTime || '') : item.duration}</Text>
                             </View>
                         </View>
@@ -324,7 +324,7 @@ export default function DriverHistory() {
                     {item.status !== 'active' && item.status !== 'pending' && (
                         <View style={styles.sessionStats}>
                             <View style={styles.sessionStat}>
-                                <Zap size={14} color={COLORS.brandBlue} style={{ marginRight: 4 }} />
+                                <Lightning weight="duotone" size={14} color={COLORS.brandBlue} style={{ marginRight: 4 }} />
                                 <Text style={[styles.sessionStatValue, { color: textPrimary }]}>{item.kwh} kWh</Text>
                             </View>
                             <View style={styles.sessionStat}>
@@ -346,9 +346,9 @@ export default function DriverHistory() {
                     {item.rating > 0 && (
                         <View style={styles.ratingRow}>
                             {item.rating >= 4 ? (
-                                <ThumbsUp size={14} color={COLORS.successGreen} fill={COLORS.successGreen} />
+                                <ThumbsUp weight="duotone" size={14} color={COLORS.successGreen} fill={COLORS.successGreen} />
                             ) : (
-                                <ThumbsDown size={14} color={COLORS.alertRed} fill={COLORS.alertRed} />
+                                <ThumbsDown weight="duotone" size={14} color={COLORS.alertRed} fill={COLORS.alertRed} />
                             )}
                             <Text style={[styles.sessionMetaText, { color: item.rating >= 4 ? COLORS.successGreen : COLORS.alertRed, marginLeft: 4 }]}>
                                 {item.rating >= 4 ? 'Good' : 'Bad'}
@@ -362,7 +362,7 @@ export default function DriverHistory() {
                                 style={[styles.actionBtn, { borderColor: COLORS.brandBlue, marginRight: SPACING.md }]}
                                 onPress={openDirections}
                             >
-                                <MapPin size={14} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
+                                <MapPin weight="duotone" size={14} color={COLORS.brandBlue} style={{ marginRight: 6 }} />
                                 <Text style={[styles.actionBtnText, { color: COLORS.brandBlue }]}>View Directions</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -380,7 +380,7 @@ export default function DriverHistory() {
                                     router.push({ pathname: '/driver/session', params });
                                 }}
                             >
-                                <Play size={14} color={COLORS.successGreen} style={{ marginRight: 6 }} />
+                                <Play weight="duotone" size={14} color={COLORS.successGreen} style={{ marginRight: 6 }} />
                                 <Text style={[styles.actionBtnText, { color: COLORS.successGreen }]}>Open Session</Text>
                             </TouchableOpacity>
                         </View>
@@ -462,7 +462,7 @@ export default function DriverHistory() {
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { backgroundColor: isDark ? COLORS.cardBg : '#fff' }]}>
                         <View style={[styles.modalIcon, { backgroundColor: COLORS.alertRed + '15' }]}>
-                            <XCircle size={32} color={COLORS.alertRed} />
+                            <XCircle weight="duotone" size={32} color={COLORS.alertRed} />
                         </View>
                         <Text style={[styles.modalTitle, { color: textPrimary }]}>
                             {cancelTarget?.source === 'session' ? 'Stop Session' : 'Cancel Booking'}

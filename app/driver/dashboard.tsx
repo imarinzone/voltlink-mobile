@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Zap, Route, AlertTriangle, User } from 'lucide-react-native';
+import { Lightning, Path, Warning, User } from 'phosphor-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/theme';
 import { VehicleCard } from '../../components/vehicle/VehicleCard';
 import { MetricCard } from '../../components/ui/MetricCard';
@@ -142,7 +142,7 @@ const DriverDashboard = () => {
                                 style={styles.profileAvatar}
                                 onPress={() => router.push('/driver/profile' as any)}
                             >
-                                <User size={18} color={textPrimary} />
+                                <User weight="duotone" size={18} color={textPrimary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -155,7 +155,7 @@ const DriverDashboard = () => {
                         onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}
                         activeOpacity={0.85}
                     >
-                        <AlertTriangle size={18} color={COLORS.alertRed} />
+                        <Warning weight="duotone" size={18} color={COLORS.alertRed} />
                         <Text style={styles.alertText}>
                             {t.batteryLow} ({vehicle?.batteryLevel}%) — {t.tapToSee}
                         </Text>
@@ -170,9 +170,9 @@ const DriverDashboard = () => {
 
                 <SectionHeader title={t.stats} />
                 <View style={styles.statsRow}>
-                    <MetricCard label={t.efficiency} value={vehicle?.efficiency || 6.8} unit="km/kWh" icon={<Zap size={16} color={COLORS.brandBlue} />} />
-                    <MetricCard label={t.distance} value={230.4} unit="km" icon={<Route size={16} color={COLORS.brandBlue} />} />
-                    <MetricCard label={t.energyUsed} value={stats?.kwhConsumed || 0} unit="kWh" icon={<Zap size={16} color={COLORS.successGreen} />} />
+                    <MetricCard label={t.efficiency} value={vehicle?.efficiency || 6.8} unit="km/kWh" icon={<Lightning weight="duotone" size={16} color={COLORS.brandBlue} />} />
+                    <MetricCard label={t.distance} value={230.4} unit="km" icon={<Path weight="duotone" size={16} color={COLORS.brandBlue} />} />
+                    <MetricCard label={t.energyUsed} value={stats?.kwhConsumed || 0} unit="kWh" icon={<Lightning weight="duotone" size={16} color={COLORS.successGreen} />} />
                 </View>
 
                 <SectionHeader

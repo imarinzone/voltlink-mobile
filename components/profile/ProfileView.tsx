@@ -7,6 +7,7 @@ import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
 import { useThemeStore } from '../../store/themeStore';
 import { useRoleStore } from '../../store/roleStore';
+import { useAuthStore } from '../../store/authStore';
 import { useVehicleStore } from '../../store/vehicleStore';
 import { useRouter } from 'expo-router';
 import { getSustainabilityStats } from '../../services/b2c.service';
@@ -23,6 +24,7 @@ const RELATIONS = ['Spouse', 'Child', 'Parent', 'Sibling', 'Other'];
 export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) => {
     const { theme } = useThemeStore();
     const { switchRole, setRole } = useRoleStore();
+    const { logout: authLogout } = useAuthStore();
     const { familyVehicles, fetchFamilyVehicles, addFamilyMemberApi, removeFamilyMemberApi, myVehicle, fetchMyVehicle } = useVehicleStore();
     const { language, setLanguage } = useLanguageStore();
     const isDark = theme === 'dark';
@@ -48,6 +50,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ name, email, role }) =
     const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.03)';
 
     const handleLogout = () => {
+        authLogout();
         setRole(null as any);
         router.replace('/');
     };

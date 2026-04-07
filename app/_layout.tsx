@@ -5,6 +5,7 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useThemeStore } from '../store/themeStore';
 import { useRoleStore } from '../store/roleStore';
+import { useAuthStore } from '../store/authStore';
 import { COLORS } from '../utils/theme';
 import * as Font from 'expo-font';
 import {
@@ -51,6 +52,7 @@ function injectWebFonts() {
 export default function RootLayout() {
     const { theme } = useThemeStore();
     const { activeRole } = useRoleStore();
+    const { isAuthenticated, checkSession } = useAuthStore();
     const segments = useSegments();
     const router = useRouter();
     const isDark = theme === 'dark';
@@ -79,19 +81,25 @@ export default function RootLayout() {
     useEffect(() => {
         if (!isReady) return;
 
+        // Check session expiry
+        const sessionValid = isAuthenticated && checkSession();
+
         const inDriverGroup = segments[0] === 'driver';
         const inB2CGroup = segments[0] === 'b2c';
+        const isOnLogin = segments.length === 0 || (segments.length === 1 && segments[0] === '(index)');
 
-        if (!activeRole && (inDriverGroup || inB2CGroup)) {
+        if (!sessionValid && (inDriverGroup || inB2CGroup)) {
+            // Not authenticated but on a protected route → go to login
             router.replace('/');
-        } else if (activeRole && !inDriverGroup && !inB2CGroup) {
+        } else if (sessionValid && activeRole && !inDriverGroup && !inB2CGroup) {
+            // Authenticated with a role but on login screen → go to dashboard
             router.replace(activeRole === 'driver' ? '/driver/dashboard' : '/b2c/dashboard');
-        } else if (activeRole === 'driver' && inB2CGroup) {
+        } else if (sessionValid && activeRole === 'driver' && inB2CGroup) {
             router.replace('/driver/dashboard');
-        } else if (activeRole === 'b2c' && inDriverGroup) {
+        } else if (sessionValid && activeRole === 'b2c' && inDriverGroup) {
             router.replace('/b2c/dashboard');
         }
-    }, [activeRole, segments, isReady]);
+    }, [activeRole, segments, isReady, isAuthenticated]);
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>

@@ -1,26 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Animated, Dimensions, Platform, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, Animated, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useRoleStore } from '../store/roleStore';
+import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../utils/theme';
-import { Shield, User, Lightning } from 'phosphor-react-native';
+import { Lightning } from 'phosphor-react-native';
+import { apiClient } from '../services/api.service';
 
-const { width, height } = Dimensions.get('window');
-const CARD_WIDTH = (width - SPACING.lg * 2 - SPACING.md) / 2;
-
-export default function RoleSelector() {
+export default function LoginScreen() {
     const router = useRouter();
-    const { activeRole, setRole } = useRoleStore();
+    const { setRole } = useRoleStore();
+    const { login } = useAuthStore();
     const { theme } = useThemeStore();
     const isDark = theme === 'dark';
-    const [selected, setSelected] = useState<'driver' | 'b2c' | null>(null);
-    const transformY = React.useRef(new Animated.Value(60)).current;
-    const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+    const transformY = React.useRef(new Animated.Value(40)).current;
+
+    React.useEffect(() => {
         Animated.parallel([
             Animated.timing(transformY, {
                 toValue: 0,
@@ -35,119 +39,130 @@ export default function RoleSelector() {
         ]).start();
     }, []);
 
-    const handleContinue = () => {
-        if (selected) {
-            setRole(selected);
-            router.replace(selected === 'driver' ? '/driver/dashboard' : '/b2c/dashboard');
+    const handleLogin = async () => {
+        if (!email.trim() || !password.trim()) {
+            setError('Please enter both email and password');
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const response = await apiClient.post('/auth/login', {
+                email: email.trim().toLowerCase(),
+                password,
+            });
+
+            const userData = response.data;
+            login(userData);
+
+            // Map backend role to mobile role
+            if (userData.role === 'DRIVER') {
+                setRole('driver');
+                router.replace('/driver/dashboard');
+            } else if (userData.role === 'B2C_CUSTOMER') {
+                setRole('b2c');
+                router.replace('/b2c/dashboard');
+            } else {
+                setError('This account is not authorized for the mobile app');
+                setIsLoading(false);
+                return;
+            }
+        } catch (err: any) {
+            const message = err?.response?.data?.error || 'Invalid email or password';
+            setError(message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const bg = isDark ? COLORS.darkBg : COLORS.lightBg;
     const textPrimary = isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight;
     const textSecondary = isDark ? COLORS.textSecondaryDark : COLORS.textSecondaryLight;
+    const inputBg = isDark ? COLORS.inputBg : 'rgba(0,0,0,0.04)';
+    const inputBorder = isDark ? COLORS.cardBorder : 'rgba(0,0,0,0.1)';
 
     return (
-        <View style={[styles.container, { backgroundColor: bg }]}>
-            {/* Background glow */}
-            <View style={styles.bgGlow} />
-
-            <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
-                <View style={styles.logoContainer}>
-                    <Lightning weight="duotone" color={COLORS.primaryGreen} size={40} />
-                </View>
-                <Text style={[styles.title, { color: textPrimary }]}>VoltLink</Text>
-                <Text style={[styles.tagline, { color: textSecondary }]}>
-                    Future of EV Intelligence
-                </Text>
-            </Animated.View>
-
-            <Animated.View style={[styles.cardsContainer, { transform: [{ translateY: transformY }], opacity: fadeAnim }]}>
-                <Text style={[styles.selectLabel, { color: textSecondary }]}>SELECT YOUR ROLE</Text>
-
-                <View style={styles.row}>
-                    <RoleCard
-                        selected={selected === 'driver'}
-                        onPress={() => setSelected('driver')}
-                        icon={<Shield weight="duotone" color={selected === 'driver' ? COLORS.primaryGreen : textSecondary} size={28} />}
-                        title="Driver"
-                        subtitle="Fleet charging made simple"
-                        isDark={isDark}
-                        textPrimary={textPrimary}
-                        textSecondary={textSecondary}
-                    />
-                    <RoleCard
-                        selected={selected === 'b2c'}
-                        onPress={() => setSelected('b2c')}
-                        icon={<User weight="duotone" color={selected === 'b2c' ? COLORS.primaryGreen : textSecondary} size={28} />}
-                        title="B2C Customer"
-                        subtitle="Personal EV charging"
-                        isDark={isDark}
-                        textPrimary={textPrimary}
-                        textSecondary={textSecondary}
-                    />
-                </View>
-
-                {selected && (
-                    <Animated.View style={styles.buttonContainer}>
-                        <GlassButton title="Continue →" onPress={handleContinue} style={styles.button} />
-                    </Animated.View>
-                )}
-
-                <Text style={[styles.demoNote, { color: isDark ? COLORS.textMutedDark : COLORS.textSecondaryLight }]}>
-                    Demo Mode • No login required
-                </Text>
-            </Animated.View>
-        </View>
-    );
-}
-
-function RoleCard({ selected, onPress, icon, title, subtitle, isDark, textPrimary, textSecondary }: any) {
-    const borderColor = selected
-        ? COLORS.primaryGreen
-        : isDark
-            ? COLORS.cardBorder
-            : 'rgba(0,0,0,0.08)';
-
-    const bgColor = selected
-        ? isDark ? 'rgba(4, 234, 170, 0.12)' : 'rgba(4, 234, 170, 0.08)'
-        : isDark ? COLORS.inputBg : 'transparent';
-
-    return (
-        <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={onPress}
-            style={[
-                styles.cardWrapper,
-                {
-                    borderColor,
-                    backgroundColor: bgColor,
-                    borderWidth: selected ? 2 : 1.5,
-                },
-            ]}
+        <KeyboardAvoidingView
+            style={[styles.container, { backgroundColor: bg }]}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <View style={styles.cardContent}>
-                <View style={[styles.iconCircle, {
-                    backgroundColor: selected
-                        ? 'rgba(4, 234, 170, 0.12)'
-                        : isDark ? COLORS.inputBg : 'rgba(0,0,0,0.04)',
-                }]}>
-                    {icon}
-                </View>
-                <Text style={[styles.cardTitle, { color: textPrimary }]}>{title}</Text>
-                <Text style={[styles.cardSubtitle, { color: textSecondary }]}>{subtitle}</Text>
-                {selected && (
-                    <View style={styles.checkmark}>
-                        <Text style={styles.checkmarkText}>✓</Text>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* Background glow */}
+                <View style={styles.bgGlow} />
+
+                <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
+                    <View style={styles.logoContainer}>
+                        <Lightning weight="duotone" color={COLORS.primaryGreen} size={40} />
                     </View>
-                )}
-            </View>
-        </TouchableOpacity>
+                    <Text style={[styles.title, { color: textPrimary }]}>VoltLink</Text>
+                    <Text style={[styles.tagline, { color: textSecondary }]}>
+                        Future of EV Intelligence
+                    </Text>
+                </Animated.View>
+
+                <Animated.View style={[styles.formContainer, { transform: [{ translateY: transformY }], opacity: fadeAnim }]}>
+                    <Text style={[styles.signInLabel, { color: textSecondary }]}>SIGN IN</Text>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={[styles.inputLabel, { color: textSecondary }]}>Email</Text>
+                        <TextInput
+                            style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textPrimary }]}
+                            placeholder="Enter your email"
+                            placeholderTextColor={isDark ? COLORS.textMutedDark : '#999'}
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoComplete="email"
+                            autoCorrect={false}
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={[styles.inputLabel, { color: textSecondary }]}>Password</Text>
+                        <TextInput
+                            style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textPrimary }]}
+                            placeholder="Enter your password"
+                            placeholderTextColor={isDark ? COLORS.textMutedDark : '#999'}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                            autoCapitalize="none"
+                            autoComplete="password"
+                        />
+                    </View>
+
+                    {error ? (
+                        <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>{error}</Text>
+                        </View>
+                    ) : null}
+
+                    {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="small" color={COLORS.primaryGreen} />
+                            <Text style={[styles.loadingText, { color: textSecondary }]}>Signing in...</Text>
+                        </View>
+                    ) : (
+                        <GlassButton title="Sign In →" onPress={handleLogin} style={styles.button} />
+                    )}
+                </Animated.View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         justifyContent: 'center',
         padding: SPACING.lg,
     },
@@ -185,83 +200,60 @@ const styles = StyleSheet.create({
         fontSize: 15,
         marginTop: 4,
     },
-    cardsContainer: {
+    formContainer: {
         width: '100%',
     },
-    selectLabel: {
+    signInLabel: {
         ...TYPOGRAPHY.label,
         fontSize: 11,
         fontWeight: '700',
         letterSpacing: 1.5,
         textAlign: 'center',
+        marginBottom: SPACING.lg,
+    },
+    inputGroup: {
         marginBottom: SPACING.md,
     },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: SPACING.md,
-    },
-    cardWrapper: {
-        flex: 1,
-        borderRadius: BORDER_RADIUS.lg,
-        overflow: 'hidden',
-    },
-    cardContent: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: SPACING.xl,
-        paddingHorizontal: SPACING.md,
-        minHeight: 180,
-    },
-    iconCircle: {
-        width: 52,
-        height: 52,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: SPACING.md,
-    },
-    cardTitle: {
-        ...TYPOGRAPHY.sectionHeader,
-        fontSize: 17,
-        fontWeight: '700',
-        textAlign: 'center',
-    },
-    cardSubtitle: {
+    inputLabel: {
         ...TYPOGRAPHY.label,
-        fontSize: 12,
+        fontSize: 13,
+        fontWeight: '600',
+        marginBottom: 6,
+    },
+    input: {
+        height: 48,
+        borderWidth: 1,
+        borderRadius: BORDER_RADIUS.md,
+        paddingHorizontal: SPACING.md,
+        fontSize: 15,
+    },
+    errorContainer: {
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(239, 68, 68, 0.2)',
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.sm,
+        marginBottom: SPACING.md,
+    },
+    errorText: {
+        color: '#ef4444',
+        fontSize: 13,
         textAlign: 'center',
-        marginTop: 4,
-        lineHeight: 16,
     },
-    checkmark: {
-        position: 'absolute',
-        top: 12,
-        right: 12,
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: COLORS.primaryGreen,
-        justifyContent: 'center',
+    loadingContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        height: 54,
+        gap: 8,
     },
-    checkmarkText: {
-        color: '#000',
+    loadingText: {
         fontSize: 14,
-        fontWeight: '700',
-    },
-    buttonContainer: {
-        marginTop: SPACING.xl,
     },
     button: {
         width: '100%',
         height: 54,
         borderRadius: BORDER_RADIUS.lg,
-    },
-    demoNote: {
-        ...TYPOGRAPHY.label,
-        fontSize: 11,
-        textAlign: 'center',
-        marginTop: SPACING.lg,
+        marginTop: SPACING.sm,
     },
 });

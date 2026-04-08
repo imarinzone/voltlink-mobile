@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Animated, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, Animated, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useRoleStore } from '../store/roleStore';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../utils/theme';
-import { Lightning } from 'phosphor-react-native';
+import { Lightning, Eye, EyeSlash } from 'phosphor-react-native';
 import { apiClient } from '../services/api.service';
 
 export default function LoginScreen() {
@@ -18,6 +18,7 @@ export default function LoginScreen() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -125,16 +126,28 @@ export default function LoginScreen() {
 
                     <View style={styles.inputGroup}>
                         <Text style={[styles.inputLabel, { color: textSecondary }]}>Password</Text>
-                        <TextInput
-                            style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textPrimary }]}
-                            placeholder="Enter your password"
-                            placeholderTextColor={isDark ? COLORS.textMutedDark : '#999'}
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            autoCapitalize="none"
-                            autoComplete="password"
-                        />
+                        <View style={{ position: 'relative' }}>
+                            <TextInput
+                                style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textPrimary, paddingRight: 40 }]}
+                                placeholder="Enter your password"
+                                placeholderTextColor={isDark ? COLORS.textMutedDark : '#999'}
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry={!showPassword}
+                                autoCapitalize="none"
+                                autoComplete="password"
+                            />
+                            <TouchableOpacity 
+                                style={{ position: 'absolute', right: 12, top: 12 }} 
+                                onPress={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <EyeSlash color={isDark ? COLORS.textMutedDark : '#999'} size={24} />
+                                ) : (
+                                    <Eye color={isDark ? COLORS.textMutedDark : '#999'} size={24} />
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     {error ? (
